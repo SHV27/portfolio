@@ -18,11 +18,11 @@
  */
 ---
 
-<!-- transition:persist is what keeps the music playing. This element, and the
-     <audio> inside it, are carried across every client-side navigation instead
-     of being rebuilt, so the track never restarts and the button never lies
-     about its state. The directive must be on this element: putting it on the
-     component in the layout is silently ignored. -->
+<!-- transition:persist is what keeps the music playing: this element and the
+     media element inside it are carried across every client-side navigation
+     rather than rebuilt, so the track never restarts and the button never lies
+     about its state. The directive has to sit on the element. Putting it on the
+     component where the layout uses it is silently ignored. -->
 <div class="snd" data-snd transition:persist="sound">
   <button class="snd__btn" data-anthem type="button" aria-pressed="false" aria-label="Play the anthem">
     <span class="snd__bars" aria-hidden="true"><i></i><i></i><i></i></span>

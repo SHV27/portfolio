@@ -55,7 +55,7 @@ export const URUTHI: Project = {
       receipts: [demo('The receipt page prints the full 64-character hash and either "Seal verified on this load" or an explicit mismatch.')],
     },
     {
-      lead: 'It ranks the candidates and then throws the score away. You get reasons in words instead — “5 of 5 must-haves”, “notice 90 days against a cap of 30” — and a test fails if a reason ever smuggles a number back in.',
+      lead: 'Nobody can dismiss this ranking as a black box, because there is no box. A test fails the build if a single reason it gives ever contains the word score, a percentage, or the word points.',
       text: 'The candidate list is ranked without ever showing a score. It sorts internally, then throws the number away and shows only reasons in words — "5 of 5 must-haves in profile", "notice 90 days, cap 30". A test asserts no reason string can ever contain "score", "%" or "points", and anyone with zero must-have hits is dropped from the list rather than displayed as a weak match.',
       receipts: [demo('The Find screen shows reason chips and an order, and no number anywhere.')],
     },

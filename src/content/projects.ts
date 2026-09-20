@@ -104,7 +104,7 @@ export const AAINA: Project = {
   year: 'Aug – Sep 2026',
   accent: 'ember',
   hardProblem:
-    'The easy product is a quiz that returns "you are 72% compatible". That number is the industry standard and it is fabricated: Joel, Eastwick and Finkel threw over a hundred measures at dyad-specific compatibility in 2017 and predicted none of the variance. So the problem I set myself was producing a reading that is specific and emotionally weighty while structurally refusing the one claim everybody wants. The second problem is worse — a language model asked for relationship feedback produces Barnum statements that people rate as more accurate the moment you tell them it was written for them.',
+    'The easy product is a quiz that returns "you are 72% compatible". That number is the industry standard and it is fabricated: Joel, Eastwick and Finkel threw over a hundred measures at dyad-specific compatibility in 2017 and predicted none of the variance. So the problem I set myself was producing a reading that is specific and emotionally weighty while structurally refusing the one claim everybody wants. The second problem is worse. Ask a language model for relationship feedback and it will hand you a horoscope — and the research is blunt about what happens next: the same paragraph is rated as more accurate the instant somebody is told it was written for them personally.',
   mechanism: [
     {
       lead: 'The model is not allowed to think. Every number and every contradiction is worked out in ordinary code first; the model only gets to write the joining sentences.',
