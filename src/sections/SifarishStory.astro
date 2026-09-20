@@ -1,0 +1,92 @@
+---
+/**
+ * The seven rooms of Sifarish, told as a walk through a building.
+ *
+ * It earns the length: this is a month of work and the first pass described
+ * about a fifth of it. The technical detail is there but it arrives inside a
+ * story, because a reader should finish this knowing what it does before they
+ * know what it is written in.
+ */
+import Receipt from '../components/Receipt.astro';
+import { SIFARISH_STORY as S } from '../content/sifarish-story';
+---
+
+<section class="sfs section">
+  <div class="wrap">
+    <div class="sfs__open">
+      {S.opening.map((p) => <p class="sfs__p">{p}</p>)}
+    </div>
+
+    <div class="sfs__rooms">
+      <p class="label sfs__k">Seven rooms</p>
+      <h3 class="sfs__t display display--mid">Walk through it.</h3>
+
+      <ol class="sfs__list">
+        {S.rooms.map((r) => (
+          <li class="sfs__room reveal">
+            <div class="sfs__head">
+              <span class="sfs__no mono">{r.no}</span>
+              <div>
+                <h4 class="sfs__name display display--small">
+                  {r.name}<span class="sfs__native deva">{r.native}</span>
+                </h4>
+                <p class="sfs__what">{r.what}</p>
+              </div>
+            </div>
+            <p class="sfs__body">{r.body}</p>
+            <Receipt receipts={r.receipts} />
+          </li>
+        ))}
+      </ol>
+    </div>
+
+    <div class="sfs__close">
+      {S.closing.map((p) => <p class="sfs__p">{p}</p>)}
+    </div>
+  </div>
+</section>
+
+<style>
+  .sfs { padding-block: clamp(var(--s-12), 7vh, var(--s-24)); }
+  .sfs__p { color: var(--star-dim); max-width: var(--measure); }
+  .sfs__p + .sfs__p { margin-top: var(--s-6); }
+
+  .sfs__rooms { margin-top: clamp(var(--s-16), 9vh, var(--s-24)); }
+  .sfs__k { color: var(--gold); }
+  .sfs__t { font-size: var(--t-head); margin-top: var(--s-3); }
+
+  .sfs__list { list-style: none; padding: 0; margin: var(--s-10) 0 0; }
+  .sfs__room {
+    padding: var(--s-8) 0;
+    border-top: var(--hair) solid var(--ridge);
+  }
+  .sfs__list li:last-child { border-bottom: var(--hair) solid var(--ridge); }
+
+  .sfs__head { display: grid; grid-template-columns: auto 1fr; gap: var(--s-6); align-items: baseline; }
+  .sfs__no { color: var(--gold-deep); font-size: var(--t-micro); }
+  .sfs__name { font-size: 1.45rem; color: var(--star); }
+  .sfs__native { color: var(--gold); margin-left: 0.4em; font-size: 0.72em; }
+  .sfs__what {
+    margin-top: 2px;
+    font-family: var(--display); font-style: italic;
+    font-size: var(--t-small); color: var(--gold);
+  }
+  .sfs__body {
+    margin-top: var(--s-5);
+    margin-left: calc(var(--s-6) + 1.6rem);
+    color: var(--star-dim); max-width: 64ch;
+  }
+  .sfs__room :global(.rc) { margin-left: calc(var(--s-6) + 1.6rem); }
+
+  .sfs__close {
+    margin-top: clamp(var(--s-16), 9vh, var(--s-24));
+    padding-left: var(--s-8);
+    border-left: 2px solid var(--gold);
+  }
+
+  @media (max-width: 640px) {
+    .sfs__head { grid-template-columns: 1fr; gap: var(--s-2); }
+    .sfs__body, .sfs__room :global(.rc) { margin-left: 0; }
+    .sfs__close { padding-left: var(--s-4); }
+  }
+</style>

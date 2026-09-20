@@ -1,0 +1,83 @@
+---
+/**
+ * THE PERSISTENT SOUND CONTROL.
+ *
+ * The anthem used to live only inside the personal chapter, at roughly 90% of
+ * the scroll. Almost nobody reaches that. His note was correct: if the thing is
+ * part of who he is, it has to be reachable from the first screen.
+ *
+ * So the audio element now lives at layout level and this control is fixed in
+ * the corner from the top of the page. The full anthem moment stays where it is
+ * in the personal chapter — that button and this one drive the same element and
+ * stay in sync.
+ *
+ * Still opt-in, never autoplay: WCAG 2.1.4.2 makes audio that plays
+ * automatically for more than three seconds without a pause control a Level A
+ * failure of the entire page, and every current browser blocks unmuted autoplay
+ * for a first-time visitor regardless.
+ */
+---
+
+<div class="snd" data-snd>
+  <button class="snd__btn" data-anthem type="button" aria-pressed="false" aria-label="Play the anthem">
+    <span class="snd__bars" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span class="snd__label mono" data-anthem-label>Play the anthem</span>
+  </button>
+  <audio id="anthem" src="/anthem.mp3" preload="none"></audio>
+</div>
+
+<style>
+  /* Top right, not bottom. Bottom-corner controls read as a cookie banner and
+     get ignored; this is part of who he is, so it sits where the eye lands. */
+  .snd {
+    position: fixed;
+    right: clamp(0.75rem, 2vw, 1.5rem);
+    top: clamp(0.75rem, 2vw, 1.5rem);
+    z-index: 46;
+  }
+
+  .snd__btn {
+    display: inline-flex; align-items: center; gap: var(--s-3);
+    min-height: 40px;
+    padding: 8px 14px 8px 12px;
+    background: color-mix(in oklab, var(--void) 88%, transparent);
+    backdrop-filter: blur(6px);
+    border: var(--hair) solid var(--ridge);
+    border-radius: var(--r-full);
+    color: var(--dust);
+    cursor: pointer;
+    transition: border-color var(--d-base) var(--ease), color var(--d-base) var(--ease);
+  }
+  .snd__btn:hover { border-color: var(--gold-deep); color: var(--star-dim); }
+  .snd__btn[data-on='true'] { border-color: var(--gold); color: var(--gold); }
+
+  /* Three bars. Flat when silent, moving only while audio is genuinely playing —
+     an equaliser that dances with nothing playing is a lie about state. */
+  .snd__bars { display: flex; align-items: flex-end; gap: 2px; height: 12px; flex: none; }
+  .snd__bars i {
+    width: 2px; height: 3px;
+    background: currentColor;
+    border-radius: 1px;
+    transition: height var(--d-base) var(--ease);
+  }
+  .snd__btn[data-on='true'] .snd__bars i { height: 11px; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .snd__btn[data-on='true'] .snd__bars i { animation: eq 900ms ease-in-out infinite; }
+    .snd__btn[data-on='true'] .snd__bars i:nth-child(2) { animation-delay: 140ms; }
+    .snd__btn[data-on='true'] .snd__bars i:nth-child(3) { animation-delay: 280ms; }
+    @keyframes eq { 0%,100% { height: 4px; } 50% { height: 12px; } }
+  }
+
+  .snd__label {
+    font-size: var(--t-micro);
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+
+  /* On a phone the label costs more than it gives — the bars carry the meaning. */
+  @media (max-width: 560px) {
+    .snd__label { display: none; }
+    .snd__btn { padding: 10px; min-width: 40px; justify-content: center; }
+  }
+</style>

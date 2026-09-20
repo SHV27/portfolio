@@ -1,0 +1,76 @@
+---
+/**
+ * THE ANTHEM — moved high on the page at his request.
+ *
+ * It used to sit in the personal chapter near the end. He liked this block and
+ * wanted it where nobody can miss it, so it now runs immediately after the
+ * hero: the second thing on the page, before the argument even begins.
+ *
+ * That ordering is also right on its own merits. The site's case is "I am a
+ * serious engineer AND I am fun to work with", and burying the fun half at 90%
+ * of the scroll means most readers only ever get the serious half.
+ */
+import Aside from '../components/Aside.astro';
+import barneyTub from '../assets/aura/03-barney-bathtub.jpg';
+---
+
+<section class="an2 section" id="the-anthem">
+  <div class="wrap">
+    <Aside
+      src={barneyTub}
+      side="left"
+      alt="Barney Stinson reclining in a bathtub in a full suit, talking on a phone, captioned: He is my spirit animal."
+    >
+      <p class="an2__k label">The anthem</p>
+      <p class="an2__t display display--small">&ldquo;Shaurya Verma is Awesome&rdquo;</p>
+      <p>
+        Barney made a video called <em>I'm Awesome</em>. So did I. It exists because I thought it was funny, and
+        then it kept being funny, and now it is the second thing on my portfolio — which is funnier still.
+      </p>
+      <p class="an2__dim">
+        Press it. The rest of this page is about systems that refuse to overstate themselves, so consider this
+        the one place I am allowed to.
+      </p>
+
+      <button class="an2__play" data-anthem type="button" aria-pressed="false" aria-label="Play the anthem">
+        <span class="an2__icon" aria-hidden="true"></span>
+        <span data-anthem-label>Play the anthem</span>
+      </button>
+
+      <p class="an2__note mono">
+        It will not start on its own — the control in the top corner does the same thing, and it stays with you
+        the whole way down.
+      </p>
+    </Aside>
+  </div>
+</section>
+
+<style>
+  .an2 { padding-block: clamp(var(--s-12), 7vh, var(--s-24)); }
+  .an2__k { color: var(--gold); }
+  .an2__t { font-size: var(--t-head); margin-top: var(--s-2); color: var(--star); }
+  .an2__dim { color: var(--dust); font-size: var(--t-small); }
+
+  .an2__play {
+    margin-top: var(--s-6);
+    display: inline-flex; align-items: center; gap: var(--s-3);
+    padding: 13px 26px; min-height: 48px;
+    background: color-mix(in oklab, var(--gold) 9%, transparent);
+    border: var(--hair) solid var(--gold);
+    border-radius: var(--r-full);
+    color: var(--gold); font-size: var(--t-small); font-weight: 600; cursor: pointer;
+    transition: background var(--d-base) var(--ease), transform var(--d-fast) var(--ease);
+  }
+  .an2__play:hover { background: color-mix(in oklab, var(--gold) 18%, transparent); }
+  .an2__play:active { transform: scale(0.98); }
+  .an2__icon {
+    width: 0; height: 0; flex: none;
+    border-left: 10px solid currentColor;
+    border-top: 6.5px solid transparent; border-bottom: 6.5px solid transparent;
+  }
+  .an2__play[data-on='true'] .an2__icon {
+    width: 10px; height: 13px; border: none;
+    background: linear-gradient(to right, currentColor 0 3.5px, transparent 3.5px 6.5px, currentColor 6.5px 10px);
+  }
+  .an2__note { margin-top: var(--s-4); font-size: var(--t-micro); color: var(--dust); }
+</style>

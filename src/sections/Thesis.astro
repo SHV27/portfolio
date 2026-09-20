@@ -7,9 +7,7 @@
  * wrote it, which is the opposite of the point.
  */
 import Receipt from '../components/Receipt.astro';
-import Plate from '../components/Plate.astro';
 import { src } from '../content/types';
-import starkGenius from '../assets/aura/09-stark-genius.jpg';
 
 const PROOFS = [
   {
@@ -70,12 +68,6 @@ const PROOFS = [
       already how I build when nobody is watching.
     </p>
 
-    <Plate
-      src={starkGenius}
-      alt="Tony Stark at a workbench with the arc reactor lit, captioned: genius is undeniable."
-      caption="Stark is the reason I started. He solved anything he pointed himself at, and he had JARVIS. I have Claude Code, and I can too."
-      size="intimate"
-    />
   </div>
 </section>
 
@@ -100,6 +92,16 @@ const PROOFS = [
     padding: var(--s-8) 0; border-top: var(--hair) solid var(--ridge);
   }
   .th__proofs li:last-child { border-bottom: var(--hair) solid var(--ridge); }
+  /* Wide screens get the project name in its own column, hugging the line it
+     belongs to — otherwise a 60ch paragraph sits alone on the left of a 1,296px
+     row and the page reads half-finished. */
+  @media (min-width: 1080px) {
+    .th__proof { grid-template-columns: 2.5rem minmax(0, 11rem) minmax(0, 60ch); gap: var(--s-8); align-items: start; }
+    .th__pbody { display: contents; }
+    .th__project { grid-column: 2; text-align: right; justify-self: end; padding-top: 0.05em; }
+    .th__line, .th__pbody > :global(*:not(.th__project)) { grid-column: 3; }
+    .th__line { margin-top: 0; }
+  }
   .th__n { color: var(--gold-deep); font-size: var(--t-micro); padding-top: 0.45em; }
   .th__project {
     font-family: var(--display); font-variation-settings: 'opsz' 18;

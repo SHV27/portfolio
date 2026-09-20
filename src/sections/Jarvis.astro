@@ -1,0 +1,145 @@
+---
+/**
+ * HOW I WORK — the Stark / JARVIS chapter.
+ *
+ * The brief names this explicitly: "Tony Stark is his inspiration — that man
+ * used to solve literally anything with his JARVIS, and I can too."
+ *
+ * The risk with that claim is that it reads as a boast, so every line here is
+ * receipted to something in the repositories: the constitutions, the
+ * append-only decision logs, the custom subagents, the hooks that block a
+ * commit. "I direct AI well" is unfalsifiable. "Here is the pre-commit hook
+ * that refuses my own bad commit" is not.
+ */
+import Receipt from '../components/Receipt.astro';
+import Aside from '../components/Aside.astro';
+import { src, repoUrl } from '../content/types';
+import starkGenius from '../assets/aura/09-stark-genius.jpg';
+
+const PRACTICE = [
+  {
+    n: 'I write the constitution before the code',
+    t: 'Every project starts with a file the model has to obey — the invariants, the things that must be structurally impossible, and the taste rules. Sehat Saarthi\'s opens with a locked section marked "only Shaurya may edit; Claude must NEVER weaken these", listing seven safety rules, above a protocol that lets the agent rewrite its own tactics but never that spine.',
+    receipts: [
+      { label: 'sehat-saarthi/CLAUDE.md', href: src('sehat-saarthi', 'CLAUDE.md'), proves: 'The locked mission-and-safety section, and the rule that tactics may change but the spine may not.' },
+      { label: 'braillix/CLAUDE.md', href: src('braillix', 'CLAUDE.md'), proves: 'The same pattern: the unforgivable failure named up front — "a silent wrong answer".' },
+    ],
+  },
+  {
+    n: 'Every decision gets written down, append-only, including the wrong ones',
+    t: 'Sifarish carries 168 numbered decisions that are never deleted. That is not documentation theatre — it is what makes the sixth session able to reason about what the second one decided, and it is why the codebase has rules dated to specific live failures rather than vague best practice.',
+    receipts: [
+      { label: 'sifarish/DECISIONS.md', href: src('sifarish', 'DECISIONS.md'), proves: 'D1 through D168, append-only, plus two later series.' },
+      { label: 'plan.ts:466', href: src('sifarish', 'src/lib/strategist/plan.ts', [466, 487]), proves: 'A validator rule carrying the date and the exact model failure that caused it.' },
+    ],
+  },
+  {
+    n: 'I build adversaries, not assistants',
+    t: 'The useful move is not asking a model to write the thing. It is pointing a second one at the finished thing with instructions to break it. Uruthi has an agent that starts with no memory of how the thing was built, whose entire job is to hunt for places where the app quietly gives up instead of saying so, and it found that a consent gate I believed was structural was merely aspirational — which is written down, not buried.',
+    receipts: [
+      { label: 'aaina/scripts/audit.ts', href: src('aaina', 'scripts/audit.ts'), proves: 'Nine personas generated and graded on the finished prose, two of them built to be nearly identical.' },
+      { label: 'sifarish/tests/matrix.test.ts', href: src('sifarish', 'tests/matrix.test.ts'), proves: 'A test that invents thousands of its own inputs. It found two real bugs on its first run, and any failure can be replayed exactly.' },
+    ],
+  },
+  {
+    n: 'The machine is not allowed to be trusted',
+    t: 'Before any change of mine is allowed to be saved, a script scans it for eight shapes that look like a leaked password, and then runs every check the project has. The build greps its own source and fails if a banned library appears. None of that protects me from the model — it protects the product from me at 3am, and the model is simply held to the same line.',
+    receipts: [
+      { label: 'sifarish/tests/invariants.test.ts', href: src('sifarish', 'tests/invariants.test.ts', [85, 108]), proves: 'The build walks its own source tree and fails on any send-capable library.' },
+      { label: 'braillix/invariants.test.ts', href: src('braillix', 'app/src/invariants.test.ts'), proves: 'A guard that first proves it catches a planted offender, because a guard that can only pass is not a guard.' },
+    ],
+  },
+  {
+    n: 'I read the rendered thing with my own eyes',
+    t: 'A green test suite proves nothing about how something looks or reads. Sifarish has that written down as a project skill — literally a file instructing the loop to open the rendered PDF and look at it. Braillix photographs every screen at phone, tablet and laptop width, every single time, and fails if anything spills sideways.',
+    receipts: [
+      { label: 'braillix/e2e/screens.spec.ts', href: src('braillix', 'app/e2e/screens.spec.ts', [15, 19]), proves: 'Every screen captured at phone, tablet and laptop width, each one checked for sideways overflow.' },
+      { label: 'sifarish', href: repoUrl('sifarish'), proves: 'The "read it with your eyes" verification loop codified as a reusable project skill.' },
+    ],
+  },
+];
+---
+
+<section class="jv section" id="how-i-work">
+  <div class="wrap">
+    <p class="label jv__k">How I actually work</p>
+    <h2 class="jv__t display">Stark had JARVIS. I have Claude Code.</h2>
+
+    <Aside src={starkGenius} side="right"
+      alt="Tony Stark at a workbench with the arc reactor lit, captioned: genius is undeniable.">
+      <p>
+        I have built one of these for myself, so I am not speculating about what the partnership feels like. What
+        I want to talk about here is the other half of it — the part that is not the assistant. Anyone can hand a
+        model a problem. Almost nobody hands it a set of rules it is not allowed to break.
+      </p>
+      <p>
+        That is genuinely available now, and almost nobody uses it properly. Most people treat these models as a
+        faster autocomplete. I treat mine the way Stark treated JARVIS: <strong>I decide what is true and what the
+        rules are, and it does the part that scales.</strong>
+      </p>
+      <p class="jv__dim">
+        The difference shows up in the artefacts. Anyone can say they are good at directing AI. Below is what that
+        actually looks like in a repository, with the files.
+      </p>
+    </Aside>
+
+    <ol class="jv__list">
+      {PRACTICE.map((p, i) => (
+        <li class="jv__item reveal">
+          <span class="jv__n mono">{String(i + 1).padStart(2, '0')}</span>
+          <div>
+            <h3 class="jv__name">{p.n}</h3>
+            <p class="jv__text">{p.t}</p>
+            <Receipt receipts={p.receipts} />
+          </div>
+        </li>
+      ))}
+    </ol>
+
+    <p class="jv__close">
+      The honest version of the Stark line is this: the speed is not mine and I am not going to pretend it is.
+      What is mine is the taste to know when the output is wrong, the discipline to write down why, and the
+      willingness to delete a working model at midnight because it lied to me. <strong>JARVIS was never the
+      interesting half of that partnership.</strong>
+    </p>
+  </div>
+</section>
+
+<style>
+  .jv__k { color: var(--gold); }
+  .jv__t { font-size: var(--t-title); margin-top: var(--s-4); max-width: 20ch; }
+  .jv__dim { color: var(--dust); font-size: var(--t-small); }
+
+  .jv__list { list-style: none; padding: 0; margin: var(--s-12) 0 0; }
+  .jv__item {
+    display: grid; grid-template-columns: auto 1fr; gap: var(--s-6);
+    padding: var(--s-8) 0; border-top: var(--hair) solid var(--ridge);
+  }
+  @media (min-width: 1080px) {
+    .jv__item { grid-template-columns: 2.5rem minmax(0, 20rem) minmax(0, 58ch); gap: var(--s-8); align-items: start; }
+    .jv__item > div { display: contents; }
+    .jv__name { grid-column: 2; text-align: right; justify-self: end; max-width: 22ch; }
+    .jv__text, .jv__item > div > :global(*:not(.jv__name)) { grid-column: 3; }
+    .jv__text { margin-top: 0; }
+  }
+  .jv__list li:last-child { border-bottom: var(--hair) solid var(--ridge); }
+  .jv__n { color: var(--gold-deep); font-size: var(--t-micro); padding-top: 0.5em; }
+  .jv__name {
+    font-family: var(--display); font-variation-settings: 'opsz' 22;
+    font-size: 1.2rem; font-weight: 500; color: var(--star);
+  }
+  .jv__text { margin-top: var(--s-3); color: var(--star-dim); max-width: 64ch; }
+
+  .jv__close {
+    margin-top: var(--s-12);
+    padding-left: var(--s-8); border-left: 2px solid var(--gold);
+    max-width: 62ch; color: var(--star-dim);
+  }
+  .jv__close strong { color: var(--star); }
+
+  @media (max-width: 640px) {
+    .jv__item { grid-template-columns: 1fr; gap: var(--s-3); }
+    .jv__n { padding-top: 0; }
+    .jv__close { padding-left: var(--s-4); }
+  }
+</style>

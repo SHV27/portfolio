@@ -15,6 +15,7 @@ export const SIFARISH: Project = {
   live: 'https://sifarish-shv-s-projects.vercel.app',
   tagline: 'Compile truth. Draft everything. Send nothing.',
   hook: 'I built a job-hunt assistant that compiles a résumé out of things I can actually prove — and that is physically incapable of applying on my behalf.',
+  dek: 'Seven rooms and one ledger, built over a month, under a rule I gave it on the first day: it may find, draft and prepare — it may never press send.',
   year: 'Jul – Sep 2026',
   accent: 'gold',
   hardProblem:
@@ -79,6 +80,9 @@ export const SIFARISH: Project = {
     { file: 'sifarish/page-a-babaclick.png', alt: 'A compiled one-page résumé for a company called Babaclick, ordered Education, then Achievements, then Projects.', caption: 'One dossier, compiled for a company that says it cares about aptitude. Education and the NTSE scholarship lead.' },
     { file: 'sifarish/page-b-ngo.png', alt: 'The same dossier compiled for an NGO posting, ordered Projects, then Positions of Responsibility, then Achievements, with the education section absent.', caption: 'The same dossier, same facts, an NGO posting. Projects and social work lead; education is gone. Nothing was rewritten — only re-decided.' },
     { file: 'sifarish/khabri-taleem-radar.png', alt: 'A panel listing skills the market is asking for that the user’s ledger cannot yet prove, each with the named job postings that asked for it.', caption: 'It also tells you what you cannot prove yet — each gap carrying the named postings that asked for it.' },
+    { file: 'sifarish/gate.png', alt: 'The Sifarish entry screen offering two modes side by side: Owner Mode, which verifies an owner code on the server and stores nothing in the browser, and Demo Mode, which runs read-only on a fictional persona.', caption: 'The first screen is a door. Demo mode is read-only, runs on a fictional persona, cannot spend my API budget, and is structurally incapable of sending anything — which is why I can leave it open to the public at all.' },
+    { file: 'sifarish/radar-scored-roles.png', alt: 'The Shikaar Radar screen, headed "29 keyless boards · ranked, capped at 15", listing scored roles at Siemens, Open Health Agents, LeadVaultAI, AryaXAI and Netflix, each with a numeric score and a "why this score" link.', caption: 'It reads twenty-nine job boards without a single API key, ranks eighty-five roles, and then deliberately caps the list at fifteen. Every score opens into its own reasoning — there is no number here you are asked to take on faith.' },
+    { file: 'sifarish/briefing.png', alt: 'The Sifarish dashboard greeting the owner by name with four packets compiled and ready, three ranked roles beneath it, and below that the Sach Ledger showing a shipped Gloaming entry and skills marked shipped.', caption: 'The morning briefing, and under it the Sach Ledger — the single place anything about me is written down, each entry either provable or honestly marked as still in the forge. The résumé is compiled out of this. It is never typed.' },
   ],
 };
 
@@ -90,6 +94,7 @@ export const AAINA: Project = {
   live: 'https://aaina-two.vercel.app',
   tagline: 'You already know more than you think.',
   hook: 'A relationship and self assessment I built that refuses to give you a compatibility score — and shows you the receipts for every sentence it writes about you.',
+  dek: 'Ninety-one questions and no score at the end. What you get instead is every place your own answers contradict each other, quoted back to you.',
   year: 'Aug – Sep 2026',
   accent: 'ember',
   hardProblem:
@@ -105,7 +110,7 @@ export const AAINA: Project = {
       text: 'Any paragraph whose citations do not resolve is discarded in three independent places — in the serverless function, in the client orchestrator, and at the component, which renders nothing for unresolvable evidence.',
       receipts: [
         { label: 'write.ts:139', href: src('aaina', 'api/write.ts', [139, 193]), proves: 'Server-side allowlist built per request from that reader’s own findings.' },
-        { label: 'Claim.tsx:48', href: src('aaina', 'src/components/Claim.tsx', 48), proves: '“A guard that exists in one place is a guard the second call site will bypass.”' },
+        { label: 'Claim.tsx:48', href: src('aaina', 'src/ui/Claim.tsx', 48), proves: '“A guard that exists in one place is a guard the second call site will bypass.”' },
       ],
     },
     {
@@ -156,6 +161,7 @@ export const AAINA: Project = {
     { file: 'aaina/science-desktop.png', alt: 'A page headed “Why there is no compatibility percentage”, citing Joel 2017, Montoya 2008 and Joel 2020.', caption: 'It devotes a whole chapter to explaining why it will not give you the number you came for.' },
     { file: 'aaina/report-desktop.png', alt: 'A report paragraph reading “You are 69% committed to this lasting, and 30% satisfied… here they have separated”, each paragraph tagged with a receipt count.', caption: 'The writing comes from contradictions between your own answers — not from a score.' },
     { file: 'aaina/report-together-desktop.png', alt: 'A couple-mode section showing a prediction marked correct, then the line “You read them correctly — and the two of you are still 50 points apart”.', caption: 'Couple mode runs with no server: both halves travel inside the link itself, and safety answers are blocked from travelling at all.' },
+    { file: 'aaina/landing-desktop.png', alt: 'The Aaina landing page headed “You already know more than you think”, with a Company School painting of a green parrot beside it, credited to the Cleveland Museum of Art, and a button reading “Start — two minutes”.', caption: 'The first screen makes the promise the rest of it has to keep: two minutes, no sign-up, no email, nothing saved to any server of mine. Every painting in it is public-domain Company School or Ragamala work, credited where it sits.' },
   ],
   limits: [
     'The current version replaced an earlier careless-responding detector I had built; it now surfaces dwell time and answer revisions instead, and says plainly that no self-report assessment is fake-proof.',
@@ -169,6 +175,7 @@ export const BRAILLIX: Project = {
   live: 'https://braillix.vercel.app',
   tagline: 'The teacher’s blackboard.',
   hook: 'A maths teacher writes by hand, by typing, or by photographing a textbook — and every line lands as verified mathematical braille on a blind student’s refreshable cells. No account, no server, no internet.',
+  dek: 'Fifty-one hours, built around a single fear: that a blind student is being taught something wrong and nobody in the room can tell.',
   year: 'Aug 2026',
   accent: 'gold',
   hardProblem:
@@ -232,6 +239,8 @@ export const BRAILLIX: Project = {
     { file: 'braillix/coverage-proof.jpeg', alt: 'A panel reading “232 of 232 curriculum lines translate and read back cleanly, across 27 topics, in 6.3 seconds on this machine”, above a list of per-topic results all in green.', caption: 'The claim is a button. Press it and the whole curriculum is re-translated and re-checked in front of you.' },
     { file: 'braillix/cell-atlas.png', alt: 'A reference sheet showing all sixty-four cam positions as rendered braille cells, each labelled with its dot numbers and its Nemeth meaning.', caption: 'All sixty-four positions a cell can hold, each with its dots and its meaning — the kind of reference sheet you only build if you have actually understood the code.' },
     { file: 'braillix/reader-validation.png', alt: 'A screen showing a quadratic formula, the words “what the dots say — matches what you typed”, and a per-cell table listing dots, meaning and cam position.', caption: 'The three-way check, visible: what was typed, what the dots say when read back independently, and whether they agree.' },
+    { file: 'braillix/ink-hero.jpeg', alt: 'The Braillix board showing the equation x squared plus 3x plus 2 equals 0 written by hand, a rendered six-dot braille cell, a reader panel confirming the dots read back as what was written, and a status bar listing speech as degraded while the maths engine, recognition, USB display and offline copy read ready.', caption: 'The teacher writes; the dots appear; a separate engine reads those dots back and states what they say. Along the bottom every subsystem declares its own condition — speech is degraded here, and it says so instead of quietly pretending.' },
+    { file: 'braillix/mirror-two-pods.jpeg', alt: 'The Braillix board driving two braille pods at once over Wi-Fi, with a status line reading “2 cells across 2 pods” and a cell counter reading “cells 1–2 of 7”.', caption: 'Two pods on the same board, over Wi-Fi, showing the same cells — and the software genuinely does not know how many there are. The build greps its own source and fails if any file hard-codes a cell count.' },
   ],
   limits: [
     'Handwritten Devanagari words genuinely do not work — the recogniser is trained on print, and no free browser-runnable model existed when this was built. The app says so rather than guessing.',

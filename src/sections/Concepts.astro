@@ -1,0 +1,197 @@
+---
+/**
+ * THE CONCEPTS.
+ *
+ * The brief asks for this explicitly — "will mention I got the concepts too, be
+ * it RAG etc" — and a build audit caught that it was missing.
+ *
+ * It is deliberately NOT a skills list. A wall of logos proves nothing and the
+ * page has a standing rule against CV blocks. Instead each concept gets one
+ * sentence of what I actually understand about it, and a receipt pointing at
+ * the code where I used it. A concept without a receipt does not appear.
+ *
+ * LoRA and Ollama are on my résumé as tools I have worked with, but a sweep of
+ * every public repository found no usage evidence for either, so they are not
+ * claimed here. That omission is the whole point of the section.
+ */
+import Receipt from '../components/Receipt.astro';
+import { src, repoUrl } from '../content/types';
+
+const CONCEPTS = [
+  {
+    name: 'Giving a model facts — then removing its ability to ignore them',
+    plain: 'Everyone bolts a search onto a chatbot and calls it grounded. That only counts if the model is <em>forbidden</em> from saying anything the search did not return. In mine it is: a sentence with no fact behind it does not get styled red or flagged for review — the page refuses to render at all.',
+    body: 'Retrieval is only worth it if the retrieved thing is allowed to constrain the answer. In Aaina the model receives a closed evidence bundle and may write nothing outside it; in Sifarish the retrieved facts are the only things the compiler is permitted to place. Both are retrieval-augmented — but the augmentation is a hard boundary, not a hint.',
+    receipts: [
+      { label: 'derive.ts:28', href: src('aaina', 'src/engine/derive.ts', 28), proves: 'One deterministic function builds the entire evidence bundle the model is allowed to see.' },
+      { label: 'compiler.ts:284', href: src('sifarish', 'src/lib/compile/compiler.ts', [284, 285]), proves: 'A line with no retrieved fact behind it throws rather than rendering.' },
+    ],
+  },
+  {
+    name: 'Grading the answer, not the fact that an answer arrived',
+    plain: 'Most testing proves the machine replied, which is like marking an exam on whether the pen worked. So I write two people who look nearly identical on paper, run both all the way through, and fail the entire build if either one is handed a sentence that could just as easily have gone to the other.',
+    body: 'Most eval harnesses check that a call returned. Mine check whether the thing produced is any good. Aaina generates full reports for nine personas — two built to be almost identical — and fails if either gets a sentence the other could have been given. Gloaming pits a smart bot against a greedy one on identical seeded games to prove skill actually pays.',
+    receipts: [
+      { label: 'audit.ts:21', href: src('aaina', 'scripts/audit.ts', [21, 23]), proves: 'Nine personas, adversarially similar by design, graded on the finished prose.' },
+      { label: 'PROGRESS.md:17', href: src('gloaming-game', 'PROGRESS.md', [17, 20]), proves: 'A measured +16-point skill gap on paired seeded games.' },
+    ],
+  },
+  {
+    name: 'Rules a model cannot talk its way around',
+    plain: 'If your safety rule is a sentence inside a prompt, it is a polite request to something that is very good at conversation. I would rather the bad outcome be impossible to express: Sifarish searches its own source code as it builds and refuses to compile if any file so much as imports something capable of sending an email.',
+    body: 'A guardrail written as a prompt instruction is a suggestion. I prefer ones that make the bad state unrepresentable: a thrown exception on an uncited line, a braille line that cannot exist without a human confirmation, a required disclaimer field on the response schema, a grep over the source tree that fails the build if a mail library ever appears.',
+    receipts: [
+      { label: 'lesson.ts:21', href: src('braillix', 'app/src/lesson.ts', [21, 23]), proves: 'A recognised line is unrepresentable without an explicit confirmation.' },
+      { label: 'schemas.py:21', href: src('sehat-saarthi', 'backend/app/schemas.py', [21, 36]), proves: 'The disclaimer is a required field, not a UI convention.' },
+      { label: 'invariants.test.ts:85', href: src('sifarish', 'tests/invariants.test.ts', [85, 108]), proves: 'The build greps its own source and fails on any send-capable library.' },
+    ],
+  },
+  {
+    name: 'Borrowing a trained brain instead of raising one from scratch',
+    plain: 'Teaching a model to see from nothing takes a warehouse of pictures and a room full of GPUs. So you take one that already knows what an edge and a texture are, and teach it only the last part — the part that is actually your problem. I have done it both ways: the expensive way on 17,736 real telescope images, and the cheap way for a clinic app with no GPU anywhere in the budget.',
+    body: 'I fine-tuned a ResNet50 end-to-end on 17,736 real survey images, then ran the same experiment at four labelling budgets to find where the curve flattens. In Sehat Saarthi, with no GPU, I went the other way — froze an ImageNet backbone and trained only a class-balanced head, then exported the whole thing to a single ONNX graph so it runs on a free CPU tier.',
+    receipts: [
+      { label: 'galaxy-morphology-transfer', href: repoUrl('galaxy-morphology-transfer'), proves: 'ResNet50 fine-tuned on Galaxy10-DECaLS, four label regimes, macro-F1 as the primary metric.' },
+      { label: 'training/', href: `${repoUrl('sehat-saarthi')}/tree/main/training`, proves: 'Frozen MobileNetV2 feature extractor plus a class-balanced logistic head, exported to ONNX.' },
+    ],
+  },
+  {
+    name: 'Making “80% sure” actually mean eighty per cent',
+    plain: 'A model saying 80% does not mean it is right eight times in ten. Usually it just means it is loud. In a clinic that is the number that does the damage — worse than being wrong — because a family reads it and believes it. So every probability the app shows is put through a correction that forces it to match how often it is really right, before a human ever sees it.',
+    body: 'An uncalibrated probability on out-of-distribution input is confident nonsense, and in a clinic that is far more dangerous than being wrong. Every tabular model in Sehat Saarthi is isotonically calibrated with five-fold cross-validation, because the number a health worker reads has to mean what it says.',
+    receipts: [{ label: 'training/', href: `${repoUrl('sehat-saarthi')}/tree/main/training`, proves: 'CalibratedClassifierCV with isotonic regression, cv=5, across all five tabular modules.' }],
+  },
+  {
+    name: 'Choosing the right yardstick, out loud, before seeing the result',
+    plain: 'If ninety per cent of your examples are one thing, a model that always guesses that thing scores ninety per cent and has learnt absolutely nothing. So you measure a different way — and you commit to which way in writing first, because if you pick afterwards you will pick whichever number flatters you. That is not statistics, that is marketing.',
+    body: 'Choosing macro-F1 over accuracy because the classes are imbalanced and saying why. Validating a detector by planting a known signal and measuring recovery instead of reporting a number with nothing to compare it to. Deriving composite weights from two published effect sizes rather than tuning them until the output looked nice.',
+    receipts: [
+      { label: 'README', href: src('galaxy-morphology-transfer', 'README.md'), proves: 'Macro-F1 chosen as primary, with the reason stated and class-weighted loss.' },
+      { label: 'dimensions.ts:23', href: src('aaina', 'src/engine/dimensions.ts', 23), proves: '"If you disagree with a weight, you disagree with Joel 2020 or Le 2010, not with us."' },
+    ],
+  },
+  {
+    name: 'The whole thing running on your laptop, with the Wi-Fi switched off',
+    plain: 'A blind student’s work is not allowed to leave the room, so there is no server to send it to. A 76 MB vision model and a complete text-reading engine live inside the browser tab instead. If even one of the eleven pieces it needs is missing or arrives truncated, the build stops — because an app that is quietly only half-offline is worse than one that admits it cannot run.',
+    body: 'Braillix runs a 76 MB vision model and a full OCR engine inside the browser, offline, because student work must never leave the room. That meant a web worker, a hand-written service worker, self-hosted weights, and a build step that refuses to ship if any of the eleven required assets is missing or truncated.',
+    receipts: [
+      { label: 'vite.config.ts:31', href: src('braillix', 'app/vite.config.ts', [31, 123]), proves: 'Hand-written service worker precaching the whole application; no CDN is ever contacted.' },
+      { label: 'assert-assets.mjs:19', href: src('braillix', 'app/scripts/assert-assets.mjs', [19, 33]), proves: 'The build fails rather than shipping a half-offline app.' },
+    ],
+  },
+  {
+    name: 'Getting a model to return something a program can actually use',
+    plain: 'Ask a model for clean data and it will cheerfully hand you a paragraph with a curly bracket stuck on the front. I ran the experiment rather than guessing: one request mode failed three times out of three, another worked — so the fix was the mode, not the temperature dial everybody reaches for first. Same story with speed limits: I measured that the provider bills you for tokens you <em>might</em> use, then spaced the requests around that.',
+    body: 'I found out by controlled experiment that JSON-schema mode succeeded where JSON-object mode failed at any temperature — and wrote the counts into the file. Separately, Aaina fans its sections out in waves of three, thirty-five seconds apart, because Groq reserves max_tokens against the per-minute budget at request time, so three concurrent sections rate-limit before a word is generated.',
+    receipts: [
+      { label: 'dimaag/core.ts:57', href: src('sifarish', 'src/lib/dimaag/core.ts', [57, 70]), proves: 'The measured probe: 0/3, 0/3, then 2/3 — the mode was the variable, not temperature.' },
+      { label: 'compose.ts:40', href: src('aaina', 'src/report/compose.ts', [40, 41]), proves: 'Wave scheduling derived from measured per-request token reservation.' },
+    ],
+  },
+];
+---
+
+<section class="cn section" id="concepts">
+  <div class="wrap">
+    <p class="label cn__k">Under the hood</p>
+    <h2 class="cn__t display">Eight ideas, explained like you're a person.</h2>
+    <p class="cn__lede lede">
+      Anybody can put "RAG" on a CV. Here is each idea in plain words, the mistake almost everyone makes with it,
+      and the exact line of my code where I got it right. The precise, jargon-heavy version is one click down if
+      you want it. Nothing appears on this list that I can't point at.
+    </p>
+
+    <ol class="cn__list">
+      {CONCEPTS.map((c, i) => (
+        <li class="cn__item reveal">
+          <span class="cn__n mono">{String(i + 1).padStart(2, '0')}</span>
+          <div class="cn__body">
+            <h3 class="cn__name">{c.name}</h3>
+            <p class="cn__plain" set:html={c.plain} />
+            <details class="cn__tech">
+              <summary class="cn__techs mono">The precise version</summary>
+              <p class="cn__text">{c.body}</p>
+            </details>
+            <Receipt receipts={c.receipts} />
+          </div>
+        </li>
+      ))}
+    </ol>
+
+    <div class="cn__tools">
+      <p class="label cn__toolsk">Also in the toolkit</p>
+      <p class="cn__toolstext">
+        Python · TypeScript · PyTorch · SQL · Hugging Face · Groq · Git · Claude Code. Also LoRA fine-tuning and
+        local models through Ollama — I've worked with both, I haven't shipped anything public with either, and
+        I'm telling you that rather than letting you assume otherwise. Everything above this line has a link
+        under it. This is where the line is.
+      </p>
+      <p class="cn__cert mono">
+        AI Mentorship Programme — LaunchED Global (IIT Kharagpur / KSHITIJ), credential LEDCC4828 ·
+        Predictive Analytics guided projects — LinkedIn Learning, via TIET
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cn__k { color: var(--gold); }
+  .cn__t { font-size: var(--t-title); margin-top: var(--s-4); max-width: 20ch; }
+  .cn__lede { margin-top: var(--s-6); }
+
+  .cn__list { list-style: none; padding: 0; margin: var(--s-16) 0 0; }
+  .cn__item {
+    display: grid; grid-template-columns: auto 1fr; gap: var(--s-6);
+    padding: var(--s-8) 0;
+    border-top: var(--hair) solid var(--ridge);
+  }
+  /* On a wide screen the name moves into its own column instead of stacking
+     above a 500px paragraph with half the page empty beside it. */
+  @media (min-width: 1080px) {
+    .cn__item { grid-template-columns: 2.5rem minmax(0, 20rem) minmax(0, 58ch); gap: var(--s-8); align-items: start; }
+    .cn__body { display: contents; }
+    .cn__name { grid-column: 2; text-align: right; justify-self: end; max-width: 22ch; }
+    .cn__plain, .cn__tech, .cn__body > :global(*:not(.cn__name)) { grid-column: 3; }
+    .cn__plain { margin-top: 0; }
+  }
+  .cn__list li:last-child { border-bottom: var(--hair) solid var(--ridge); }
+  .cn__n { color: var(--gold-deep); font-size: var(--t-micro); padding-top: 0.5em; }
+  .cn__name {
+    font-family: var(--display); font-variation-settings: 'opsz' 22;
+    font-size: clamp(1.25rem, 2vw, 1.55rem); font-weight: 500; color: var(--star);
+    text-wrap: balance; max-width: 30ch;
+  }
+  .cn__plain {
+    margin-top: var(--s-3);
+    max-width: 66ch;
+    font-size: clamp(1.02rem, 1.2vw, 1.14rem);
+    line-height: 1.6;
+    color: var(--star-dim);
+    text-wrap: pretty;
+  }
+  .cn__plain :global(em) { color: var(--gold); font-style: italic; font-family: var(--display); }
+
+  .cn__tech { margin-top: var(--s-4); }
+  .cn__techs {
+    display: inline-flex; align-items: center; gap: var(--s-2);
+    font-size: var(--t-micro); letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--dust); cursor: pointer; list-style: none;
+    padding: 4px 0;
+  }
+  .cn__techs::-webkit-details-marker { display: none; }
+  .cn__techs::before { content: '+'; color: var(--gold); font-size: 1.1em; line-height: 1; }
+  .cn__tech[open] .cn__techs::before { content: '\2212'; }
+  .cn__techs:hover { color: var(--gold); }
+  .cn__text { margin-top: var(--s-3); color: var(--dust); font-size: var(--t-small); max-width: 66ch; }
+
+  .cn__tools { margin-top: var(--s-16); border-left: 2px solid var(--ridge-lit); padding-left: var(--s-8); max-width: 66ch; }
+  .cn__toolsk { color: var(--dust); }
+  .cn__toolstext { margin-top: var(--s-4); font-size: var(--t-small); line-height: 1.65; color: var(--dust); }
+  .cn__cert { margin-top: var(--s-6); font-size: var(--t-micro); color: var(--dust-faint); line-height: 1.7; }
+
+  @media (max-width: 640px) {
+    .cn__item { grid-template-columns: 1fr; gap: var(--s-3); }
+    .cn__n { padding-top: 0; }
+    .cn__tools { padding-left: var(--s-4); }
+  }
+</style>

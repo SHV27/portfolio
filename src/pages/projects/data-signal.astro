@@ -1,0 +1,60 @@
+---
+/**
+ * The analytics chapter as its own page, matching every other project.
+ * It is not a repo-backed Project object, so it renders its own section
+ * rather than going through the ProjectCase template.
+ */
+import Base from '../../layouts/Base.astro';
+import Analytics from '../../sections/Analytics.astro';
+import StarBirth from '../../sections/StarBirth.astro';
+import { PLATES } from '../../content/plates';
+
+const plate = PLATES['data-signal'];
+---
+<Base
+  title="Data & Signal — Shaurya Verma"
+  description="Label-efficient transfer learning on 17,736 real survey images, and three detection pipelines validated by planting a known signal and measuring how much came back."
+>
+  <a class="back" href="/#work">
+    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M9 2 L4 7 L9 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg>
+    All work
+  </a>
+
+  <Analytics />
+
+  <StarBirth
+    plate={plate.src}
+    credit={plate.credit}
+    kicker={plate.kicker}
+    line={plate.line}
+    sub={plate.sub}
+    focus={plate.focus}
+    height="mid"
+  />
+
+  <nav class="pager wrap" aria-label="Other projects">
+    <a class="pager__l" href="/projects/braillix"><span class="label">Previous</span><span class="pager__n display display--small">Braillix</span></a>
+    <a class="pager__l pager__l--next" href="/projects/reckoner"><span class="label">Next</span><span class="pager__n display display--small">Reckoner</span></a>
+  </nav>
+</Base>
+
+<style>
+  .back {
+    position: sticky; top: var(--s-4); z-index: 30;
+    display: inline-flex; align-items: center; gap: var(--s-2);
+    margin: var(--s-6) 0 0 var(--gutter);
+    padding: 8px 16px; min-height: 40px;
+    background: color-mix(in oklab, var(--void) 86%, transparent);
+    backdrop-filter: blur(6px);
+    border: var(--hair) solid var(--ridge);
+    border-radius: var(--r-full);
+    font-size: var(--t-small); color: var(--dust); text-decoration: none;
+    transition: border-color var(--d-base) var(--ease), color var(--d-base) var(--ease);
+  }
+  .back:hover { border-color: var(--gold); color: var(--gold); }
+  .pager { display: flex; justify-content: space-between; gap: var(--s-8); padding-block: var(--s-16) var(--s-32); border-top: var(--hair) solid var(--ridge); }
+  .pager__l { display: flex; flex-direction: column; gap: 3px; text-decoration: none; }
+  .pager__l--next { text-align: right; align-items: flex-end; }
+  .pager__n { font-size: clamp(1.2rem, 2.6vw, 1.9rem); color: var(--star); transition: color var(--d-base) var(--ease); }
+  .pager__l:hover .pager__n { color: var(--gold); }
+</style>

@@ -1,6 +1,6 @@
 ---
 /**
- * PLATE — one image, alone, whole.
+ * PLATE — one image, alone, whole, and mounted like a plate in a catalogue.
  *
  * This component takes exactly ONE image. It has no grid mode, no gallery prop,
  * no array. That is deliberate: his instruction was "koi collage ya kuch mat
@@ -8,8 +8,21 @@
  * batches. A collage is therefore not expressible in this codebase — the rule is
  * enforced by the type signature rather than by remembering it.
  *
- * The frame takes the image's own aspect ratio, so nothing is ever cropped and
- * the "face cut off" failure he warned about cannot occur.
+ * SIZING (rewritten — the old version wasted enormous amounts of the page).
+ * The old plate was a centred column: a 560px-wide portrait sitting in a 1296px
+ * row, so 57% of every row was empty air, and because the height was whatever
+ * the aspect ratio produced, one photograph could be 1,209px tall — more than a
+ * full screen for a single picture. Measured on the home page: 23,685px, of
+ * which the plates were roughly a third, most of it nothing.
+ *
+ * Now the image is budgeted by HEIGHT first and the leftover width is given to
+ * the caption, which sits beside the picture and bottom-aligns to it — the way
+ * a plate is captioned in a printed catalogue. A portrait that used to occupy
+ * 1,034px of page now occupies about 440px and the row is fully used.
+ *
+ * The photograph itself is never cropped: the frame takes the image's own
+ * aspect ratio and the width is derived from the height budget, so the whole
+ * picture is always visible.
  */
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
@@ -20,54 +33,104 @@ interface Props {
   caption?: string;
   /** Credit line, where a licence requires one. */
   credit?: string;
-  /** How much of the viewport width the plate occupies. */
+  /** The height budget the plate is allowed to spend. */
   size?: 'intimate' | 'standard' | 'wide';
   /** Priority images (above the fold) are eagerly loaded and never lazy. */
   priority?: boolean;
-  align?: 'left' | 'center';
+  /** Which side the picture sits on. Alternates automatically when unset. */
+  side?: 'left' | 'right';
 }
 
 const {
   src, alt, caption, credit,
   size = 'standard',
   priority = false,
-  align = 'center',
+  side,
 } = Astro.props;
 
-// Never upscale: the largest source here is 1440px wide.
-const maxW = Math.min(src.width, size === 'intimate' ? 560 : size === 'wide' ? 1180 : 860);
+/* Height budget, then width derived from it — never the other way round.
+   A tall portrait therefore gets narrow, not gigantic.                      */
+const BUDGET = {
+  intimate: { h: 480, w: 440 },
+  standard: { h: 560, w: 700 },
+  wide: { h: 640, w: 980 },
+}[size];
+
+const ratio = src.width / src.height;
+const w = Math.min(BUDGET.w, Math.round(BUDGET.h * ratio), src.width);
 ---
 
-<figure class:list={['plate', `plate--${size}`, `plate--${align}`, 'reveal']}>
-  <div class="plate__frame" style={`aspect-ratio:${src.width}/${src.height};max-width:${maxW}px`}>
+<figure
+  class:list={['plate', `plate--${size}`, side && `plate--${side}`, 'reveal']}
+  style={`--ar:${ratio.toFixed(4)};--pw:${w}px`}
+>
+  <div class="plate__frame">
     <Image
       src={src}
       alt={alt}
-      widths={[360, 560, 860, 1180].filter((w) => w <= src.width)}
-      sizes={`(max-width: 640px) 92vw, ${maxW}px`}
+      widths={[300, 460, 660, 940].filter((n) => n <= src.width)}
+      sizes={`(max-width: 760px) 88vw, ${w}px`}
       loading={priority ? 'eager' : 'lazy'}
       fetchpriority={priority ? 'high' : 'auto'}
       decoding={priority ? 'sync' : 'async'}
       format="avif"
     />
   </div>
-  {(caption || credit) && (
-    <figcaption class="plate__cap">
-      {caption && <span class="plate__caption">{caption}</span>}
-      {credit && <span class="plate__credit mono">{credit}</span>}
-    </figcaption>
-  )}
+
+  <figcaption class="plate__cap">
+    <span class="plate__no mono" aria-hidden="true"></span>
+    {caption && <span class="plate__caption">{caption}</span>}
+    {credit && <span class="plate__credit mono">{credit}</span>}
+  </figcaption>
 </figure>
 
 <style>
-  .plate { margin-block: clamp(var(--s-12), 8vh, var(--s-24)); }
-  .plate--center { display: flex; flex-direction: column; align-items: center; }
-  .plate--center .plate__cap { text-align: center; }
+  /* Plates number themselves down the page, like a catalogue. Free, and the
+     kind of detail nobody generates by accident.                            */
+  .plate { counter-increment: plate; }
+
+  /* The figure is only as wide as the picture plus its label — a full-bleed row
+     holding a 270px portrait is the thing that looked like wasted page. It then
+     hugs alternating edges, so the margin left over reads as composition rather
+     than as a gap somebody forgot to fill.                                    */
+  .plate {
+    display: grid;
+    grid-template-columns: var(--pw) minmax(18ch, 34ch);
+    gap: clamp(var(--s-6), 3vw, var(--s-12));
+    align-items: end;
+    width: fit-content;
+    max-width: 100%;
+    margin-block: clamp(var(--s-8), 5vh, var(--s-16));
+    margin-right: auto;
+  }
+
+  /* The side alternates on its own, so a column of plates never reads as a
+     stack. An explicit `side` prop overrides it where a spread needs pinning. */
+  .plate:nth-of-type(even) {
+    grid-template-columns: minmax(18ch, 34ch) var(--pw);
+    margin-right: 0;
+    margin-left: auto;
+  }
+  .plate:nth-of-type(even) .plate__frame { order: 2; }
+  .plate:nth-of-type(even) .plate__cap { text-align: right; align-items: flex-end; }
+  .plate--left {
+    grid-template-columns: var(--pw) minmax(18ch, 34ch) !important;
+    margin-right: auto !important; margin-left: 0 !important;
+  }
+  .plate--left .plate__frame { order: 0 !important; }
+  .plate--left .plate__cap { text-align: left !important; align-items: flex-start !important; }
+  .plate--right {
+    grid-template-columns: minmax(18ch, 34ch) var(--pw) !important;
+    margin-left: auto !important; margin-right: 0 !important;
+  }
+  .plate--right .plate__frame { order: 2 !important; }
+  .plate--right .plate__cap { text-align: right !important; align-items: flex-end !important; }
 
   .plate__frame {
-    width: 100%;
     position: relative;
-    border-radius: var(--r-lg);
+    width: 100%;
+    aspect-ratio: var(--ar);
+    border-radius: var(--r-md);
     overflow: hidden;
     /* A contact shadow plus an ambient one — elevation, not decoration. */
     box-shadow: var(--lift-2);
@@ -75,26 +138,40 @@ const maxW = Math.min(src.width, size === 'intimate' ? 560 : size === 'wide' ? 1
     outline: var(--hair) solid var(--ridge);
     outline-offset: -1px;
     background: var(--deep);
+    transition: outline-color var(--d-slow) var(--ease);
   }
+  .plate:hover .plate__frame { outline-color: color-mix(in oklab, var(--gold) 45%, var(--ridge)); }
 
   /* object-fit: contain is the point — the whole frame, always, never a crop. */
   .plate__frame :global(img) {
     width: 100%;
     height: 100%;
     object-fit: contain;
+    display: block;
   }
 
   .plate__cap {
-    margin-top: var(--s-4);
-    max-width: 62ch;
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     gap: var(--s-2);
+    padding-bottom: var(--s-1);
   }
+  .plate__no {
+    align-self: stretch;
+    font-size: var(--t-micro);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold);
+    padding-bottom: var(--s-2);
+    border-bottom: var(--hair) solid var(--ridge);
+  }
+  .plate__no::before { content: 'Plate ' counter(plate, decimal-leading-zero); }
   .plate__caption {
     font-size: var(--t-small);
     line-height: 1.55;
     color: var(--star-dim);
+    text-wrap: pretty;
   }
   .plate__credit {
     font-size: var(--t-micro);
@@ -102,7 +179,24 @@ const maxW = Math.min(src.width, size === 'intimate' ? 560 : size === 'wide' ? 1
     letter-spacing: 0.04em;
   }
 
-  @media (max-width: 640px) {
-    .plate { margin-block: var(--s-12); }
+  /* Below the fold of a phone there is no second column to give away, so the
+     caption goes under the picture and the height budget tightens.           */
+  @media (max-width: 760px) {
+    .plate,
+    .plate:nth-of-type(even),
+    .plate--left,
+    .plate--right {
+      grid-template-columns: minmax(0, 1fr) !important;
+      gap: var(--s-4);
+      width: 100%;
+      margin-inline: 0 !important;
+    }
+    .plate:nth-of-type(even) .plate__cap,
+    .plate--right .plate__cap { text-align: left !important; align-items: flex-start !important; }
+    .plate .plate__frame,
+    .plate:nth-of-type(even) .plate__frame { order: 0 !important; }
+    .plate__frame { max-width: min(100%, calc(52vh * var(--ar))); }
+    .plate__cap { max-width: none; }
+    .plate { margin-block: var(--s-10); }
   }
 </style>

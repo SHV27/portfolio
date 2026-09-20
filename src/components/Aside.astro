@@ -1,0 +1,90 @@
+---
+/**
+ * A photograph beside its text, not stacked above it.
+ *
+ * The old personal chapter was a vertical column of full-width images with
+ * paragraphs between them, which is what made the page feel endless. Here the
+ * image takes one side and the words take the other, and the side alternates
+ * down the page.
+ *
+ * The photograph is still whole and never cropped — the frame takes the image's
+ * own aspect ratio and the image is contained inside it.
+ */
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  caption?: string;
+  side?: 'left' | 'right';
+  /** Narrower column for portrait-orientation photographs. */
+  width?: 'narrow' | 'wide';
+}
+const { src, alt, caption, side = 'left', width = 'narrow' } = Astro.props;
+
+/* Budgeted by height, like Plate. 340px made a photograph read as a thumbnail;
+   a portrait now gets a real 460px column and a landscape gets 620px, and
+   neither is ever allowed to be taller than a comfortable two-thirds screen. */
+const H = width === 'narrow' ? 545 : 470;
+const ratio = src.width / src.height;
+const max = Math.min(width === 'narrow' ? 470 : 660, Math.round(H * ratio), src.width);
+---
+
+<div class:list={['as', `as--${side}`]}>
+  <figure class="as__fig reveal">
+    <div class="as__frame" style={`--ar:${ratio.toFixed(4)};aspect-ratio:${ratio.toFixed(4)};max-width:${max}px`}>
+      <Image
+        src={src} alt={alt}
+        widths={[300, 460, 640, 860].filter((w) => w <= src.width)}
+        sizes={`(max-width: 860px) 84vw, ${max}px`}
+        loading="lazy" decoding="async" format="avif"
+      />
+    </div>
+    {caption && <figcaption class="as__cap">{caption}</figcaption>}
+  </figure>
+
+  <div class="as__body prose">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .as {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: clamp(var(--s-8), 4.5vw, var(--s-16));
+    align-items: center;
+    /* Capped and centred so the text column ends near the picture rather than
+       trailing off toward a far gutter with 300px of nothing after it. */
+    max-width: 1180px;
+    margin-inline: auto;
+    margin-block: clamp(var(--s-6), 4vh, var(--s-12));
+  }
+  .as--right { grid-template-columns: minmax(0, 1fr) auto; }
+  .as--right .as__fig { order: 2; }
+
+  .as__fig { margin: 0; }
+  .as__frame {
+    width: 100%;
+    border-radius: var(--r-lg); overflow: hidden;
+    outline: var(--hair) solid var(--ridge); outline-offset: -1px;
+    box-shadow: var(--lift-2);
+    background: var(--deep);
+  }
+  .as__frame :global(img) { width: 100%; height: 100%; object-fit: contain; }
+  .as__cap { margin-top: var(--s-3); font-size: var(--t-micro); color: var(--dust); max-width: 34ch; }
+  /* The label hangs off the same edge as the picture it belongs to. */
+  .as--right .as__cap { text-align: right; margin-left: auto; }
+
+  .as__body { max-width: 62ch; }
+  .as__body :global(p + p) { margin-top: var(--s-5); }
+  .as__body :global(p) { text-wrap: pretty; }
+
+  @media (max-width: 860px) {
+    .as, .as--right { grid-template-columns: 1fr; gap: var(--s-8); }
+    .as--right .as__fig { order: 0; }
+    .as__frame { max-width: min(88vw, calc(48vh * var(--ar))) !important; margin-inline: auto; }
+    .as__cap { text-align: center; max-width: none; }
+  }
+</style>

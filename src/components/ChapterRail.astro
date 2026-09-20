@@ -1,0 +1,162 @@
+---
+/**
+ * THE RAIL — navigation for a very long page.
+ *
+ * A hairline scale down the right edge with one tick per chapter, a gold fill
+ * showing how far through you are, and the current chapter named beside it.
+ * Click or keyboard to jump.
+ *
+ * It is a measurement scale, which is the correct idiom for this art direction —
+ * a plate book has a scale bar, not a navbar. It also solves the real usability
+ * problem: 84 screens with no way to move through them is not "immersive", it
+ * is just hard to use.
+ *
+ * Hidden below 1100px, where it would crowd the text; a phone gets a slim
+ * progress line at the top of the viewport instead.
+ */
+const CHAPTERS = [
+  { id: 'the-anthem', n: 'The anthem' },
+  { id: 'thesis',     n: 'The short version' },
+  { id: 'work',       n: 'The work' },
+  { id: 'who',        n: 'Who I am' },
+  { id: 'contact',    n: 'Contact' },
+];
+---
+
+<nav class="rail" aria-label="Chapters" data-rail>
+  <ol class="rail__list">
+    {CHAPTERS.map((c) => (
+      <li class="rail__item">
+        <a class="rail__link" href={`#${c.id}`} data-rail-link={c.id}>
+          <span class="rail__name">{c.n}</span>
+          <span class="rail__tick" aria-hidden="true"></span>
+        </a>
+      </li>
+    ))}
+  </ol>
+  <div class="rail__track" aria-hidden="true"><div class="rail__fill" data-rail-fill></div></div>
+</nav>
+
+<div class="rail__mobile" aria-hidden="true"><div class="rail__mobilefill" data-rail-mfill></div></div>
+
+<style>
+  .rail {
+    position: fixed; right: clamp(1rem, 2.2vw, 2rem); top: calc(50% + 28px);
+    transform: translateY(-50%);
+    z-index: 40;
+    display: none;
+  }
+  @media (min-width: 1100px) { .rail { display: block; } }
+
+  .rail__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+  .rail__item { display: flex; justify-content: flex-end; }
+
+  .rail__link {
+    display: flex; align-items: center; justify-content: flex-end; gap: var(--s-3);
+    padding: 5px 0;
+    text-decoration: none;
+    /* full-height hit area without a visible box */
+    min-height: 22px;
+  }
+
+  .rail__name {
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.06em;
+    color: var(--dust);
+    opacity: 0; transform: translateX(6px);
+    white-space: nowrap;
+    pointer-events: none;
+    transition: opacity var(--d-base) var(--ease), transform var(--d-base) var(--ease), color var(--d-base) var(--ease);
+  }
+  .rail__tick {
+    width: 14px; height: var(--hair);
+    background: var(--ridge-lit);
+    flex: none;
+    transition: width var(--d-base) var(--ease), background var(--d-base) var(--ease);
+  }
+
+  .rail__link:hover .rail__name,
+  .rail__link:focus-visible .rail__name,
+  .rail__link[aria-current='true'] .rail__name { opacity: 1; transform: none; }
+  .rail__link:hover .rail__tick,
+  .rail__link:focus-visible .rail__tick { width: 26px; background: var(--star-dim); }
+
+  .rail__link[aria-current='true'] .rail__tick { width: 30px; background: var(--gold); }
+  .rail__link[aria-current='true'] .rail__name { color: var(--gold); }
+
+  /* the scale bar itself */
+  .rail__track {
+    position: absolute; right: 6px; top: 0; bottom: 0;
+    width: var(--hair); background: var(--ridge);
+    z-index: -1;
+  }
+  .rail__fill {
+    position: absolute; left: 0; top: 0; width: 100%;
+    height: 0%; background: var(--gold); opacity: 0.55;
+  }
+
+  /* phones get a hairline progress bar instead */
+  .rail__mobile {
+    position: fixed; top: 0; left: 0; right: 0; height: 2px;
+    z-index: 40; background: transparent; pointer-events: none;
+  }
+  @media (min-width: 1100px) { .rail__mobile { display: none; } }
+  .rail__mobilefill { height: 100%; width: 0%; background: var(--gold); opacity: 0.8; }
+</style>
+
+<script>
+  const rail = document.querySelector('[data-rail]');
+  const fill = document.querySelector<HTMLElement>('[data-rail-fill]');
+  const mfill = document.querySelector<HTMLElement>('[data-rail-mfill]');
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-rail-link]'));
+  const targets = links
+    .map((a) => ({ a, el: document.getElementById(a.dataset.railLink!) }))
+    .filter((t): t is { a: HTMLAnchorElement; el: HTMLElement } => !!t.el);
+
+  if (targets.length) {
+    let ticking = false;
+
+    const update = () => {
+      ticking = false;
+      const y = window.scrollY;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = max > 0 ? Math.min(100, (y / max) * 100) : 0;
+      if (fill) fill.style.height = pct + '%';
+      if (mfill) mfill.style.width = pct + '%';
+
+      // current chapter = the last one whose top is above the middle of the screen
+      const mid = window.innerHeight * 0.45;
+      let current = -1;
+      for (let i = 0; i < targets.length; i++) {
+        if (targets[i].el.getBoundingClientRect().top <= mid) current = i;
+      }
+      if (current < 0) current = 0;
+      targets.forEach((t, i) => {
+        if (i === current) t.a.setAttribute('aria-current', 'true');
+        else t.a.removeAttribute('aria-current');
+      });
+    };
+
+    window.addEventListener('scroll', () => {
+      if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    }, { passive: true });
+    window.addEventListener('resize', update, { passive: true });
+    update();
+
+    // The rail is noise until you have actually started reading.
+    const show = () => {
+      if (!rail) return;
+      rail.classList.toggle('is-visible', window.scrollY > window.innerHeight * 0.6);
+    };
+    window.addEventListener('scroll', show, { passive: true });
+    show();
+  }
+</script>
+
+<style is:global>
+  @media (min-width: 1100px) {
+    .rail { opacity: 0; pointer-events: none; transition: opacity var(--d-slow) var(--ease); }
+    .rail.is-visible { opacity: 1; pointer-events: auto; }
+  }
+</style>

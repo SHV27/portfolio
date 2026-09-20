@@ -1,0 +1,1133 @@
+---
+/**
+ * THE COSMIC FIELD — one living sky behind the entire site.
+ *
+ * This replaces the separate "here is a black hole" and "here is a galaxy"
+ * sections. Those were exhibits; this is an environment. Something is always
+ * happening somewhere in the frame, and you travel through it as you scroll
+ * rather than arriving at it.
+ *
+ * WHAT LIVES IN IT
+ *  · Three star layers at three distances, parallaxed by scroll. The near ones
+ *    sweep, the far ones hold — the differential is what reads as travel.
+ *  · A black hole that drifts slowly across the deep field, bending the stars
+ *    behind it by a 1/r deflection law. Pass close enough and the light wraps
+ *    into an Einstein ring. Nudge it with your pointer.
+ *  · A persistent deep layer, pre-rendered once per resize: nebula clouds lit
+ *    from inside, the Milky Way's band with its dust lanes, zodiacal light, a
+ *    distant spiral galaxy, a globular cluster and a ringed planet.
+ *  · Red giants breathing with prominence arcs; planetary nebulae; kilonovae
+ *    that spiral in and merge; gamma-ray bursts; light echoes; exoplanet
+ *    transits; satellites glinting as they tumble past.
+ *  · Wormholes, quasars with twin jets, aurorae, binaries, pulsars, comets.
+ *  · Sporadic meteors, singly and occasionally in short showers.
+ *  · Protostars: every so often a point of gas collapses, flares, and settles
+ *    into a new star that stays in the field afterwards.
+ *  · A slow drifting dust band, so the depth is not uniform.
+ *
+ * PERFORMANCE
+ *  One canvas. No WebGL, no shader compile, no texture upload. Everything is
+ *  arithmetic on a few hundred points. Halts entirely when the tab is hidden or
+ *  the page is idle-scrolled past, caps its own star count on small screens,
+ *  and under prefers-reduced-motion paints one still frame and stops.
+ */
+---
+
+<canvas class="field" data-field aria-hidden="true"></canvas>
+<!-- The scrim is what lets the sky be this bright. Without it every nebula has
+     to be dim enough for body copy to clear AA on top of its brightest pixel,
+     which is why the old field was grey dots. With a fixed wash between the
+     canvas and the page, the sky gets its colour back and the text gets a
+     guaranteed floor of darkness underneath it. -->
+<div class="field-scrim" aria-hidden="true"></div>
+
+<style>
+  .field {
+    position: fixed; inset: 0;
+    width: 100%; height: 100%;
+    z-index: -2;
+    pointer-events: none;
+    background: var(--void);
+    display: block;
+  }
+  .field-scrim {
+    position: fixed; inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(130% 100% at 50% 0%, rgba(8, 8, 11, 0.22), rgba(8, 8, 11, 0.5) 55%, rgba(8, 8, 11, 0.62)),
+      linear-gradient(to bottom, rgba(8, 8, 11, 0.1), rgba(8, 8, 11, 0.22));
+  }
+</style>
+
+<script>
+  const cv = document.querySelector<HTMLCanvasElement>('[data-field]');
+  if (cv) {
+    const ctx = cv.getContext('2d', { alpha: false })!;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    let W = 0, H = 0, DPR = 1, raf = 0, t = 0;
+    let scrollY = window.scrollY;
+    let docH = 1;
+    let px = 0.5, py = 0.5;          // pointer, normalised
+
+    type Star = { x: number; y: number; z: number; r: number; hue: string; a: number; tw: number };
+    type Meteor = { x: number; y: number; vx: number; vy: number; life: number; max: number; len: number };
+    type Proto = { x: number; y: number; age: number; max: number; hue: string };
+    // A dying star: swells to a red giant, holds, then detonates and leaves a
+    // slowly expanding shell behind. The whole life cycle, in about 20 seconds.
+    type Nova = { x: number; y: number; age: number; hue: string };
+    // A neutron star: a point with a lighthouse beam sweeping round it.
+    type Pulsar = { x: number; y: number; age: number; max: number; spin: number };
+    // A comet on a long slow arc, tail always pointing away from the field centre.
+    type Comet = { x: number; y: number; vx: number; vy: number; age: number; max: number };
+    // A wormhole: concentric rings folding inward.
+    type Wormhole = { x: number; y: number; age: number; max: number; r: number };
+    // A quasar: a supermassive core firing two opposed relativistic jets.
+    type Quasar = { x: number; y: number; age: number; max: number; ang: number };
+    // Aurora: slow curtains of light — the one atmospheric thing in an astronomical field.
+    type Aurora = { y: number; age: number; max: number; hue: string };
+    // A binary pair orbiting a shared centre of mass.
+    type Binary = { x: number; y: number; age: number; max: number; sep: number; spin: number };
+    // A planetary nebula: a sun-like star's outer shell, thrown off and lit from
+    // the inside by the white dwarf it left behind.
+    type PlanNeb = { x: number; y: number; age: number; max: number; tilt: number };
+    // A kilonova: two neutron stars spiralling together, merging, and throwing
+    // out a shell of freshly made heavy elements. This is where gold comes from.
+    type Kilo = { x: number; y: number; age: number; max: number; sep: number };
+    // A gamma-ray burst: the brightest thing in the universe, for a few seconds.
+    type Burst = { x: number; y: number; age: number; max: number; ang: number };
+    // A light echo: the flash of a nova arriving at nearby dust, ring by ring.
+    type Echo = { x: number; y: number; age: number; max: number };
+    // A red giant, breathing, with prominence arcs off its limb.
+    type Giant = { x: number; y: number; age: number; max: number; r: number };
+    // A satellite crossing the field in a straight line, glinting as it tumbles.
+    type Sat = { x: number; y: number; vx: number; vy: number; age: number; max: number };
+    // A transit: a dark planet crossing the disc of a star, which is how almost
+    // every exoplanet we know about was actually found.
+    type Transit = { x: number; y: number; age: number; max: number; r: number };
+
+    let stars: Star[] = [];
+    let meteors: Meteor[] = [];
+    let protos: Proto[] = [];
+    let novae: Nova[] = [];
+    let pulsars: Pulsar[] = [];
+    let comets: Comet[] = [];
+    let wormholes: Wormhole[] = [];
+    let quasars: Quasar[] = [];
+    let aurorae: Aurora[] = [];
+    let binaries: Binary[] = [];
+    let plannebs: PlanNeb[] = [];
+    let kilos: Kilo[] = [];
+    let bursts: Burst[] = [];
+    let echoes: Echo[] = [];
+    let giants: Giant[] = [];
+    let sats: Sat[] = [];
+    let transits: Transit[] = [];
+
+    /* The deep layer: everything that does not move on its own. Painted once
+       per resize into an offscreen canvas and then composited with parallax,
+       so a skyful of nebulosity costs one drawImage per frame instead of a
+       few thousand gradient fills. */
+    let deep: HTMLCanvasElement | null = null;
+    const DEEP = 1.6;              // taller than the viewport, for parallax room
+
+    const HUES = ['#F5F2EA', '#F5F2EA', '#F5F2EA', '#F5F2EA', '#CFE0FF', '#FFE2B8', '#FFD0A8', '#BFD4FF'];
+
+    function size() {
+      DPR = Math.min(window.devicePixelRatio || 1, 2);
+      W = window.innerWidth; H = window.innerHeight;
+      cv.width = Math.round(W * DPR);
+      cv.height = Math.round(H * DPR);
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      docH = Math.max(1, document.documentElement.scrollHeight - H);
+      seed();
+      buildDeep();
+    }
+
+    function seed() {
+      // Fewer stars on small screens — a phone does not need 900 of them.
+      const n = W < 700 ? 260 : Math.round(Math.min(900, (W * H) / 1700));
+      stars = Array.from({ length: n }, () => {
+        const z = Math.random();                       // 0 = far, 1 = near
+        return {
+          x: Math.random() * W,
+          y: Math.random() * H * 2.2 - H * 0.6,        // taller than the viewport, so parallax has room
+          z,
+          r: 0.28 + z * 1.25,
+          hue: HUES[(Math.random() * HUES.length) | 0],
+          a: 0.3 + z * 0.55,
+          tw: Math.random() * Math.PI * 2,
+        };
+      });
+    }
+
+    /* ---- THE DEEP LAYER -------------------------------------------------
+       Nebulae, the galactic band, zodiacal light, a far spiral, a globular
+       cluster and a ringed planet. None of them animate; all of them are the
+       reason the sky looks like somewhere rather than like a screensaver.   */
+    function buildDeep() {
+      const c = document.createElement('canvas');
+      const h = H * DEEP;
+      c.width = Math.round(W * DPR);
+      c.height = Math.round(h * DPR);
+      const g = c.getContext('2d');
+      if (!g) return;
+      g.setTransform(DPR, 0, 0, DPR, 0, 0);
+      g.globalCompositeOperation = 'lighter';
+
+      const R = (a: number, b: number) => a + Math.random() * (b - a);
+
+      /* --- the galactic band: a river of unresolved stars ---------------- */
+      const bandAng = R(-0.55, -0.28);
+      const bandY = h * R(0.3, 0.62);
+      g.save();
+      g.translate(W / 2, bandY);
+      g.rotate(bandAng);
+      const bw = Math.hypot(W, h) * 1.2;
+      const bg = g.createLinearGradient(0, -h * 0.22, 0, h * 0.22);
+      bg.addColorStop(0, 'rgba(120,140,200,0)');
+      bg.addColorStop(0.42, 'rgba(150,160,210,0.055)');
+      bg.addColorStop(0.5, 'rgba(210,200,220,0.075)');
+      bg.addColorStop(0.58, 'rgba(150,160,210,0.055)');
+      bg.addColorStop(1, 'rgba(120,140,200,0)');
+      g.fillStyle = bg;
+      g.fillRect(-bw / 2, -h * 0.22, bw, h * 0.44);
+      // dark lanes of dust cutting across it, which is what sells the band
+      g.globalCompositeOperation = 'source-over';
+      for (let i = 0; i < 4; i++) {
+        const x0 = R(-bw / 2, 0), x1 = x0 + R(bw * 0.18, bw * 0.4);
+        const ly = R(-h * 0.07, h * 0.07);
+        g.beginPath();
+        g.moveTo(x0, ly);
+        for (let x = x0; x <= x1; x += 40) g.lineTo(x, ly + Math.sin(x * 0.004 + i) * 14);
+        g.strokeStyle = 'rgba(8,8,11,0.34)';
+        g.lineWidth = R(8, 22);
+        g.lineCap = 'round';
+        g.stroke();
+      }
+      g.globalCompositeOperation = 'lighter';
+      // and the unresolved stars themselves, packed toward the spine
+      for (let i = 0; i < 1500; i++) {
+        const x = R(-bw / 2, bw / 2);
+        const y = (Math.random() + Math.random() + Math.random() - 1.5) * h * 0.13;
+        g.globalAlpha = R(0.1, 0.5);
+        g.fillStyle = Math.random() < 0.8 ? '#F5F2EA' : '#CFE0FF';
+        g.fillRect(x, y, R(0.6, 1.3), R(0.6, 1.3));
+      }
+      g.globalAlpha = 1;
+      g.restore();
+
+      /* --- nebulae: clouds of gas lit from inside ------------------------ */
+      const PAL = [
+        [232, 96, 72], [196, 108, 200], [70, 150, 220],
+        [236, 160, 70], [90, 200, 180], [210, 80, 140],
+      ];
+      const clouds = W < 700 ? 3 : 5;
+      for (let n = 0; n < clouds; n++) {
+        const col = PAL[(Math.random() * PAL.length) | 0];
+        const cx = R(W * 0.06, W * 0.94);
+        const cy = R(h * 0.06, h * 0.94);
+        const rad = Math.min(W, h) * R(0.12, 0.3);
+        const puffs = 46;
+        for (let i = 0; i < puffs; i++) {
+          const a = Math.random() * Math.PI * 2;
+          const d = Math.pow(Math.random(), 0.65) * rad;
+          const x = cx + Math.cos(a) * d;
+          const y = cy + Math.sin(a) * d * R(0.55, 1);
+          const rr = rad * R(0.18, 0.5);
+          const gg = g.createRadialGradient(x, y, 0, x, y, rr);
+          const al = R(0.035, 0.115) * (1 - d / rad * 0.55);
+          gg.addColorStop(0, `rgba(${col[0]},${col[1]},${col[2]},${al})`);
+          gg.addColorStop(0.55, `rgba(${col[0]},${col[1]},${col[2]},${al * 0.4})`);
+          gg.addColorStop(1, `rgba(${col[0]},${col[1]},${col[2]},0)`);
+          g.fillStyle = gg;
+          g.beginPath(); g.arc(x, y, rr, 0, Math.PI * 2); g.fill();
+        }
+        // a few hot young stars embedded in it, because that is why it glows
+        for (let i = 0; i < 9; i++) {
+          const a = Math.random() * Math.PI * 2, d = Math.random() * rad * 0.7;
+          const x = cx + Math.cos(a) * d, y = cy + Math.sin(a) * d;
+          const gg = g.createRadialGradient(x, y, 0, x, y, R(4, 11));
+          gg.addColorStop(0, 'rgba(255,252,244,0.85)');
+          gg.addColorStop(1, 'rgba(200,220,255,0)');
+          g.fillStyle = gg;
+          g.beginPath(); g.arc(x, y, 11, 0, Math.PI * 2); g.fill();
+        }
+      }
+
+      /* --- a distant spiral galaxy, seen at an angle --------------------- */
+      const gx = R(W * 0.1, W * 0.9), gy = R(h * 0.08, h * 0.92);
+      const gr = Math.min(W, h) * R(0.055, 0.1);
+      g.save();
+      g.translate(gx, gy);
+      g.rotate(R(0, Math.PI));
+      g.scale(1, R(0.34, 0.62));
+      const core = g.createRadialGradient(0, 0, 0, 0, 0, gr * 0.55);
+      core.addColorStop(0, 'rgba(255,238,206,0.5)');
+      core.addColorStop(0.5, 'rgba(255,206,150,0.14)');
+      core.addColorStop(1, 'rgba(255,190,130,0)');
+      g.fillStyle = core;
+      g.beginPath(); g.arc(0, 0, gr * 0.55, 0, Math.PI * 2); g.fill();
+      for (let arm = 0; arm < 2; arm++) {
+        for (let i = 0; i < 420; i++) {
+          const th = (i / 420) * 5.6 + arm * Math.PI;
+          const rr = gr * 0.16 * Math.exp(0.24 * th) / 3.1;
+          if (rr > gr) break;
+          const sp = (Math.random() - 0.5) * gr * 0.1;
+          g.globalAlpha = 0.16 * (1 - rr / gr) + 0.05;
+          g.fillStyle = rr < gr * 0.45 ? '#FFE3BC' : '#CFE0FF';
+          g.fillRect(Math.cos(th) * rr + sp, Math.sin(th) * rr + sp, 1.1, 1.1);
+        }
+      }
+      g.globalAlpha = 1;
+      g.restore();
+
+      /* --- a globular cluster: a hundred thousand old stars in a ball ---- */
+      const cx2 = R(W * 0.08, W * 0.92), cy2 = R(h * 0.05, h * 0.95);
+      const cr = Math.min(W, h) * R(0.03, 0.055);
+      for (let i = 0; i < 520; i++) {
+        const a = Math.random() * Math.PI * 2;
+        const d = Math.pow(Math.random(), 2.4) * cr;
+        g.globalAlpha = 0.2 + (1 - d / cr) * 0.55;
+        g.fillStyle = Math.random() < 0.7 ? '#FFE9C8' : '#FFF6E8';
+        g.fillRect(cx2 + Math.cos(a) * d, cy2 + Math.sin(a) * d, 1.1, 1.1);
+      }
+      g.globalAlpha = 1;
+
+      /* --- a ringed planet, lit from one side --------------------------- */
+      const pr = Math.min(W, h) * R(0.016, 0.026);
+      const pxp = R(pr * 3, W - pr * 3), pyp = R(pr * 3, h - pr * 3);
+      const lit = R(0, Math.PI * 2);
+      g.save();
+      g.translate(pxp, pyp);
+      g.rotate(R(-0.5, -0.15));
+      g.globalCompositeOperation = 'source-over';
+      // far half of the ring, then the planet, then the near half — so the ring
+      // passes behind and in front, which is the whole reason it reads as 3D
+      const drawRing = (from: number, to: number) => {
+        for (let k = 0; k < 3; k++) {
+          const rr = pr * (1.45 + k * 0.28);
+          g.beginPath();
+          g.ellipse(0, 0, rr, rr * 0.26, 0, from, to);
+          g.strokeStyle = `rgba(226,206,172,${0.2 - k * 0.05})`;
+          g.lineWidth = pr * (0.16 - k * 0.03);
+          g.stroke();
+        }
+      };
+      drawRing(Math.PI, Math.PI * 2);
+      const pg = g.createRadialGradient(-pr * 0.4, -pr * 0.4, pr * 0.1, 0, 0, pr);
+      pg.addColorStop(0, 'rgba(226,198,156,0.62)');
+      pg.addColorStop(0.62, 'rgba(150,120,90,0.55)');
+      pg.addColorStop(1, 'rgba(26,21,18,0.6)');
+      g.fillStyle = pg;
+      g.beginPath(); g.arc(0, 0, pr, 0, Math.PI * 2); g.fill();
+      drawRing(0, Math.PI);
+      g.restore();
+      void lit;
+
+      /* --- zodiacal light: sunlight scattered off interplanetary dust ---- */
+      g.globalCompositeOperation = 'lighter';
+      const zg = g.createLinearGradient(0, h, W * 0.3, h * 0.5);
+      zg.addColorStop(0, 'rgba(255,226,180,0.05)');
+      zg.addColorStop(1, 'rgba(255,226,180,0)');
+      g.fillStyle = zg;
+      g.beginPath();
+      g.moveTo(-W * 0.05, h);
+      g.lineTo(W * 0.42, h);
+      g.lineTo(W * 0.16, h * 0.42);
+      g.closePath();
+      g.fill();
+
+      deep = c;
+    }
+
+    /* ---- EVENTS -------------------------------------------------------- */
+    function spawnMeteor(fast = false) {
+      const fromRight = Math.random() < 0.82;
+      const speed = (fast ? 12 : 7) + Math.random() * 6;
+      const ang = (fromRight ? 2.55 : 0.6) + (Math.random() - 0.5) * 0.25;
+      meteors.push({
+        x: fromRight ? W * (0.55 + Math.random() * 0.6) : -W * 0.1,
+        y: H * (Math.random() * 0.5 - 0.1),
+        vx: Math.cos(ang) * speed,
+        vy: Math.sin(ang) * speed,
+        life: 0,
+        max: 55 + Math.random() * 45,
+        len: 40 + Math.random() * 90,
+      });
+    }
+
+    function spawnNova() {
+      /* and its echo, arriving in the dust a few seconds later */
+      novae.push({
+        x: W * (0.1 + Math.random() * 0.8),
+        y: H * (0.12 + Math.random() * 0.76),
+        age: 0,
+        hue: '#FF9A5A',
+      });
+    }
+
+    function spawnPulsar() {
+      pulsars.push({
+        x: W * (0.12 + Math.random() * 0.76),
+        y: H * (0.15 + Math.random() * 0.7),
+        age: 0,
+        max: 520 + Math.random() * 260,
+        spin: 0.055 + Math.random() * 0.04,
+      });
+    }
+
+    function spawnComet() {
+      const fromLeft = Math.random() < 0.5;
+      comets.push({
+        x: fromLeft ? -80 : W + 80,
+        y: H * (0.1 + Math.random() * 0.7),
+        vx: (fromLeft ? 1 : -1) * (0.55 + Math.random() * 0.5),
+        vy: (Math.random() - 0.35) * 0.4,
+        age: 0,
+        max: 1400,
+      });
+    }
+
+    function spawnWormhole() {
+      wormholes.push({
+        x: W * (0.15 + Math.random() * 0.7), y: H * (0.18 + Math.random() * 0.64),
+        age: 0, max: 620, r: Math.min(W, H) * (0.07 + Math.random() * 0.05),
+      });
+    }
+    function spawnQuasar() {
+      quasars.push({
+        x: W * (0.12 + Math.random() * 0.76), y: H * (0.15 + Math.random() * 0.7),
+        age: 0, max: 640, ang: Math.random() * Math.PI,
+      });
+    }
+    function spawnAurora() {
+      aurorae.push({
+        y: H * (0.05 + Math.random() * 0.25), age: 0, max: 900,
+        hue: Math.random() < 0.6 ? '120,220,170' : '150,190,255',
+      });
+    }
+    function spawnBinary() {
+      binaries.push({
+        x: W * (0.15 + Math.random() * 0.7), y: H * (0.15 + Math.random() * 0.7),
+        age: 0, max: 800, sep: 14 + Math.random() * 16, spin: 0.026 + Math.random() * 0.02,
+      });
+    }
+
+    function spawnPlanNeb() {
+      plannebs.push({
+        x: W * (0.12 + Math.random() * 0.76), y: H * (0.12 + Math.random() * 0.76),
+        age: 0, max: 700, tilt: Math.random() * Math.PI,
+      });
+    }
+    function spawnKilo() {
+      kilos.push({
+        x: W * (0.15 + Math.random() * 0.7), y: H * (0.15 + Math.random() * 0.7),
+        age: 0, max: 560, sep: 26 + Math.random() * 14,
+      });
+    }
+    function spawnBurst() {
+      bursts.push({
+        x: W * (0.15 + Math.random() * 0.7), y: H * (0.12 + Math.random() * 0.76),
+        age: 0, max: 200, ang: Math.random() * Math.PI,
+      });
+    }
+    function spawnEcho(x?: number, y?: number) {
+      echoes.push({
+        x: x ?? W * (0.15 + Math.random() * 0.7),
+        y: y ?? H * (0.15 + Math.random() * 0.7),
+        age: 0, max: 620,
+      });
+    }
+    function spawnGiant() {
+      giants.push({
+        x: W * (0.1 + Math.random() * 0.8), y: H * (0.1 + Math.random() * 0.8),
+        age: 0, max: 900, r: Math.min(W, H) * (0.022 + Math.random() * 0.016),
+      });
+    }
+    function spawnSat() {
+      const up = Math.random() < 0.5;
+      const sp = 1.5 + Math.random() * 1.2;
+      const ang = (up ? -0.5 : 0.5) + (Math.random() - 0.5) * 0.5;
+      sats.push({
+        x: -30, y: H * (0.15 + Math.random() * 0.7),
+        vx: Math.cos(ang) * sp + 1.4, vy: Math.sin(ang) * sp * 0.4,
+        age: 0, max: 1400,
+      });
+    }
+    function spawnTransit() {
+      transits.push({
+        x: W * (0.12 + Math.random() * 0.76), y: H * (0.12 + Math.random() * 0.76),
+        age: 0, max: 520, r: 9 + Math.random() * 6,
+      });
+    }
+
+    function spawnProto() {
+      protos.push({
+        x: W * (0.08 + Math.random() * 0.84),
+        y: H * (0.1 + Math.random() * 0.8),
+        age: 0,
+        max: 260 + Math.random() * 160,
+        hue: Math.random() < 0.55 ? '#FFE2B8' : '#CFE0FF',
+      });
+    }
+
+    /* ---- THE BLACK HOLE ------------------------------------------------- */
+    // It drifts on a slow loop of its own, nudged by the pointer, so it is
+    // somewhere different every time you look up.
+    function holePos() {
+      const a = t * 0.00028;
+      const bx = W * (0.5 + Math.cos(a) * 0.34) + (px - 0.5) * 60;
+      const by = H * (0.46 + Math.sin(a * 1.31) * 0.3) + (py - 0.5) * 40;
+      return { bx, by, rs: Math.min(W, H) * 0.052 };
+    }
+
+    function draw() {
+      raf = 0;
+      t += 1;
+
+      ctx.fillStyle = '#08080B';
+      ctx.fillRect(0, 0, W, H);
+
+      const prog = scrollY / docH;
+      const { bx, by, rs } = holePos();
+
+      /* the deep layer, drifting slower than everything else */
+      if (deep) {
+        const extra = H * (DEEP - 1);
+        const off = -(((scrollY * 0.055) % (extra + 1)));
+        ctx.drawImage(deep, (px - 0.5) * -26, off, W, H * DEEP);
+      }
+
+      /* dust band — a faint diagonal wash so depth is not uniform */
+      const band = ctx.createLinearGradient(0, H * (0.2 + prog * 0.3), W, H * (0.8 - prog * 0.2));
+      band.addColorStop(0, 'rgba(120,140,190,0)');
+      band.addColorStop(0.45, 'rgba(150,120,160,0.045)');
+      band.addColorStop(0.62, 'rgba(200,120,80,0.05)');
+      band.addColorStop(1, 'rgba(120,140,190,0)');
+      ctx.fillStyle = band;
+      ctx.fillRect(0, 0, W, H);
+
+      /* stars, parallaxed by scroll and lensed by the hole */
+      for (const s of stars) {
+        const par = scrollY * (0.04 + s.z * 0.5);
+        let y = s.y - (par % (H * 2.2));
+        if (y < -H * 0.6) y += H * 2.2;
+        if (y > H * 1.6) y -= H * 2.2;
+        if (y < -40 || y > H + 40) continue;
+
+        let x = s.x;
+        const dx = x - bx, dy = y - by;
+        const d = Math.hypot(dx, dy) || 0.001;
+        let alpha = s.a * (0.72 + 0.28 * Math.sin(t * 0.02 + s.tw));
+        let rad = s.r;
+
+        if (d < rs * 11) {
+          if (d < rs * 0.95) continue;                      // inside the shadow
+          const bend = (rs * rs * 1.7) / d;
+          x += (dx / d) * bend;
+          y += (dy / d) * bend;
+          const near = Math.max(0, 1 - Math.abs(d - rs * 1.3) / (rs * 1.1));
+          if (near > 0.1) {
+            const tx = -dy / d, ty = dx / d;
+            const len = near * near * rs * 0.85;
+            ctx.globalAlpha = Math.min(1, alpha * (1 + near * 3));
+            ctx.strokeStyle = s.hue;
+            ctx.lineWidth = rad * (1 + near * 1.5);
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(x - tx * len, y - ty * len);
+            ctx.lineTo(x + tx * len, y + ty * len);
+            ctx.stroke();
+            continue;
+          }
+        }
+
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = s.hue;
+        ctx.beginPath();
+        ctx.arc(x, y, rad, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+
+      /* the hole: accretion glow, photon ring, shadow */
+      const disk = ctx.createRadialGradient(bx, by, rs * 0.92, bx, by, rs * 2.5);
+      disk.addColorStop(0, 'rgba(255,228,182,0.52)');
+      disk.addColorStop(0.2, 'rgba(255,172,86,0.26)');
+      disk.addColorStop(0.55, 'rgba(206,104,52,0.08)');
+      disk.addColorStop(1, 'rgba(120,60,40,0)');
+      ctx.save();
+      ctx.translate(bx, by); ctx.rotate(-0.3); ctx.scale(1, 0.24); ctx.translate(-bx, -by);
+      ctx.fillStyle = disk;
+      ctx.beginPath(); ctx.arc(bx, by, rs * 2.5, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+
+      const ring = ctx.createRadialGradient(bx, by, rs * 0.96, bx, by, rs * 1.6);
+      ring.addColorStop(0, 'rgba(255,238,205,0.6)');
+      ring.addColorStop(1, 'rgba(255,190,120,0)');
+      ctx.fillStyle = ring;
+      ctx.beginPath(); ctx.arc(bx, by, rs * 1.6, 0, Math.PI * 2); ctx.fill();
+
+      ctx.fillStyle = '#000';
+      ctx.beginPath(); ctx.arc(bx, by, rs * 0.95, 0, Math.PI * 2); ctx.fill();
+
+      /* protostars — a point of gas collapses, flares, settles into a star */
+      for (let i = protos.length - 1; i >= 0; i--) {
+        const p = protos[i];
+        p.age++;
+        const k = p.age / p.max;
+        if (k >= 1) {
+          stars.push({ x: p.x, y: p.y + (scrollY * 0.3) % (H * 2.2), z: 0.8, r: 1.15, hue: p.hue, a: 0.8, tw: 0 });
+          protos.splice(i, 1);
+          continue;
+        }
+        // collapse in, flare, then fade to a steady point
+        const flare = k < 0.62 ? k / 0.62 : 1 - (k - 0.62) / 0.38;
+        const rr = (1 - Math.min(k / 0.62, 1)) * 26 + 2;
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, rr + flare * 22);
+        g.addColorStop(0, `rgba(255,248,236,${0.9 * flare})`);
+        g.addColorStop(0.3, `rgba(255,224,180,${0.35 * flare})`);
+        g.addColorStop(1, 'rgba(255,200,140,0)');
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(p.x, p.y, rr + flare * 22, 0, Math.PI * 2); ctx.fill();
+      }
+
+      /* red giant -> supernova -> expanding remnant */
+      for (let i = novae.length - 1; i >= 0; i--) {
+        const n = novae[i];
+        n.age++;
+        const SWELL = 300, HOLD = 420, BLAST = 470, END = 1150;
+        if (n.age > END) { novae.splice(i, 1); continue; }
+
+        if (n.age < BLAST) {
+          // swelling red giant
+          const k = Math.min(n.age / SWELL, 1);
+          const rr = 2 + k * 15;
+          const pulse = 1 + Math.sin(n.age * 0.045) * 0.09;
+          const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, rr * 3.4 * pulse);
+          g.addColorStop(0, 'rgba(255,175,110,0.92)');
+          g.addColorStop(0.32, 'rgba(240,120,70,0.34)');
+          g.addColorStop(1, 'rgba(200,70,40,0)');
+          ctx.fillStyle = g;
+          ctx.beginPath(); ctx.arc(n.x, n.y, rr * 3.4 * pulse, 0, Math.PI * 2); ctx.fill();
+          // a held breath just before it goes
+          if (n.age > HOLD) {
+            const f = (n.age - HOLD) / (BLAST - HOLD);
+            ctx.globalAlpha = f * 0.5;
+            ctx.fillStyle = '#FFF4E4';
+            ctx.beginPath(); ctx.arc(n.x, n.y, rr * (1 - f * 0.55), 0, Math.PI * 2); ctx.fill();
+            ctx.globalAlpha = 1;
+          }
+        } else {
+          // the detonation and its expanding shell
+          const k = (n.age - BLAST) / (END - BLAST);
+          const rr = 6 + k * Math.min(W, H) * 0.34;
+          const fade = 1 - k;
+          const g = ctx.createRadialGradient(n.x, n.y, rr * 0.72, n.x, n.y, rr);
+          g.addColorStop(0, 'rgba(255,255,255,0)');
+          g.addColorStop(0.82, `rgba(120,190,255,${0.10 * fade})`);
+          g.addColorStop(0.93, `rgba(255,214,150,${0.34 * fade})`);
+          g.addColorStop(0.985, `rgba(255,120,70,${0.26 * fade})`);
+          g.addColorStop(1, 'rgba(180,80,60,0)');
+          ctx.fillStyle = g;
+          ctx.beginPath(); ctx.arc(n.x, n.y, rr, 0, Math.PI * 2); ctx.fill();
+          // filaments — a remnant is torn sheets of gas, never a smooth ring
+          ctx.globalAlpha = fade * 0.3;
+          ctx.strokeStyle = 'rgba(255,206,164,1)';
+          ctx.lineWidth = 1;
+          for (let f = 0; f < 11; f++) {
+            const a = (f / 11) * Math.PI * 2 + n.age * 0.0006;
+            const w1 = 0.86 + Math.sin(f * 2.7) * 0.07;
+            ctx.beginPath();
+            ctx.moveTo(n.x + Math.cos(a) * rr * w1, n.y + Math.sin(a) * rr * w1 * 0.94);
+            ctx.lineTo(n.x + Math.cos(a) * rr * 1.0, n.y + Math.sin(a) * rr * 0.99);
+            ctx.stroke();
+          }
+          ctx.globalAlpha = 1;
+          if (k < 0.16) {
+            ctx.globalAlpha = (1 - k / 0.16) * 0.85;
+            ctx.fillStyle = '#FFFDF6';
+            ctx.beginPath(); ctx.arc(n.x, n.y, 3 + (1 - k / 0.16) * 12, 0, Math.PI * 2); ctx.fill();
+            ctx.globalAlpha = 1;
+          }
+        }
+      }
+
+      /* pulsars — a lighthouse beam sweeping round a neutron star */
+      for (let i = pulsars.length - 1; i >= 0; i--) {
+        const p = pulsars[i];
+        p.age++;
+        if (p.age > p.max) { pulsars.splice(i, 1); continue; }
+        const env = Math.min(p.age / 90, 1) * Math.min((p.max - p.age) / 90, 1);
+        const a = p.age * p.spin;
+        const len = Math.min(W, H) * 0.24;
+        for (const dir of [a, a + Math.PI]) {
+          const g = ctx.createLinearGradient(p.x, p.y, p.x + Math.cos(dir) * len, p.y + Math.sin(dir) * len);
+          g.addColorStop(0, `rgba(200,225,255,${0.30 * env})`);
+          g.addColorStop(1, 'rgba(200,225,255,0)');
+          ctx.strokeStyle = g;
+          ctx.lineWidth = 2.4;
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(p.x + Math.cos(dir) * len, p.y + Math.sin(dir) * len);
+          ctx.stroke();
+        }
+        ctx.globalAlpha = env;
+        ctx.fillStyle = '#E8F1FF';
+        ctx.beginPath(); ctx.arc(p.x, p.y, 1.7, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+
+      /* comets — long slow arc, tail pointing away from the centre of the field */
+      for (let i = comets.length - 1; i >= 0; i--) {
+        const c = comets[i];
+        c.age++;
+        c.x += c.vx; c.y += c.vy;
+        if (c.age > c.max || c.x < -160 || c.x > W + 160) { comets.splice(i, 1); continue; }
+        const env = Math.min(c.age / 120, 1) * Math.min((c.max - c.age) / 160, 1);
+        const ax = c.x - W / 2, ay = c.y - H / 2;
+        const an = Math.hypot(ax, ay) || 1;
+        const tl = 90 + env * 60;
+        const g = ctx.createLinearGradient(c.x, c.y, c.x + (ax / an) * tl, c.y + (ay / an) * tl);
+        g.addColorStop(0, `rgba(190,230,255,${0.5 * env})`);
+        g.addColorStop(1, 'rgba(190,230,255,0)');
+        ctx.strokeStyle = g; ctx.lineWidth = 3; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(c.x, c.y); ctx.lineTo(c.x + (ax / an) * tl, c.y + (ay / an) * tl); ctx.stroke();
+        ctx.globalAlpha = env;
+        ctx.fillStyle = '#F2FBFF';
+        ctx.beginPath(); ctx.arc(c.x, c.y, 1.9, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+
+      /* aurora — slow curtains, behind everything else */
+      for (let i = aurorae.length - 1; i >= 0; i--) {
+        const a = aurorae[i];
+        a.age++;
+        if (a.age > a.max) { aurorae.splice(i, 1); continue; }
+        const env = Math.min(a.age / 200, 1) * Math.min((a.max - a.age) / 240, 1);
+        for (let k = 0; k < 3; k++) {
+          ctx.beginPath();
+          const off = k * 26, amp = 26 + k * 9, drift = a.age * 0.5 + k * 90;
+          ctx.moveTo(0, a.y + off);
+          for (let x = 0; x <= W; x += 22) {
+            ctx.lineTo(x, a.y + off + Math.sin((x + drift) * 0.0055) * amp + Math.sin((x - drift) * 0.011) * 7);
+          }
+          const g = ctx.createLinearGradient(0, a.y + off - 40, 0, a.y + off + 120);
+          g.addColorStop(0, 'rgba(' + a.hue + ',0)');
+          g.addColorStop(0.42, 'rgba(' + a.hue + ',' + (0.055 * env * (1 - k * 0.22)) + ')');
+          g.addColorStop(1, 'rgba(' + a.hue + ',0)');
+          ctx.strokeStyle = g; ctx.lineWidth = 46; ctx.stroke();
+        }
+      }
+
+      /* wormhole — concentric rings folding inward */
+      for (let i = wormholes.length - 1; i >= 0; i--) {
+        const wh = wormholes[i];
+        wh.age++;
+        if (wh.age > wh.max) { wormholes.splice(i, 1); continue; }
+        const env = Math.min(wh.age / 140, 1) * Math.min((wh.max - wh.age) / 160, 1);
+        for (let k = 0; k < 7; k++) {
+          const ph = ((wh.age * 0.006) + k / 7) % 1;
+          const rr = wh.r * (0.25 + ph * 1.15);
+          ctx.globalAlpha = env * (1 - ph) * 0.5;
+          ctx.strokeStyle = k % 2 ? 'rgba(180,205,255,1)' : 'rgba(230,200,255,1)';
+          ctx.lineWidth = 1.3;
+          ctx.beginPath();
+          ctx.ellipse(wh.x, wh.y, rr, rr * 0.9, 0, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+        const core = ctx.createRadialGradient(wh.x, wh.y, 0, wh.x, wh.y, wh.r * 0.5);
+        core.addColorStop(0, 'rgba(10,10,18,' + (0.85 * env) + ')');
+        core.addColorStop(0.75, 'rgba(120,150,230,' + (0.14 * env) + ')');
+        core.addColorStop(1, 'rgba(120,150,230,0)');
+        ctx.fillStyle = core;
+        ctx.beginPath(); ctx.arc(wh.x, wh.y, wh.r * 0.5, 0, Math.PI * 2); ctx.fill();
+      }
+
+      /* quasar — bright core, two opposed jets */
+      for (let i = quasars.length - 1; i >= 0; i--) {
+        const q = quasars[i];
+        q.age++;
+        if (q.age > q.max) { quasars.splice(i, 1); continue; }
+        const env = Math.min(q.age / 150, 1) * Math.min((q.max - q.age) / 170, 1);
+        const jet = Math.min(W, H) * 0.3 * Math.min(q.age / 220, 1);
+        const dirs = [q.ang, q.ang + Math.PI];
+        for (const dir of dirs) {
+          const ex = q.x + Math.cos(dir) * jet, ey = q.y + Math.sin(dir) * jet;
+          const g = ctx.createLinearGradient(q.x, q.y, ex, ey);
+          g.addColorStop(0, 'rgba(215,235,255,' + (0.34 * env) + ')');
+          g.addColorStop(0.55, 'rgba(160,190,255,' + (0.14 * env) + ')');
+          g.addColorStop(1, 'rgba(140,170,255,0)');
+          ctx.strokeStyle = g; ctx.lineWidth = 3.4; ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.moveTo(q.x, q.y); ctx.lineTo(ex, ey); ctx.stroke();
+        }
+        const core = ctx.createRadialGradient(q.x, q.y, 0, q.x, q.y, 22);
+        core.addColorStop(0, 'rgba(255,252,240,' + (0.75 * env) + ')');
+        core.addColorStop(0.4, 'rgba(200,220,255,' + (0.22 * env) + ')');
+        core.addColorStop(1, 'rgba(160,190,255,0)');
+        ctx.fillStyle = core;
+        ctx.beginPath(); ctx.arc(q.x, q.y, 22, 0, Math.PI * 2); ctx.fill();
+      }
+
+      /* binary pair orbiting a shared centre */
+      for (let i = binaries.length - 1; i >= 0; i--) {
+        const bi = binaries[i];
+        bi.age++;
+        if (bi.age > bi.max) { binaries.splice(i, 1); continue; }
+        const env = Math.min(bi.age / 130, 1) * Math.min((bi.max - bi.age) / 150, 1);
+        const a2 = bi.age * bi.spin;
+        const pair = [[a2, 2.1, '255,236,200'], [a2 + Math.PI, 1.5, '200,220,255']];
+        for (const pr of pair) {
+          const d = pr[0], rad = pr[1], hue = pr[2];
+          const sx = bi.x + Math.cos(d) * bi.sep, sy = bi.y + Math.sin(d) * bi.sep * 0.55;
+          const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, rad * 5);
+          g.addColorStop(0, 'rgba(' + hue + ',' + (0.9 * env) + ')');
+          g.addColorStop(1, 'rgba(' + hue + ',0)');
+          ctx.fillStyle = g;
+          ctx.beginPath(); ctx.arc(sx, sy, rad * 5, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+
+      /* red giant — a swollen old star, breathing, with prominence arcs */
+      for (let i = giants.length - 1; i >= 0; i--) {
+        const gi = giants[i];
+        gi.age++;
+        if (gi.age > gi.max) { giants.splice(i, 1); continue; }
+        const env = Math.min(gi.age / 180, 1) * Math.min((gi.max - gi.age) / 200, 1);
+        const breathe = 1 + Math.sin(gi.age * 0.012) * 0.07;
+        const rr = gi.r * breathe;
+        const g1 = ctx.createRadialGradient(gi.x, gi.y, 0, gi.x, gi.y, rr * 3.2);
+        g1.addColorStop(0, `rgba(255,186,120,${0.85 * env})`);
+        g1.addColorStop(0.22, `rgba(226,104,60,${0.42 * env})`);
+        g1.addColorStop(0.5, `rgba(180,60,40,${0.14 * env})`);
+        g1.addColorStop(1, 'rgba(150,50,35,0)');
+        ctx.fillStyle = g1;
+        ctx.beginPath(); ctx.arc(gi.x, gi.y, rr * 3.2, 0, Math.PI * 2); ctx.fill();
+        // prominence arcs lifting off the limb
+        for (let k = 0; k < 3; k++) {
+          const a = gi.age * 0.004 + (k * Math.PI * 2) / 3;
+          const lift = rr * (1.15 + 0.28 * Math.abs(Math.sin(gi.age * 0.01 + k)));
+          ctx.beginPath();
+          ctx.ellipse(gi.x + Math.cos(a) * rr * 0.86, gi.y + Math.sin(a) * rr * 0.86,
+                      lift * 0.5, lift * 0.22, a, 0, Math.PI);
+          ctx.strokeStyle = `rgba(255,158,92,${0.3 * env})`;
+          ctx.lineWidth = 1.6;
+          ctx.stroke();
+        }
+      }
+
+      /* planetary nebula — a shell thrown off, lit by the white dwarf inside */
+      for (let i = plannebs.length - 1; i >= 0; i--) {
+        const pn = plannebs[i];
+        pn.age++;
+        if (pn.age > pn.max) { plannebs.splice(i, 1); continue; }
+        const env = Math.min(pn.age / 200, 1) * Math.min((pn.max - pn.age) / 220, 1);
+        const rr = Math.min(W, H) * 0.05 * Math.min(pn.age / 300, 1) + 6;
+        ctx.save();
+        ctx.translate(pn.x, pn.y);
+        ctx.rotate(pn.tilt);
+        for (let k = 0; k < 3; k++) {
+          const g2 = ctx.createRadialGradient(0, 0, rr * (0.5 - k * 0.12), 0, 0, rr * (1 + k * 0.22));
+          g2.addColorStop(0, 'rgba(90,200,190,0)');
+          g2.addColorStop(0.72, `rgba(${k ? '120,180,255' : '90,220,200'},${0.16 * env})`);
+          g2.addColorStop(1, 'rgba(120,180,255,0)');
+          ctx.fillStyle = g2;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, rr * (1 + k * 0.22), rr * (0.62 + k * 0.1), 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+        const wd = ctx.createRadialGradient(pn.x, pn.y, 0, pn.x, pn.y, 9);
+        wd.addColorStop(0, `rgba(238,248,255,${0.95 * env})`);
+        wd.addColorStop(1, 'rgba(200,225,255,0)');
+        ctx.fillStyle = wd;
+        ctx.beginPath(); ctx.arc(pn.x, pn.y, 9, 0, Math.PI * 2); ctx.fill();
+      }
+
+      /* kilonova — two neutron stars spiral in, merge, and scatter gold */
+      for (let i = kilos.length - 1; i >= 0; i--) {
+        const kn = kilos[i];
+        kn.age++;
+        if (kn.age > kn.max) { kilos.splice(i, 1); continue; }
+        const MERGE = 260;
+        if (kn.age < MERGE) {
+          const k = kn.age / MERGE;
+          const sep = kn.sep * (1 - k * k);
+          const a = kn.age * (0.05 + k * 0.22);
+          for (const d of [a, a + Math.PI]) {
+            const sx = kn.x + Math.cos(d) * sep, sy = kn.y + Math.sin(d) * sep * 0.7;
+            const g3 = ctx.createRadialGradient(sx, sy, 0, sx, sy, 9);
+            g3.addColorStop(0, 'rgba(226,240,255,0.95)');
+            g3.addColorStop(1, 'rgba(150,190,255,0)');
+            ctx.fillStyle = g3;
+            ctx.beginPath(); ctx.arc(sx, sy, 9, 0, Math.PI * 2); ctx.fill();
+          }
+        } else {
+          const k = (kn.age - MERGE) / (kn.max - MERGE);
+          const rr = Math.min(W, H) * 0.14 * k + 6;
+          const fade = 1 - k;
+          const g4 = ctx.createRadialGradient(kn.x, kn.y, rr * 0.55, kn.x, kn.y, rr);
+          g4.addColorStop(0, 'rgba(255,214,140,0)');
+          g4.addColorStop(0.78, `rgba(255,206,130,${0.3 * fade})`);
+          g4.addColorStop(0.93, `rgba(226,120,200,${0.22 * fade})`);
+          g4.addColorStop(1, 'rgba(180,120,255,0)');
+          ctx.fillStyle = g4;
+          ctx.beginPath(); ctx.arc(kn.x, kn.y, rr, 0, Math.PI * 2); ctx.fill();
+          if (k < 0.16) {
+            const fl = ctx.createRadialGradient(kn.x, kn.y, 0, kn.x, kn.y, 70);
+            fl.addColorStop(0, `rgba(255,252,246,${0.9 * (1 - k / 0.16)})`);
+            fl.addColorStop(1, 'rgba(255,220,180,0)');
+            ctx.fillStyle = fl;
+            ctx.beginPath(); ctx.arc(kn.x, kn.y, 70, 0, Math.PI * 2); ctx.fill();
+          }
+        }
+      }
+
+      /* gamma-ray burst — two needle beams and a flash, gone in seconds */
+      for (let i = bursts.length - 1; i >= 0; i--) {
+        const br = bursts[i];
+        br.age++;
+        if (br.age > br.max) { bursts.splice(i, 1); continue; }
+        const k = br.age / br.max;
+        const env = k < 0.12 ? k / 0.12 : Math.pow(1 - (k - 0.12) / 0.88, 1.6);
+        const len = Math.max(W, H) * 0.7 * Math.min(k * 3, 1);
+        for (const d of [br.ang, br.ang + Math.PI]) {
+          const ex = br.x + Math.cos(d) * len, ey = br.y + Math.sin(d) * len;
+          const g5 = ctx.createLinearGradient(br.x, br.y, ex, ey);
+          g5.addColorStop(0, `rgba(236,244,255,${0.62 * env})`);
+          g5.addColorStop(0.3, `rgba(180,200,255,${0.2 * env})`);
+          g5.addColorStop(1, 'rgba(150,180,255,0)');
+          ctx.strokeStyle = g5;
+          ctx.lineWidth = 2.2;
+          ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.moveTo(br.x, br.y); ctx.lineTo(ex, ey); ctx.stroke();
+        }
+        const fl = ctx.createRadialGradient(br.x, br.y, 0, br.x, br.y, 46);
+        fl.addColorStop(0, `rgba(255,255,255,${0.85 * env})`);
+        fl.addColorStop(1, 'rgba(200,220,255,0)');
+        ctx.fillStyle = fl;
+        ctx.beginPath(); ctx.arc(br.x, br.y, 46, 0, Math.PI * 2); ctx.fill();
+      }
+
+      /* light echo — the flash arriving at sheet after sheet of dust */
+      for (let i = echoes.length - 1; i >= 0; i--) {
+        const e = echoes[i];
+        e.age++;
+        if (e.age > e.max) { echoes.splice(i, 1); continue; }
+        for (let k = 0; k < 3; k++) {
+          const ph = ((e.age / e.max) * 1.6 - k * 0.22);
+          if (ph <= 0 || ph >= 1) continue;
+          const rr = Math.min(W, H) * 0.19 * ph;
+          ctx.globalAlpha = (1 - ph) * 0.3;
+          ctx.strokeStyle = 'rgba(214,226,255,1)';
+          ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.arc(e.x, e.y, rr, 0, Math.PI * 2); ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      /* a transit — a dark world crossing the face of its star */
+      for (let i = transits.length - 1; i >= 0; i--) {
+        const tr = transits[i];
+        tr.age++;
+        if (tr.age > tr.max) { transits.splice(i, 1); continue; }
+        const env = Math.min(tr.age / 120, 1) * Math.min((tr.max - tr.age) / 140, 1);
+        const R0 = tr.r * 2.6;
+        const g6 = ctx.createRadialGradient(tr.x, tr.y, 0, tr.x, tr.y, R0 * 2.4);
+        g6.addColorStop(0, `rgba(255,248,232,${0.92 * env})`);
+        g6.addColorStop(0.32, `rgba(255,226,170,${0.3 * env})`);
+        g6.addColorStop(1, 'rgba(255,210,150,0)');
+        ctx.fillStyle = g6;
+        ctx.beginPath(); ctx.arc(tr.x, tr.y, R0 * 2.4, 0, Math.PI * 2); ctx.fill();
+        // the planet itself, crossing left to right
+        const k = tr.age / tr.max;
+        const ox = (k * 2 - 1) * R0 * 1.5;
+        if (Math.abs(ox) < R0 * 1.15) {
+          ctx.globalAlpha = env;
+          ctx.fillStyle = '#08080B';
+          ctx.beginPath(); ctx.arc(tr.x + ox, tr.y - R0 * 0.16, tr.r * 0.52, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+      }
+
+      /* a satellite, tumbling and glinting on a straight pass */
+      for (let i = sats.length - 1; i >= 0; i--) {
+        const sa = sats[i];
+        sa.age++;
+        sa.x += sa.vx; sa.y += sa.vy;
+        if (sa.age > sa.max || sa.x > W + 40) { sats.splice(i, 1); continue; }
+        const glint = 0.35 + 0.65 * Math.pow(Math.abs(Math.sin(sa.age * 0.035)), 6);
+        ctx.globalAlpha = glint * 0.9;
+        ctx.fillStyle = '#F5F2EA';
+        ctx.beginPath(); ctx.arc(sa.x, sa.y, 1.5, 0, Math.PI * 2); ctx.fill();
+        if (glint > 0.8) {
+          const g7 = ctx.createRadialGradient(sa.x, sa.y, 0, sa.x, sa.y, 14);
+          g7.addColorStop(0, 'rgba(255,255,255,0.5)');
+          g7.addColorStop(1, 'rgba(255,255,255,0)');
+          ctx.fillStyle = g7;
+          ctx.beginPath(); ctx.arc(sa.x, sa.y, 14, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      /* meteors */
+      for (let i = meteors.length - 1; i >= 0; i--) {
+        const m = meteors[i];
+        m.life++;
+        m.x += m.vx; m.y += m.vy;
+        if (m.life > m.max || m.x < -200 || m.y > H + 200) { meteors.splice(i, 1); continue; }
+        const k = m.life / m.max;
+        const fade = k < 0.12 ? k / 0.12 : 1 - (k - 0.12) / 0.88;
+        const n = Math.hypot(m.vx, m.vy) || 1;
+        const g = ctx.createLinearGradient(m.x, m.y, m.x - (m.vx / n) * m.len, m.y - (m.vy / n) * m.len);
+        g.addColorStop(0, `rgba(255,248,236,${0.9 * fade})`);
+        g.addColorStop(1, 'rgba(255,248,236,0)');
+        ctx.strokeStyle = g;
+        ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(m.x, m.y);
+        ctx.lineTo(m.x - (m.vx / n) * m.len, m.y - (m.vy / n) * m.len);
+        ctx.stroke();
+      }
+
+      if (!reduce && !document.hidden) raf = requestAnimationFrame(draw);
+    }
+
+    const kick = () => { if (!raf && !reduce && !document.hidden) raf = requestAnimationFrame(draw); };
+
+    /* On a phone every one of these costs a much larger share of the frame, so
+       the sky runs at half the concurrency and the gaps stretch. It is still a
+       living sky; it just does not cost a scroll janking to be one. */
+    const gap = () => (W < 700 ? 1.6 : 1);
+
+    /* ---- SCHEDULERS ------------------------------------------------------
+       Irregular on purpose. A metronome reads as decoration; catching a meteor
+       should feel like luck. */
+    let timers: number[] = [];
+    function schedule() {
+      timers.forEach(clearTimeout);
+      timers = [];
+      const meteor = () => {
+        if (!document.hidden) {
+          spawnMeteor();
+          if (Math.random() < 0.18) {                    // occasional short shower
+            for (let i = 1; i <= 2 + Math.floor(Math.random() * 3); i++) {
+              timers.push(window.setTimeout(() => spawnMeteor(true), i * (180 + Math.random() * 260)));
+            }
+          }
+        }
+        timers.push(window.setTimeout(meteor, (3200 + Math.random() * 7000) * gap()));
+      };
+      const proto = () => {
+        if (!document.hidden && protos.length < (W < 700 ? 1 : 2)) spawnProto();
+        timers.push(window.setTimeout(proto, (6000 + Math.random() * 8000) * gap()));
+      };
+      const nova = () => {
+        if (!document.hidden && novae.length < 1) spawnNova();
+        timers.push(window.setTimeout(nova, (15000 + Math.random() * 12000) * gap()));
+      };
+      const pulsar = () => {
+        if (!document.hidden && pulsars.length < 1) spawnPulsar();
+        timers.push(window.setTimeout(pulsar, (11000 + Math.random() * 10000) * gap()));
+      };
+      const comet = () => {
+        if (!document.hidden && comets.length < 1) spawnComet();
+        timers.push(window.setTimeout(comet, (12000 + Math.random() * 11000) * gap()));
+      };
+      timers.push(window.setTimeout(meteor, 1800));
+      timers.push(window.setTimeout(proto, 5200));
+      timers.push(window.setTimeout(pulsar, 4000));
+      timers.push(window.setTimeout(nova, 5600));
+      timers.push(window.setTimeout(comet, 7600));
+      const wormhole = () => {
+        if (!document.hidden && wormholes.length < 1) spawnWormhole();
+        timers.push(window.setTimeout(wormhole, (17000 + Math.random() * 14000) * gap()));
+      };
+      const quasar = () => {
+        if (!document.hidden && quasars.length < 1) spawnQuasar();
+        timers.push(window.setTimeout(quasar, (15000 + Math.random() * 13000) * gap()));
+      };
+      const aurora = () => {
+        if (!document.hidden && aurorae.length < 1) spawnAurora();
+        timers.push(window.setTimeout(aurora, (21000 + Math.random() * 18000) * gap()));
+      };
+      const binary = () => {
+        if (!document.hidden && binaries.length < 1) spawnBinary();
+        timers.push(window.setTimeout(binary, (12000 + Math.random() * 10000) * gap()));
+      };
+
+      /* The seven newer wonders. Everything first appears inside the first ten
+         seconds and then recurs in the 8-22s band, because a phenomenon you
+         have to wait forty seconds for is one nobody will ever see.          */
+      const planneb = () => {
+        if (!document.hidden && plannebs.length < (W < 700 ? 1 : 2)) spawnPlanNeb();
+        timers.push(window.setTimeout(planneb, (13000 + Math.random() * 11000) * gap()));
+      };
+      const kilo = () => {
+        if (!document.hidden && kilos.length < 1) spawnKilo();
+        timers.push(window.setTimeout(kilo, (16000 + Math.random() * 12000) * gap()));
+      };
+      const burst = () => {
+        if (!document.hidden && bursts.length < 1) spawnBurst();
+        timers.push(window.setTimeout(burst, (14000 + Math.random() * 13000) * gap()));
+      };
+      const echo = () => {
+        if (!document.hidden && echoes.length < (W < 700 ? 1 : 2)) spawnEcho();
+        timers.push(window.setTimeout(echo, (12000 + Math.random() * 10000) * gap()));
+      };
+      const giant = () => {
+        if (!document.hidden && giants.length < (W < 700 ? 1 : 2)) spawnGiant();
+        timers.push(window.setTimeout(giant, (11000 + Math.random() * 9000) * gap()));
+      };
+      const sat = () => {
+        if (!document.hidden && sats.length < (W < 700 ? 1 : 2)) spawnSat();
+        timers.push(window.setTimeout(sat, (9000 + Math.random() * 9000) * gap()));
+      };
+      const transit = () => {
+        if (!document.hidden && transits.length < (W < 700 ? 1 : 2)) spawnTransit();
+        timers.push(window.setTimeout(transit, (10000 + Math.random() * 9000) * gap()));
+      };
+
+      timers.push(window.setTimeout(giant, 1600));
+      timers.push(window.setTimeout(binary, 2600));
+      timers.push(window.setTimeout(transit, 3400));
+      timers.push(window.setTimeout(planneb, 4300));
+      timers.push(window.setTimeout(sat, 5200));
+      timers.push(window.setTimeout(quasar, 6100));
+      timers.push(window.setTimeout(echo, 7000));
+      timers.push(window.setTimeout(wormhole, 8200));
+      timers.push(window.setTimeout(kilo, 9400));
+      timers.push(window.setTimeout(aurora, 10600));
+      timers.push(window.setTimeout(burst, 12000));
+    }
+
+    /* ---- INPUT + LIFECYCLE ---------------------------------------------- */
+    window.addEventListener('scroll', () => {
+      scrollY = window.scrollY;
+      docH = Math.max(1, document.documentElement.scrollHeight - H);
+    }, { passive: true });
+
+    window.addEventListener('pointermove', (e) => {
+      px = e.clientX / window.innerWidth;
+      py = e.clientY / window.innerHeight;
+    }, { passive: true });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) { if (raf) cancelAnimationFrame(raf); raf = 0; }
+      else kick();
+    });
+
+    let rt: number | undefined;
+    window.addEventListener('resize', () => {
+      clearTimeout(rt);
+      rt = window.setTimeout(() => { size(); draw(); }, 200);
+    }, { passive: true });
+
+    size();
+    draw();
+    if (!reduce) schedule();
+  }
+</script>

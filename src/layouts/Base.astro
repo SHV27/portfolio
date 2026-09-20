@@ -1,7 +1,11 @@
 ---
 import '../styles/base.css';
-import Cosmos from '../components/Cosmos.astro';
+import CosmicField from '../components/CosmicField.astro';
+import ChapterRail from '../components/ChapterRail.astro';
+import SoundToggle from '../components/SoundToggle.astro';
 import ogImage from '../assets/photos/01-bridge-colour.jpg';
+import nebA from '../assets/space/rho-ophiuchi.jpg';
+import nebB from '../assets/space/pillars.jpg';
 
 interface Props { title: string; description: string; }
 const { title, description } = Astro.props;
@@ -44,10 +48,13 @@ const og = new URL(ogImage.src, Astro.site).href;
   })} />
 </head>
 
-<body>
+<body style={`--neb-a:url(${nebA.src});--neb-b:url(${nebB.src})`}>
   <a class="skip" href="#main">Skip to content</a>
-  <Cosmos />
+  <CosmicField />
   <div class="grain" aria-hidden="true"></div>
+
+  <ChapterRail />
+  <SoundToggle />
 
   <main id="main">
     <slot />
@@ -80,21 +87,26 @@ const og = new URL(ogImage.src, Astro.site).href;
     //     and every current browser blocks unmuted autoplay for a first-time
     //     visitor anyway. So: silent until asked, one visible control, and the
     //     choice is remembered. See docs/AUDIO.md.
-    const btn = document.querySelector<HTMLButtonElement>('[data-anthem]');
+    const btns = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-anthem]'));
     const audio = document.querySelector<HTMLAudioElement>('#anthem');
-    if (btn && audio) {
+    if (btns.length && audio) {
       const KEY = 'sv-anthem';
+      // Two controls drive one element: the persistent corner toggle and the
+      // one in the personal chapter. They must never disagree about state.
       const setUI = (on: boolean) => {
-        btn.setAttribute('aria-pressed', String(on));
-        btn.dataset.on = String(on);
-        const t = btn.querySelector('[data-anthem-label]');
-        if (t) t.textContent = on ? 'Pause the anthem' : 'Play the anthem';
+        for (const btn of btns) {
+          btn.setAttribute('aria-pressed', String(on));
+          btn.dataset.on = String(on);
+          btn.setAttribute('aria-label', on ? 'Pause the anthem' : 'Play the anthem');
+          const t = btn.querySelector('[data-anthem-label]');
+          if (t) t.textContent = on ? 'Pause the anthem' : 'Play the anthem';
+        }
       };
       // A stored ON does not autoplay — browsers would refuse, and it would
       // ambush a returning visitor. It only pre-arms the control.
       setUI(false);
 
-      btn.addEventListener('click', async () => {
+      const toggle = async () => {
         if (audio.paused) {
           try {
             audio.volume = 0;
@@ -114,7 +126,8 @@ const og = new URL(ogImage.src, Astro.site).href;
           setUI(false);
           try { localStorage.setItem(KEY, '0'); } catch {}
         }
-      });
+      };
+      for (const btn of btns) btn.addEventListener('click', toggle);
 
       audio.addEventListener('ended', () => setUI(false));
       // Duck when the tab is hidden — nobody wants a forgotten tab singing.

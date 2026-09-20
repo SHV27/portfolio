@@ -1,0 +1,248 @@
+Skip to the finding
+Reckoner
+
+It explains why a number moved, shows the arithmetic, and refuses to answer when it cannot prove the answer.
+
+Dark
+Print / PDF
+LEDGER
+UK online gift retailer — transaction ledger
+ROWS ANALYSED
+1,033,036
+PERIOD
+2009-12-01 → 2011-12-09
+DATA SENT TO A SERVER
+None. Ever.
+ACT ONE · WHAT EVERY OTHER TOOL REPORTS
+Revenue fell −57.6% in December 2011.
+
+This is the answer you get from a correct query over correct data. It is arithmetically right and completely wrong, and nothing on a conventional dashboard would tell you so.
+
+NOVEMBER 2011
+£1.50m
+DECEMBER 2011
+£638k
+REPORTED CHANGE
+−57.6%
+0
+£752k
+£1.50m
+2009
+2010
+2011
+the number everyone reports
+Source: UCI Machine Learning Repository, Online Retail II (CC BY 4.0) · 1,033,036 transaction lines · figures in GBP · this claim compares November 2011 with December 2011
+ACT TWO · WE REFUSE TO PUBLISH IT
+That number is not a business result. It is 9 days of data.
+
+December 2011 is not a whole period in this ledger. The data stops on 2011-12-09. Comparing it with a full month measures the calendar, not the company.
+
+CALENDAR DAYS PRESENT
+9 of 31
+TRADING DAYS OBSERVED
+8
+TYPICAL TRADING MONTH
+26 days
+RECORDS, VS 2,884 IN THE BUSIEST PERIOD
+839
+
+Compare November 2010 with November 2011 instead — both are fully observed, and being the same month one year apart they hold seasonality constant.
+
+Refusal issued by the period gate before any explanation was attempted · check period-complete · this is the only period in 25 that fails it
+ACT THREE · WHAT ACTUALLY HAPPENED
+Revenue looks flat at +2.7% — but underneath, £484k of new products is being cancelled out by £245k of volume.
+
+Comparing November 2010 with November 2011 — the same month one year apart, so seasonality is held constant. Both periods are fully observed.
+
+NOVEMBER 2010
+£1.46m
+NOVEMBER 2011
+£1.50m
+REAL CHANGE
++2.7%
+HOW THE MONEY GOT FROM ONE TOTAL TO THE OTHER
+£1.46m
+November 2010
+TOTAL
+−£245k
+Volume
++£73.5k
+Price
+−£138k
+Mix & interaction
++£484k
+New products
+−£135k
+Discontinued
+£1.50m
+November 2011
+TOTAL
+IN PLAIN WORDS
+
+Between November 2010 and November 2011 revenue grew by +£39.6k (+2.7%), from £1.46m to £1.50m. That net figure sits on top of two much larger movements pulling against each other: New products added +£484k while Volume took away −£245k. Across country, United Kingdom is the single biggest mover at +£50.3k. 11.1% of the movement sits outside the 8 named entries, spread across 23 others.
+
+Rewrite this with AI
+Deterministic wording. No model was called, and none is needed.
+Source: UCI Machine Learning Repository, Online Retail II (CC BY 4.0), original dataset · SHA-256 bcbe73b35f5b7bab… · every figure below reconciles exactly to the total movement
+THE LEDGER
+8 named countries carry the movement, and 11.1% of it sits outside them — across 23 others, on its own line.
+
+Every country in the file was scanned — not a sample, and not just the ones we guessed at. Ranked by how much of the movement each one carries.
+
+BREAK DOWN BY
+Country
+Product
+COUNTRY	CONTRIBUTION TO THE MOVE	AMOUNT	SHARE	
+WORKING
+
+United Kingdom	
+1.3× the entire net change
+	+£50,297.97	+127.1%	Show working
+France	
+	+£12,107.85	+30.6%	Show working
+Australia	
+	−£11,002.80	−27.8%	Show working
+Netherlands	
+	−£10,184.73	−25.7%	Show working
+Japan	
+	+£8,436.48	+21.3%	Show working
+Switzerland	
+	−£5,451.77	−13.8%	Show working
+Portugal	
+	−£2,874.67	−7.3%	Show working
+Finland	
+	+£2,655.26	+6.7%	Show working
+Not concentrated anywhere	spread across 23 other countries, none individually material	−£4,409.95	−11.1%	
+Total movement	the 8 named rows + the residual, reconciled exactly	+£39,573.64	+100.0%	
+
+11.1% of the movement sits outside the 8 named countries, spread across 23 others. It gets its own line rather than being absorbed into the rows above, because an explanation that quietly drops what it cannot account for is how a plausible wrong number gets published. Note that the named shares here sum to more than 100% because some countries moved against the others — the amounts still reconcile exactly, as the total row shows.
+
+Each row opens to its own arithmetic · contributions and the residual sum to the total movement exactly, in integer minor units · as of 2011-12-09
+THE PROOF
+Every check this finding had to pass before it was allowed on screen.
+
+These run at render time, in your browser, on this finding — not once in a test suite months ago. A finding that fails any of them is refused, not rounded.
+
+✓
+The bridge balances
+: passed
+Volume + price + mix + new + discontinued equals the total move exactly, to the penny.
+✓
+The attribution balances
+: passed
+Named segments plus the unexplained residual equal the total move exactly.
+✓
+Every published figure is an exact integer
+: passed
+Every figure shown is an integer count of minor units at scale 10,000, within the range where integer arithmetic is exact. The volume and price effects are derived from average unit prices, which are real numbers; they are rounded to integers and the mix term absorbs the remainder, so the bridge closes exactly rather than approximately.
+✓
+The explanation is not empty
+: passed
+8 named segments carry the move.
+
+15,660 candidate explanations were evaluated, in this browser. An analyst working by hand writes perhaps ten GROUP BY queries and stops at the first story that sounds right. Every candidate here was scored, so the flattering explanation was never chosen — because none of them was chosen.
+
+Checks are recomputed on every render · a failing block-level check replaces this exhibit with a refusal
+BEFORE YOU TRUST ANY OF IT
+This file has 5 defects that would each have moved the numbers above. Here they are.
+
+Every one of these was found, counted, and handled before a single figure was published — not discovered afterwards by the person who acted on the report.
+
+DEFECT	ROWS	WHY IT WOULD HAVE MATTERED	WHAT WE DID
+Exact duplicate rowsEXCLUDED	34,335	Duplicated transaction lines inflate every revenue total they touch. A published case study found a duplicate join silently inflating revenue by 76%.	Excluded from every figure on this page.
+Cancellation invoices (Invoice starts with C)	19,494	Cancellations carry negative quantities. Summed naively they net against sales and hide both the gross sales figure and the returns figure.	Kept, but classified as returns rather than netted into sales.
+Negative-quantity lines (returns and credits)	22,950	These are real money leaving the business, not an error — but they are not sales.	Reported separately as returns.
+Zero or negative unit price	6,207	Zero-price lines break any unit-economics calculation and are usually adjustments, samples or data entry errors.	Excluded from unit-price analysis; counted here.
+Rows with no Customer ID	243,007	Any per-customer analysis silently drops these. That is 22.8% of this file — a fifth of the business invisible to a customer cohort report.	Included in company totals, excluded from per-customer analysis, and the exclusion is stated on every customer exhibit.
+
+The 34,335 duplicate rows are the dangerous one. They are not corrupt or malformed — they are perfectly valid-looking transaction lines that happen to appear twice. Summed naively they inflate revenue, and no error is raised, no warning appears, and the total still looks entirely reasonable. That is the exact shape of failure this product was built to make impossible. A worked example of the same bug class inflated a revenue figure by 76% with nothing flagging it.
+
+Computed at build time from the source file · SHA-256 bcbe73b35f5b7bab… · 1,067,371 raw rows in, 1,033,036 analysed
+YOUR TURN
+Point it at your own numbers. They never leave this browser.
+
+There is no server on the data path and no account to create. Open your network tab, or switch off your Wi-Fi entirely — the analysis still runs, because it is running here.
+
+Drop a CSV here
+
+or click to choose one · nothing is transmitted
+
+CSV or tab-separated, with a date column, a money column and something to group by · parsed in this tab · nothing is uploaded, stored, logged, or sent to any model
+METHOD
+How you can know these numbers are right, without taking anyone's word for it.
+
+Four mechanisms, in descending order of how much work they save you. The first three are structural — they make a wrong number impossible rather than unlikely.
+
+Money is never a floating-point number
+src/engine/money.ts
+
+Every amount is an integer count of ten-thousandths of a currency unit. The conversion happens once, at ingest, and any value that will not round-trip exactly is refused rather than rounded. Constructing a money value from a fraction throws, as does one beyond the range where integer arithmetic stays exact. So "balances to the penny" is arithmetic, not a slogan. On the bundled sample the measured round-trip error is 0.0 and the grand total sits 46,700× inside JavaScript's safe-integer limit.
+
+Every explanation must reconcile, or it is refused
+src/engine/run.ts · preflight()
+
+Before any exhibit renders, the engine re-adds its own ledger and compares it to the observed movement. Not within a tolerance — exactly. If the terms do not sum to the total, the finding is replaced by a refusal that names the gap. This runs at render time in your browser, on the finding in front of you.
+
+The model is never shown the data, and cannot type a digit
+api/narrate.ts · src/narrate/slots.ts
+
+The language model receives a list of placeholder names — no rows, no figures, no file contents, not even for the public sample. It returns a sentence of {{placeholders}} which this browser fills from its own arithmetic. Output containing a digit outside a placeholder is rejected automatically. An invented figure is not unlikely here; it has no route to the screen.
+
+The invariants are proved over generated data, and the tests are proved to fail
+src/engine/engine.test.ts · src/narrate/slots.test.ts
+
+Property-based tests build thousands of random datasets and assert that the decomposition reconciles on every one. Then — because a test that cannot fail proves nothing — three deliberate bugs were introduced into the engine and each was confirmed to break the suite: computing the mix term independently, dropping the residual, and disabling the period gate.
+
+Every claim on this page is checkable in the source at the paths given.
+THE EVIDENCE
+What was actually run, and what came back.
+CHECK	SCALE	RESULT
+Bridge reconciles to the movement exactly	1,500 random cubes	pass — zero drift
+Named segments + residual reconcile exactly	1,500 random cubes × every topN	pass — zero drift
+No member silently dropped from a scan	800 random cubes	pass
+Money addition is exactly invertible	2,000 random integer pairs	pass
+Narration guard rejects any injected digit	600 injection positions	pass — all caught
+Narration guard accepts valid wording	deterministic + hand-written	pass
+Period gate refuses a truncated period	the real December 2011	refused, as designed
+Period gate ALLOWS a complete but quiet month	the real December 2010	allowed, as designed
+Mutation: compute mix independently	deliberate bug	suite failed — caught
+Mutation: drop the residual	deliberate bug	suite failed — caught
+Mutation: disable the period gate	deliberate bug	suite failed — caught
+Live model wrote a digit	18 live generations	0 of 18 — structurally prevented
+Reproduce with `npm test` in the repository.
+THE LIMITS
+What this product cannot do, and where it could still mislead you.
+
+Stated plainly, because a tool that claims no weaknesses is telling you its first lie. Of the seven major "ask your data" products surveyed while building this, only two publish an accuracy figure at all — Snowflake on 150 internal questions and Databricks on 28 — and neither has been independently replicated.
+
+It explains WHAT moved. It does not know WHY.
+
+The bridge and the ledger are arithmetic: they say where the money went, exactly. They cannot tell you that a competitor opened nearby or that a supplier failed. Causal claims need an experiment or a natural one, and this product deliberately does not pretend otherwise — automatic causal verdicts were considered and cut, because their assumptions cannot be tested from the data alone.
+
+The AI wording can attach a right number to the wrong subject.
+
+Across 18 live generations the model never wrote a digit — it structurally cannot. But roughly one paragraph in six placed a correct figure against the wrong noun, for instance giving one country a share that belonged to all eight. That is why AI wording is off by default, behind a labelled button, and why the deterministic exhibits above it are the authoritative ones.
+
+'Reconciles exactly' is a statement about arithmetic, not about your data being right.
+
+If the source file is wrong, this will faithfully explain a wrong number. That is why the data-quality exhibit runs first and why it is stated before any finding rather than after.
+
+Only one comparison shape is supported: two periods of one money metric.
+
+No forecasting, no cohort retention, no multi-metric models. Each was considered and cut rather than shipped shallow. A narrow tool that is right beats a broad one that is plausible.
+
+The sample ledger is real, but it is from 2009–2011.
+
+It is a genuine UK retailer's transaction file, chosen because it is real, openly licensed, and — usefully — full of the exact defects this product exists to catch. It is not current, and the interface says so on every exhibit rather than quietly implying freshness.
+
+Findings describe the periods compared, not a trend.
+
+Two periods are two points. A movement between them is not a direction of travel, and nothing here should be read as one.
+
+It has not been evaluated by a real CEO.
+
+It has been driven end to end in a real browser at desktop and phone widths, checked for console errors and layout failures, and audited against published research on what executives actually reject in analytics tools. That is the strongest evaluation available without access to executives, and it is not the same thing as one. Stated so nobody has to guess.
+
+Measured, not estimated · the narration figure comes from 18 live generations against openai/gpt-oss-120b on 2026-09-19
+
+Reckoner runs entirely in your browser. There is no server on the data path and no account. Data: Chen, D. (2019). Online Retail II [Dataset]. UCI Machine Learning Repository. Licensed CC BY 4.0.

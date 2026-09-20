@@ -85,8 +85,27 @@ h1, h2, h3 { text-wrap: balance; }
 .prose strong { color: var(--star); font-weight: 600; }
 
 /* ---- LAYOUT -------------------------------------------------------------- */
+/* Plates number themselves down each page. Reset once, at the root. */
+body { counter-reset: plate; }
+
 .wrap { width: 100%; max-width: var(--page-max); margin-inline: auto; padding-inline: var(--gutter); }
-.section { padding-block: clamp(var(--s-24), 14vh, var(--s-48)); position: relative; }
+.section { padding-block: clamp(var(--s-16), 8.5vh, var(--s-32)); position: relative; }
+/* Two sections meeting would otherwise stack their padding into a 250px gulf. */
+.section + .section { padding-top: clamp(var(--s-12), 6vh, var(--s-24)); }
+
+/* ---- OFFSCREEN WORK THE BROWSER SHOULD NOT DO ----------------------------
+   This page is ~84 screens tall. Without this, the browser lays out and paints
+   all of it before first paint, which measured as 2.2s of render delay on a
+   throttled phone — the single largest component of LCP.
+
+   content-visibility: auto lets it skip layout and paint for anything offscreen.
+   contain-intrinsic-size: auto <n> gives a placeholder height first time and then
+   remembers the real one, so the scrollbar stays honest and in-page anchors land
+   correctly. The title card is excluded — it must render immediately.        */
+.section:not(.tc),
+.sb,
+.pc,
+.bh { content-visibility: auto; contain-intrinsic-size: auto 900px; }
 
 /* ---- LINKS --------------------------------------------------------------- */
 a { color: inherit; }

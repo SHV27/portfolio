@@ -1,0 +1,139 @@
+---
+/**
+ * One page per project.
+ *
+ * The home page was one 84-screen scroll, which buried everything below the
+ * third project. Now the home page indexes the work and each project gets its
+ * own page with room to breathe — less scrolling, faster first load, and a URL
+ * he can send to someone about a single thing.
+ */
+import Base from '../../layouts/Base.astro';
+import ProjectCase from '../../sections/ProjectCase.astro';
+import Plate from '../../components/Plate.astro';
+import DossierToggle from '../../components/DossierToggle.astro';
+import SifarishStory from '../../sections/SifarishStory.astro';
+import StarBirth from '../../sections/StarBirth.astro';
+import { ORDER } from '../../content/all';
+import { SHOTS } from '../../content/shots';
+import { PLATES } from '../../content/plates';
+
+import lockIn from '../../assets/aura/10-built-in-silence.jpg';
+import fuckNormal from '../../assets/aura/05-fuck-normal-magic.jpg';
+
+/** Display numbers follow the brief, where Data & Signal occupies 04. */
+/* The same numbering the work index prints. Nine entries, because Data &
+   Signal is one of them even though it is not a repo-backed Project. */
+const DISPLAY_NO: Record<string, string> = {
+  sifarish: '01', aaina: '02', jarvis: '03', braillix: '04', 'data-signal': '05',
+  reckoner: '06', uruthi: '07', 'sehat-saarthi': '08', gloaming: '09',
+};
+
+export function getStaticPaths() {
+  return ORDER.map((p, i) => ({
+    params: { slug: p.id },
+    props: { project: p, index: i },
+  }));
+}
+
+const { project, index } = Astro.props;
+// The pager walks the brief's order, which includes the Data & Signal page.
+const CHAIN = [
+  { id: 'sifarish', name: 'Sifarish', href: '/projects/sifarish' },
+  { id: 'aaina', name: 'Aaina', href: '/projects/aaina' },
+  { id: 'jarvis', name: 'JARVIS', href: '/projects/jarvis' },
+  { id: 'braillix', name: 'Braillix', href: '/projects/braillix' },
+  { id: 'data-signal', name: 'Data & Signal', href: '/projects/data-signal' },
+  { id: 'reckoner', name: 'Reckoner', href: '/projects/reckoner' },
+  { id: 'uruthi', name: 'Uruthi', href: '/projects/uruthi' },
+  { id: 'sehat-saarthi', name: 'Sehat Saarthi', href: '/projects/sehat-saarthi' },
+  { id: 'gloaming', name: 'Gloaming', href: '/projects/gloaming' },
+];
+const at = CHAIN.findIndex((c) => c.id === project.id);
+const prev = CHAIN[at - 1];
+const next = CHAIN[at + 1];
+
+const plate = PLATES[project.id];
+---
+
+<Base
+  title={`${project.name} — Shaurya Verma`}
+  description={project.hook}
+>
+  <a class="back" href="/#work">
+    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M9 2 L4 7 L9 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg>
+    All work
+  </a>
+
+  <ProjectCase project={project} index={`Project ${DISPLAY_NO[project.id] ?? String(index + 1).padStart(2, "0")}`} shots={SHOTS}>
+    {project.id === 'sifarish' && <><SifarishStory /><DossierToggle /></>}
+    {project.id === 'braillix' && (
+      <Plate
+        src={lockIn}
+        alt="Iron Man standing in a workshop, captioned: Lock in — build yourself."
+        caption="Braillix was fifty-one hours start to finish, including tearing the whole thing down halfway and rebuilding it. This is on my wall, and it is roughly what that felt like."
+        size="intimate"
+      />
+    )}
+    {project.id === 'gloaming' && (
+      <Plate
+        src={fuckNormal}
+        alt="A luminous figure dissolving into a trail of stardust, with hand-lettered text reading: Fuck normal, I want magic."
+        caption="I had a working game and I threw it away, because working is not the bar. This one is on the wall too."
+        size="intimate"
+      />
+    )}
+  </ProjectCase>
+
+  {plate && (
+    <StarBirth
+      plate={plate.src}
+      credit={plate.credit}
+      kicker={plate.kicker}
+      line={plate.line}
+      sub={plate.sub}
+      focus={plate.focus}
+      height="mid"
+    />
+  )}
+
+  <nav class="pager wrap" aria-label="Other projects">
+    {prev ? (
+      <a class="pager__l" href={prev.href}>
+        <span class="label">Previous</span>
+        <span class="pager__n display display--small">{prev.name}</span>
+      </a>
+    ) : <span></span>}
+    {next && (
+      <a class="pager__l pager__l--next" href={next.href}>
+        <span class="label">Next</span>
+        <span class="pager__n display display--small">{next.name}</span>
+      </a>
+    )}
+  </nav>
+</Base>
+
+<style>
+  .back {
+    position: sticky; top: var(--s-4); z-index: 30;
+    display: inline-flex; align-items: center; gap: var(--s-2);
+    margin: var(--s-6) 0 0 var(--gutter);
+    padding: 8px 16px; min-height: 40px;
+    background: color-mix(in oklab, var(--void) 86%, transparent);
+    backdrop-filter: blur(6px);
+    border: var(--hair) solid var(--ridge);
+    border-radius: var(--r-full);
+    font-size: var(--t-small); color: var(--dust); text-decoration: none;
+    transition: border-color var(--d-base) var(--ease), color var(--d-base) var(--ease);
+  }
+  .back:hover { border-color: var(--gold); color: var(--gold); }
+
+  .pager {
+    display: flex; justify-content: space-between; gap: var(--s-8);
+    padding-block: var(--s-16) var(--s-32);
+    border-top: var(--hair) solid var(--ridge);
+  }
+  .pager__l { display: flex; flex-direction: column; gap: 3px; text-decoration: none; }
+  .pager__l--next { text-align: right; align-items: flex-end; }
+  .pager__n { font-size: clamp(1.2rem, 2.6vw, 1.9rem); color: var(--star); transition: color var(--d-base) var(--ease); }
+  .pager__l:hover .pager__n { color: var(--gold); }
+</style>

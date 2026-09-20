@@ -2,20 +2,22 @@
 /**
  * THE PERSONAL CHAPTER.
  *
- * Every image here stands alone, full frame, uncropped, with copy between —
- * never paired, never gridded (his instruction, twice, for both batches).
+ * Rebuilt: photographs sit beside their text and alternate sides, instead of a
+ * vertical column of full-width images. Same photographs, same rule — each one
+ * whole, alone, never cropped, never two in a frame together.
  *
- * The résumé facts live inside the prose here rather than in a CV block,
- * because the portfolio IS the résumé (CLAUDE.md §5, DECISIONS D044).
+ * The résumé facts live inside this prose rather than in a CV block, because
+ * the portfolio IS the résumé.
  */
+import Aside from '../components/Aside.astro';
 import Plate from '../components/Plate.astro';
 
 import iAmWhoIAm from '../assets/aura/06-i-am-who-i-am.jpg';
+import lobbyBlazer from '../assets/photos/03-lobby-blazer.jpg';
 import mountains from '../assets/photos/04-mountains.jpg';
-import wallBlue from '../assets/photos/07-wall-blue.jpg';
-import barneyTub from '../assets/aura/03-barney-bathtub.jpg';
 import wallBw from '../assets/photos/06-wall-bw.jpg';
 import jumping from '../assets/photos/08-jumping.jpg';
+import gym from '../assets/photos/09-gym-back.jpg';
 import barneyAwesome from '../assets/aura/08-barney-awesome.jpg';
 ---
 
@@ -23,158 +25,134 @@ import barneyAwesome from '../assets/aura/08-barney-awesome.jpg';
   <div class="wrap">
     <p class="label hu__k">Enough about the code</p>
     <h2 class="hu__t display">Who's actually building this</h2>
-  </div>
 
-  <div class="wrap">
-    <Plate
-      src={iAmWhoIAm}
-      alt="A silhouetted figure and an outstretched hand rendered entirely in streaks of starlight, captioned with Exodus 3:14 — I AM WHO I AM."
-      caption="I don't spend much energy being a version of myself that's easier to categorise."
-      size="intimate"
-    />
-
-    <div class="hu__prose prose">
+    <Aside src={lobbyBlazer} side="left"
+      alt="Shaurya Verma standing in a hotel lobby in a light grey blazer and glasses, hands in his pockets, smiling."
+      caption="The one my mother would pick.">
       <p>
-        I'm in my final year of Computer Science at Thapar Institute in Patiala, currently sitting at a
-        <strong>7.62 CGPA</strong>. Before that: 90% in Class XII, <strong>98.6% in Class X</strong>, and an
-        <strong>NTSE scholarship</strong> from the Government of India — the aptitude exam that takes roughly the
-        top 0.1% nationally. I mention the NTSE and not the CGPA when someone asks what I'm good at, because one
-        of those measures how fast I pick up a thing I've never seen and the other measures how well I sat
-        through semesters.
+        Final year, Computer Science, Thapar Institute in Patiala — currently a <strong>7.62 CGPA</strong>. Before
+        that: 90% in Class XII and <strong>98.6% in Class X</strong>, and an <strong>NTSE scholarship</strong> from
+        the Government of India, the aptitude exam that takes roughly the top 0.1% nationally.
       </p>
       <p>
-        I've won first place twice at IIT Ropar hackathons — the Gen AI Hackathon in November 2025 with a
-        multimodal Alzheimer's detection system, which is the project that eventually became Sehat Saarthi, and
-        the Agentic &amp; GenAI Showcase in July 2026 with Sifarish. Outside that I've been on the core organising
-        committee for Saturnalia, Thapar's techno-cultural festival, on the committee for Urja, the sports
-        festival, and I volunteer with Bharat Vikas Parishad.
+        I mention the NTSE rather than the CGPA when someone asks what I'm good at, because one of those measures
+        how fast I pick up a thing I've never seen and the other measures how well I sat through semesters.
       </p>
       <p>
-        The thing I'd actually want you to know is that none of the projects on this page were assigned to me. I
-        go looking for problems. It's a slightly compulsive habit — I see something broken and some part of my
-        brain starts chewing on it until I've built the thing that fixes it.
+        Two first places at IIT Ropar — the Gen AI Hackathon in November 2025 with a multimodal Alzheimer's
+        detection system, which became Sehat Saarthi, and the Agentic &amp; GenAI Showcase in July 2026 with
+        Sifarish — plus the AI Mentorship Programme with LaunchED Global, run out of IIT Kharagpur.
       </p>
-    </div>
-  </div>
+    </Aside>
 
-  <div class="wrap">
-    <Plate
-      src={mountains}
+    <Aside src={mountains} side="right"
       alt="Shaurya Verma standing on a Himalayan ridge in a white polo shirt and sunglasses, both thumbs up, a forested valley and layered mountain ranges behind him."
-      caption="Uttarakhand. I want a very big life, and I'm not embarrassed about saying so."
-      size="standard"
-    />
-
-    <div class="hu__prose prose">
+      caption="Uttarakhand.">
       <p>
-        I want to do something genuinely big. Not "senior engineer by thirty" big — I mean I want to point myself
-        at a problem that matters and actually move it. Right now that means getting inside a team building
-        frontier AI systems and being useful there faster than anyone expects a final-year student to be.
+        I want to do something genuinely big. Not "senior engineer by thirty" big — I mean point myself at a
+        problem that matters and actually move it. Right now that means getting inside a team building frontier AI
+        systems and being useful there faster than anyone expects a final-year student to be.
       </p>
-    </div>
-  </div>
-
-  <div class="wrap">
-    <Plate
-      src={wallBlue}
-      alt="Shaurya Verma standing in front of a wall covered in printed photographs and quote cards, smiling, in a light blue shirt."
-      caption="This is the wall in my room. Look closely — you've been reading it this whole time."
-      size="standard"
-    />
-
-    <div class="hu__prose prose">
       <p>
-        Every image on this page that isn't a photograph of me or a screenshot of my work is printed and stuck on
-        that wall. The Stark frames, the SRK line, Barney, the blackletter one. They were on the wall long before
-        there was a portfolio to put them in — which is why they're here rather than some tasteful abstract
-        pattern a designer would have picked instead.
+        None of the projects on this site were assigned to me. I go looking for problems; it's close to
+        compulsive. I see something broken and some part of my brain starts chewing on it until the thing that
+        fixes it exists.
       </p>
-    </div>
-  </div>
+    </Aside>
 
-  <div class="wrap">
-    <Plate
-      src={barneyTub}
-      alt="Barney Stinson reclining in a bathtub in a full suit, talking on a phone, captioned: He is my spirit animal."
-      caption="Barney Stinson, on my wall, unironically."
-      size="intimate"
-    />
-  </div>
-
-  <div class="wrap">
-    <Plate
-      src={wallBw}
-      alt="Shaurya Verma in front of the same wall of printed images, photographed in black and white, laughing."
-      caption="Same wall, different day."
-      size="standard"
-    />
-
-    <div class="hu__prose prose">
+    <Aside src={wallBw} side="left"
+      alt="Shaurya Verma in front of a wall covered in printed photographs and quote cards, photographed in black and white, laughing."
+      caption="The wall, again.">
       <p>
-        My friends come to me for two things: motivation, and consolation. Those are opposite jobs and I seem to
-        be the person for both, which I think says something reasonably good about me. I'm told I'm good company.
-        I'd like the place I work to be somewhere I'm allowed to be good company.
+        Scroll back to the top for a second. The wall behind me in that first photograph is the wall in my room,
+        and every image on this site that isn't a photograph of me or a screenshot of my work is printed and stuck
+        on it — the Stark frames, the SRK line, Barney, the blackletter one.
       </p>
-    </div>
-  </div>
+      <p>
+        They went up long before there was a portfolio to put them in. That's why they're here instead of some
+        tasteful abstract pattern: I didn't choose them for a website, I chose them for a wall I look at every
+        morning.
+      </p>
+    </Aside>
 
-  <div class="wrap">
-    <Plate
-      src={jumping}
+    <Aside src={jumping} side="right"
       alt="Shaurya Verma mid-jump on his bed with both arms thrown up, laughing, the wall of printed images behind him."
-      caption="If you want someone who makes the workplace more fun, I'm available for that too."
-      size="standard"
-    />
+      caption="A normal Tuesday.">
+      <p>
+        My friends come to me for two things: motivation, and consolation. Those are opposite jobs and I'm somehow
+        the person for both, which I think says something reasonably good about me.
+      </p>
+      <p>
+        If you want someone who makes the workplace more fun, I'm available for that too. I'd like the place I
+        work to be somewhere I'm allowed to be good company.
+      </p>
+    </Aside>
   </div>
 
-  <div class="wrap hu__anthem">
-    <div class="hu__anthembox">
-      <p class="label hu__ak">The anthem</p>
-      <h3 class="hu__at display display--small">"Shaurya Verma is Awesome"</h3>
-      <p class="hu__ap">
-        Barney made a video called <em>I'm Awesome</em>. I have one too. It exists because I thought it was funny
-        and then it kept being funny.
+  <div class="wrap">
+    <Aside src={gym} side="left"
+      alt="Shaurya Verma in a bathroom mirror, flexing, his back visible in the reflection behind him."
+      caption="The other discipline.">
+      <p>
+        I lift. Not as a personality, just as the other thing I am strict about — the gym is the only place I
+        know where the feedback loop is completely honest. The weight moves or it does not. Nothing about your
+        intent matters. You find out what you actually did, every single session.
       </p>
-      <button class="hu__play" data-anthem type="button" aria-pressed="false">
-        <span class="hu__playicon" aria-hidden="true"></span>
-        <span data-anthem-label>Play the anthem</span>
-      </button>
-      <audio id="anthem" src="/anthem.mp3" preload="none"></audio>
-      <p class="hu__anote mono">
-        It won't start on its own. Nothing on this page makes noise unless you ask it to.
+      <p>
+        I think that is the same instinct that runs through everything on this site. I would rather be told the
+        truth by a system than flattered by one, and I build the same way: put the measurement in, let it tell
+        me I was wrong, and change the thing.
       </p>
-    </div>
+      <p class="hu__vol">
+        Off-campus I volunteer with <strong>Bharat Vikas Parishad</strong>, and on campus I have sat on the core
+        organising committee for <strong>Saturnalia</strong> — Thapar's techno-cultural festival — and on the
+        committee for <strong>Urja</strong>, the sports festival. Running a festival is the least glamorous
+        project-management training available and easily the most useful.
+      </p>
+    </Aside>
+  </div>
 
-    <Plate
-      src={barneyAwesome}
-      alt="Neil Patrick Harris reclining at a desk in a suit, photographed in black and white, captioned: I'm sorry, I can't hear you over the sound of how awesome I am."
-      caption="I'm aware of how this looks. That's rather the point."
-      size="intimate"
-    />
+  <div class="wrap">
+    <Aside src={iAmWhoIAm} side="left"
+      alt="A silhouetted figure and an outstretched hand rendered entirely in streaks of starlight, captioned with Exodus 3:14 — I AM WHO I AM."
+      caption="Exodus 3:14, rendered in starlight.">
+      <p>
+        I don't spend much energy being a version of myself that is easier to categorise. It has cost me
+        nothing so far and it saves an enormous amount of time.
+      </p>
+      <p>
+        The short version: I am loud about the work and quiet about almost everything else, I would rather be
+        wrong in public than vague in private, and I have never once been the most qualified person in a room
+        and let that decide the outcome.
+      </p>
+    </Aside>
+  </div>
+
+  <div class="wrap">
+    <Aside src={barneyAwesome} side="right"
+      alt="Neil Patrick Harris reclining at a desk in a suit, photographed in black and white, captioned: I'm sorry, I can't hear you over the sound of how awesome I am.">
+      <p>
+        I am aware of how all of this looks. That is rather the point — I would rather be memorable and slightly
+        ridiculous than forgettable and safe.
+      </p>
+      <p>
+        But every claim on this site has a link under it going to the code that proves it. The swagger is the
+        packaging. The receipts are the product.
+      </p>
+    </Aside>
   </div>
 </section>
 
 <style>
   .hu__k { color: var(--gold); }
   .hu__t { font-size: var(--t-title); margin-top: var(--s-4); }
-  .hu__prose { margin: var(--s-12) auto 0; }
-  .hu__prose p + p { margin-top: var(--s-6); }
+  .hu__aura { margin-block: clamp(var(--s-12), 8vh, var(--s-24)); }
 
-  .hu__anthem { margin-top: clamp(var(--s-16), 9vh, var(--s-24)); }
-  .hu__anthembox {
-    max-width: 52ch; margin-inline: auto;
-    padding: var(--s-8);
-    border: var(--hair) solid var(--ridge);
-    border-radius: var(--r-lg);
-    text-align: center;
-  }
   .hu__ak { color: var(--gold); }
-  .hu__at { font-size: var(--t-head); margin-top: var(--s-3); }
-  .hu__ap { margin-top: var(--s-4); font-size: var(--t-small); color: var(--star-dim); }
-  .hu__ap em { font-family: var(--display); font-style: italic; }
+  .hu__at { font-size: var(--t-head); margin-top: var(--s-2); color: var(--star); }
 
   .hu__play {
-    margin-top: var(--s-8);
+    margin-top: var(--s-6);
     display: inline-flex; align-items: center; gap: var(--s-3);
     padding: 12px 24px; min-height: 44px;
     background: color-mix(in oklab, var(--gold) 8%, transparent);
@@ -193,5 +171,7 @@ import barneyAwesome from '../assets/aura/08-barney-awesome.jpg';
     width: 9px; height: 12px; border: none;
     background: linear-gradient(to right, currentColor 0 3px, transparent 3px 6px, currentColor 6px 9px);
   }
-  .hu__anote { margin-top: var(--s-4); font-size: var(--t-micro); color: var(--dust-faint); }
+  .hu__anote { margin-top: var(--s-4); font-size: var(--t-micro); color: var(--dust); }
+  .hu__vol { font-size: var(--t-small); color: var(--dust); }
+  .hu__vol strong { color: var(--star-dim); font-weight: 600; }
 </style>

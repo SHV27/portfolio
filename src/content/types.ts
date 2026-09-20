@@ -84,6 +84,12 @@ export interface Project {
   live?: string;
   /** One line a non-technical recruiter understands completely. */
   hook: string;
+  /**
+   * The line under the title on the project's own page. Never the hook — you
+   * arrived here by clicking the hook, and reading it twice is a small insult.
+   * This one assumes you are already interested and gets sharper.
+   */
+  dek?: string;
   /** The tagline in his own product's voice, where the repo has one. */
   tagline?: string;
   year: string;

@@ -1,0 +1,59 @@
+---
+/**
+ * The two long "how I think" chapters, moved off the home page.
+ *
+ * They are the most valuable reading on the site for a technical reviewer, and
+ * also the densest — leaving them inline was most of what made the home page
+ * feel endless. Home now carries a short invitation and this page carries the
+ * depth, which is the same trade the project pages make.
+ */
+import Base from '../layouts/Base.astro';
+import Jarvis from '../sections/Jarvis.astro';
+import Concepts from '../sections/Concepts.astro';
+import Writings from '../sections/Writings.astro';
+import StarBirth from '../sections/StarBirth.astro';
+import { PLATES } from '../content/plates';
+
+const plate = PLATES['how-i-work'];
+---
+<Base
+  title="How I work — Shaurya Verma"
+  description="How I actually build: constitutions before code, append-only decision logs, adversarial agents, the concepts behind the tools, and the two papers I have written — each one receipted to the file that proves it."
+>
+  <a class="back" href="/">
+    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M9 2 L4 7 L9 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg>
+    Home
+  </a>
+
+  <Jarvis />
+
+  <StarBirth
+    plate={plate.src}
+    credit={plate.credit}
+    kicker={plate.kicker}
+    line={plate.line}
+    sub={plate.sub}
+    focus={plate.focus}
+    height="mid"
+  />
+
+  <Concepts />
+
+  <Writings />
+</Base>
+
+<style>
+  .back {
+    position: sticky; top: var(--s-4); z-index: 30;
+    display: inline-flex; align-items: center; gap: var(--s-2);
+    margin: var(--s-6) 0 0 var(--gutter);
+    padding: 8px 16px; min-height: 40px;
+    background: color-mix(in oklab, var(--void) 86%, transparent);
+    backdrop-filter: blur(6px);
+    border: var(--hair) solid var(--ridge);
+    border-radius: var(--r-full);
+    font-size: var(--t-small); color: var(--dust); text-decoration: none;
+    transition: border-color var(--d-base) var(--ease), color var(--d-base) var(--ease);
+  }
+  .back:hover { border-color: var(--gold); color: var(--gold); }
+</style>

@@ -5,7 +5,9 @@ export const SEHAT: Project = {
   name: 'Sehat Saarthi',
   native: 'ਸਿਹਤ ਸਾਰਥੀ',
   repo: 'sehat-saarthi',
+  live: 'https://sehat-saarthi-punjab.vercel.app',
   hook: 'A Punjabi-first screening assistant I built for rural government clinics — and the project where I deleted two working models of my own because they lied convincingly.',
+  dek: 'Nine models built, seven shipped. The two I deleted at midnight are the reason I would trust the seven.',
   tagline: 'The decision always belongs to the doctor. The saarthi only guides the way.',
   year: 'Jun 2026',
   accent: 'ember',
@@ -56,7 +58,10 @@ export const SEHAT: Project = {
     ],
   },
   stack: ['Python', 'FastAPI', 'scikit-learn', 'ONNX Runtime', 'React', 'Vite', 'Hugging Face Spaces', 'Noto Sans Gurmukhi'],
-  shots: [],
+  shots: [
+    { file: 'sehat/home.png', alt: 'The Sehat Saarthi screening menu, headed in Gurmukhi with English beneath, a phulkari diamond border, a banner reading "Proof-of-concept — pending clinical validation", and a note saying voice is not available on this phone.', caption: 'Gurmukhi first, English second, on every single element — and the honest banner is in the masthead, not buried in a footer. Note the line on the right: when the phone has no Punjabi voice, it says so rather than silently failing.' },
+    { file: 'sehat/module.png', alt: 'A screening module in Sehat Saarthi showing bilingual input fields with units and ranges.', caption: 'Each screening is a config entry, not a code path — which is what made nine of them possible on a zero-rupee budget, and what made deleting two of them a one-line change.' },
+  ],
   limits: [
     'Proof of concept, pending clinical validation and regulatory review. Not approved, certified, or fit for unsupervised clinical use — the repository’s own words.',
     'Trained on small public datasets with no external validation. Domain shift is untested.',
@@ -73,6 +78,7 @@ export const GLOAMING: Project = {
   live: 'https://gloaming-murex.vercel.app',
   tagline: 'The board that plays back.',
   hook: 'A co-operative horror board game I built for the browser, where the board itself is the opponent — the dark eats it from the edges inward while you try to get everyone out.',
+  dek: 'Version one worked perfectly and frightened nobody. So I threw it away and rebuilt every rule as something you can watch move.',
   year: 'Jun – Jul 2026',
   accent: 'gold',
   hardProblem:

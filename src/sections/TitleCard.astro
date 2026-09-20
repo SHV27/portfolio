@@ -11,13 +11,8 @@
  * seeing anything" is a real engineer about a celebrated site.
  */
 import { Image } from 'astro:assets';
-import hero from '../assets/photos/02-bridge-bw.jpg';
+import hero from '../assets/photos/07-wall-blue.jpg';
 
-const LIVE = [
-  { name: 'Sifarish',  native: 'सिफ़ारिश', href: 'https://sifarish-shv-s-projects.vercel.app', what: 'a résumé compiler that cannot cite what it cannot prove' },
-  { name: 'Aaina',     native: 'आईना',    href: 'https://aaina-two.vercel.app',                what: 'an assessment that refuses to score you' },
-  { name: 'Braillix',  native: '',         href: 'https://braillix.vercel.app',                 what: 'maths into braille, entirely offline' },
-];
 ---
 
 <section class="tc">
@@ -37,24 +32,16 @@ const LIVE = [
 
       <p class="tc__quote">“Everything I do gotta be iconic cause I&rsquo;m me.”</p>
 
-      <div class="tc__live">
-        <p class="label tc__live-label">Running right now — click any of them</p>
-        <ul class="tc__list">
-          {LIVE.map((p) => (
-            <li>
-              <a class="tc__item" href={p.href} target="_blank" rel="noopener noreferrer">
-                <span class="tc__item-name display display--small">
-                  {p.name}{p.native && <span class="deva tc__item-native">{p.native}</span>}
-                </span>
-                <span class="tc__item-what">{p.what}</span>
-                <svg class="tc__arrow" width="13" height="13" viewBox="0 0 13 13" aria-hidden="true">
-                  <path d="M3 10 L10 3 M5 3 h5 v5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square"/>
-                </svg>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <dl class="tc__stats">
+        <div><dt class="label">Built</dt><dd class="tc__n display display--small tabular">9</dd></div>
+        <div><dt class="label">Running right now</dt><dd class="tc__n tc__n--live display display--small tabular">7</dd></div>
+        <div><dt class="label">Free from</dt><dd class="tc__n display display--small">Jan 2027</dd></div>
+      </dl>
+
+      <a class="tc__see" href="#work">
+        See the work
+        <svg width="13" height="13" viewBox="0 0 13 13" aria-hidden="true"><path d="M6.5 2 v9 M2.5 7 l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square"/></svg>
+      </a>
 
       <nav class="tc__links" aria-label="Contact">
         <a class="link" href="https://github.com/SHV27" target="_blank" rel="noopener noreferrer">GitHub</a>
@@ -66,9 +53,9 @@ const LIVE = [
     <div class="tc__portrait">
       <Image
         src={hero}
-        alt="Shaurya Verma in sunglasses on a riverside walkway, one hand pushed back through his hair, photographed in high-contrast black and white against a blown-out sky."
-        widths={[420, 640, 900]}
-        sizes="(max-width: 900px) 78vw, 440px"
+        alt="Shaurya Verma standing in a light blue shirt in front of a wall covered in printed photographs and quote cards, smiling at the camera."
+        widths={[400, 640, 864]}
+        sizes="(max-width: 900px) 74vw, 400px"
         loading="eager"
         fetchpriority="high"
         decoding="sync"
@@ -126,31 +113,33 @@ const LIVE = [
     padding-left: var(--s-4);
   }
 
-  .tc__live { margin-top: var(--s-12); }
-  .tc__live-label { color: var(--verify); }
-  .tc__list { list-style: none; padding: 0; margin: var(--s-4) 0 0; }
-
-  .tc__item {
-    display: flex; align-items: baseline; gap: var(--s-3);
-    padding: var(--s-4) 0;
+  .tc__stats {
+    margin-top: var(--s-12);
+    display: flex; flex-wrap: wrap; gap: clamp(var(--s-8), 5vw, var(--s-16));
+    padding-top: var(--s-6);
     border-top: var(--hair) solid var(--ridge);
-    text-decoration: none;
-    transition: border-color var(--d-base) var(--ease);
   }
-  .tc__list li:last-child .tc__item { border-bottom: var(--hair) solid var(--ridge); }
-  .tc__item:hover { border-color: var(--gold-deep); }
-  .tc__item-name { font-size: 1.22rem; color: var(--star); flex: none; }
-  .tc__item-native { font-size: 0.7em; color: var(--gold); margin-left: 0.35em; }
-  .tc__item-what { font-size: var(--t-small); color: var(--dust); flex: 1; }
-  .tc__arrow { color: var(--gold); flex: none; transition: transform var(--d-base) var(--ease); }
-  .tc__item:hover .tc__arrow { transform: translate(2px, -2px); }
+  .tc__stats dt { margin-bottom: var(--s-2); }
+  .tc__stats dd { margin: 0; }
+  .tc__n { font-size: clamp(1.6rem, 3.4vw, 2.3rem); color: var(--star); line-height: 1; }
+  .tc__n--live { color: var(--verify); }
+
+  .tc__see {
+    margin-top: var(--s-8);
+    display: inline-flex; align-items: center; gap: var(--s-2);
+    font-size: var(--t-small); color: var(--gold); text-decoration: none;
+    border-bottom: 1px solid color-mix(in oklab, var(--gold) 38%, transparent);
+    padding-bottom: 2px;
+  }
+  .tc__see svg { transition: transform var(--d-base) var(--ease); }
+  .tc__see:hover svg { transform: translateY(2px); }
 
   .tc__links { margin-top: var(--s-8); display: flex; flex-wrap: wrap; gap: var(--s-6); font-size: var(--t-small); }
 
   /* Whole frame, never cropped. The container takes the photo's own 1:1 ratio. */
   .tc__portrait {
-    aspect-ratio: 1 / 1;
-    max-width: 440px; width: 100%; margin-left: auto;
+    aspect-ratio: 3 / 4;
+    max-width: 400px; width: 100%; margin-left: auto;
     border-radius: var(--r-lg); overflow: hidden;
     outline: var(--hair) solid var(--ridge); outline-offset: -1px;
     box-shadow: var(--lift-2);

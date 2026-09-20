@@ -1,61 +1,37 @@
 ---
 /**
- * THE SCROLL.
+ * HOME — short on purpose.
  *
- * Project order is HIS, from the brief, and every one gets equal space:
- *   01 Sifarish · 02 Aaina · 03 Braillix · 04 Data & Signal · 05 the slot
- *   06 Sehat Saarthi · 07 Gloaming
- * Writings sits high — Anthropic's careers page says to put independent
- * research at the top. No separate résumé section: the page IS the résumé.
+ * Hero → anthem → the claim → a nebula → the seven builds → two things you can
+ * play with → who I am → contact. Everything dense lives on its own page:
+ * /projects/<slug>, /projects/data-signal, /how-i-work.
  *
- * Section rhythm per docs/ART-DIRECTION.md: dense reading → full-bleed plate →
- * dense reading → interactive → … Never two full-bleed moments back to back.
+ * Rhythm rule from docs/ART-DIRECTION.md: reading → full-bleed → reading →
+ * interactive → reading. Never two full-bleed moments in a row.
  */
 import Base from '../layouts/Base.astro';
 import TitleCard from '../sections/TitleCard.astro';
+import Anthem from '../sections/Anthem.astro';
 import Thesis from '../sections/Thesis.astro';
 import StarBirth from '../sections/StarBirth.astro';
-import ProjectCase from '../sections/ProjectCase.astro';
-import Analytics from '../sections/Analytics.astro';
-import Uruthi from '../sections/Uruthi.astro';
-import Writings from '../sections/Writings.astro';
+import WorkIndex from '../sections/WorkIndex.astro';
 import Human from '../sections/Human.astro';
 import Closing from '../sections/Closing.astro';
-import Plate from '../components/Plate.astro';
-import DossierToggle from '../components/DossierToggle.astro';
-import BlackHole from '../components/BlackHole.astro';
-
-import { SIFARISH, AAINA, BRAILLIX } from '../content/projects';
-import { SEHAT, GLOAMING } from '../content/projects-more';
-import { SHOTS } from '../content/shots';
+import Aside from '../components/Aside.astro';
 
 import srkIconic from '../assets/aura/01-srk-iconic.jpg';
 import starkVillains from '../assets/aura/02-stark-villains.jpg';
-import lockIn from '../assets/aura/10-built-in-silence.jpg';
-import fuckNormal from '../assets/aura/05-fuck-normal-magic.jpg';
-import bridgeColour from '../assets/photos/01-bridge-colour.jpg';
-
+import bridgeBw from '../assets/photos/02-bridge-bw.jpg';
 import rho from '../assets/space/rho-ophiuchi.jpg';
 import pillars from '../assets/space/pillars.jpg';
-import westerlund from '../assets/space/westerlund2.jpg';
-import horsehead from '../assets/space/horsehead.jpg';
 ---
 <Base
   title="Shaurya Verma — I build AI systems that can't lie"
-  description="Agentic-AI engineer, final year at Thapar. Three systems running in production: a résumé compiler that cannot cite what it cannot prove, an assessment that refuses to score you, and maths-to-braille that runs entirely offline. Every number on this page opens to the code behind it. Open for internship from January 2027."
+  description="Agentic-AI engineer, final year at Thapar. Five systems running in production, and every number on this site opens to the code behind it. Open for internship from January 2027."
 >
   <TitleCard />
 
-  <section class="section">
-    <div class="wrap">
-      <Plate
-        src={srkIconic}
-        alt="Shah Rukh Khan in a tuxedo on a red carpet, overlaid with the words: Everything I do gotta be iconic cause I'm me."
-        caption="This one is printed and stuck on my wall. It has been there a while."
-        size="intimate"
-      />
-    </div>
-  </section>
+  <Anthem />
 
   <Thesis />
 
@@ -64,107 +40,89 @@ import horsehead from '../assets/space/horsehead.jpg';
     credit="Rho Ophiuchi cloud complex · NASA, ESA, CSA, STScI, K. Pontoppidan (STScI), A. Pagan (STScI) · CC BY 4.0"
     kicker="Rho Ophiuchi — 390 light years away"
     line="The closest place to Earth where stars are being born."
-    sub="Those red streaks are jets, fired by stars that switched on within the last few hundred thousand years. Nothing here is an illustration — it is a photograph, taken by Webb, of the thing actually happening. Which is roughly the standard I hold the rest of this page to."
+    sub="Those red streaks are jets, fired by stars that switched on within the last few hundred thousand years. It is a photograph, not an illustration — which is roughly the standard I hold the rest of this site to."
     focus="52% 42%"
     height="tall"
   />
 
-  <section class="section" id="what-runs">
+  <WorkIndex />
+
+  <section class="section">
     <div class="wrap">
-      <p class="label" style="color:var(--gold)">Seven builds</p>
-      <h2 class="display display--mid" style="font-size:var(--t-title);margin-top:var(--s-6);max-width:18ch">
-        Nobody asked me to make any of these.
-      </h2>
-      <p class="prose" style="margin-top:var(--s-8)">
-        Three of them are running right now at URLs you can open. Not prototypes, not notebooks, not a demo
-        video — live software a stranger can use, built alongside a full degree. Every one started the same way:
-        I saw something broken and couldn't leave it alone.
-      </p>
-
-      <Plate
-        src={starkVillains}
+      <Aside src={starkVillains} side="right"
         alt="Robert Downey Jr. sitting on a film set holding a phone, overlaid with the words: I'm just like him, I create my own villains (problems) then kill (solve) them."
-        caption="An uncomfortably accurate description of how I pick what to work on."
-        size="intimate"
-      />
-
-      <DossierToggle />
+        caption="An uncomfortably accurate description of how I pick what to work on.">
+        <p class="label hiw__k">Before you go further</p>
+        <h2 class="hiw__t display">The speed isn't mine. The judgement is.</h2>
+        <p class="hiw__p">
+          I build with Claude Code and I am not going to be coy about it — everyone reading this has the same
+          model. What separates the results is everything around it: a constitution written before the first
+          file, an append-only log of every decision and why, and agents I point at my own work specifically to
+          break it. That is a chapter of its own, and it comes with the files, so you can check rather than
+          believe me.
+        </p>
+        <a class="hiw__cta" href="/how-i-work">
+          Read how I actually work
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 11 L11 3 M5 3 h6 v6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg>
+        </a>
+      </Aside>
     </div>
   </section>
-
-  <ProjectCase project={SIFARISH} index="Project 01" shots={SHOTS} />
-
-  <BlackHole />
-
-  <ProjectCase project={AAINA} index="Project 02" shots={SHOTS} />
 
   <StarBirth
     plate={pillars}
     credit="The Pillars of Creation, Eagle Nebula · NASA, ESA and the Hubble Heritage Team (STScI/AURA) · CC BY 4.0"
     kicker="The Pillars of Creation"
     line="Columns of gas, light-years tall, collapsing into new stars."
-    sub="Hubble, 2015. The pillars are being eroded by the very stars they are giving birth to — the kind of detail you only find by staring at one thing for a very long time."
+    sub="Hubble, 2015. The pillars are being eroded by the very stars they are giving birth to."
     focus="50% 38%"
     height="mid"
   />
 
-  <ProjectCase project={BRAILLIX} index="Project 03" shots={SHOTS}>
-    <Plate
-      src={lockIn}
-      alt="Iron Man standing in a workshop, captioned: Lock in — build yourself."
-      caption="Braillix was fifty-one hours start to finish, including tearing the whole thing down halfway and rebuilding it. This is on my wall, and it is roughly what that felt like."
-      size="intimate"
-    />
-  </ProjectCase>
-
-  <Analytics />
-
-  <StarBirth
-    plate={westerlund}
-    credit="Westerlund 2 · NASA, ESA, the Hubble Heritage Team (STScI/AURA), A. Nota (ESA/STScI) and the Westerlund 2 Science Team · CC BY 4.0"
-    kicker="Westerlund 2"
-    line="Three thousand stars, all roughly two million years old."
-    sub="A cluster caught in the act of switching on. Hubble's twenty-fifth-anniversary image."
-    focus="50% 46%"
-    height="mid"
-  />
-
-  <Uruthi />
-
-  <ProjectCase project={SEHAT} index="Project 06" shots={SHOTS} />
-
-  <ProjectCase project={GLOAMING} index="Project 07" shots={SHOTS}>
-    <Plate
-      src={fuckNormal}
-      alt="A luminous figure dissolving into a trail of stardust, with hand-lettered text reading: Fuck normal, I want magic."
-      caption="I had a working game and I threw it away, because working is not the bar. This is also on the wall."
-      size="intimate"
-    />
-  </ProjectCase>
-
-  <Writings />
-
   <section class="section">
     <div class="wrap">
-      <Plate
-        src={bridgeColour}
-        alt="Shaurya Verma on a riverside walkway in sunglasses and a patterned shirt, one hand pushed back through his hair, bright daylight behind him."
-        size="standard"
-      />
+      <Aside src={bridgeBw} side="left"
+        alt="Shaurya Verma in sunglasses on a riverside walkway, one hand pushed back through his hair, photographed in high-contrast black and white against a blown-out sky."
+        caption="Patiala, somewhere near the water.">
+        <p class="pull display">
+          I am not asking you to take my word for a single thing on this page.
+        </p>
+        <p>
+          Every number has a link under it that opens the file it came from. That is not modesty — it is the
+          flex. Anyone can write a portfolio. Very few can hand you the receipts and invite you to go looking
+          for the hole.
+        </p>
+      </Aside>
     </div>
   </section>
-
-  <StarBirth
-    plate={horsehead}
-    credit="The Horsehead Nebula in infrared · NASA, ESA and the Hubble Heritage Team (STScI/AURA) · CC BY 4.0"
-    kicker="The Horsehead, in infrared"
-    line="Look at it in a different band of light and it stops being a shadow."
-    sub="In visible light the Horsehead is a dark silhouette. In infrared it turns out to be a structure, lit from within. Same object, different instrument — which is most of what analysis is."
-    focus="50% 44%"
-    height="mid"
-  />
 
   <Human />
 
   <Closing />
 </Base>
+
+<style>
+  .hiw__k { color: var(--gold); }
+  .hiw__t { font-size: var(--t-head); margin-top: var(--s-4); }
+  .hiw__p { margin-top: var(--s-6); color: var(--star-dim); }
+  .pull {
+    font-size: clamp(1.4rem, 2.8vw, 2.1rem);
+    line-height: 1.18;
+    color: var(--star);
+    text-wrap: balance;
+    margin-bottom: var(--s-6);
+  }
+  .hiw__cta {
+    margin-top: var(--s-8);
+    display: inline-flex; align-items: center; gap: var(--s-3);
+    padding: 13px 26px; min-height: 48px;
+    border: var(--hair) solid var(--gold);
+    border-radius: var(--r-full);
+    background: color-mix(in oklab, var(--gold) 7%, transparent);
+    color: var(--gold); font-size: var(--t-small); text-decoration: none;
+    transition: background var(--d-base) var(--ease);
+  }
+  .hiw__cta:hover { background: color-mix(in oklab, var(--gold) 16%, transparent); }
+  .hiw__cta svg { transition: transform var(--d-base) var(--ease); }
+  .hiw__cta:hover svg { transform: translate(2px, -2px); }
+</style>

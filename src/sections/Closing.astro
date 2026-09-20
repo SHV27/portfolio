@@ -2,61 +2,80 @@
 /**
  * THE CLOSING.
  *
+ * Rebuilt as paired spreads. It used to be five full-width figures stacked one
+ * under another with the prose sandwiched between them — 4,160px of page, most
+ * of it empty to one side of each picture. Now every photograph sits beside the
+ * paragraph it belongs to and the sides alternate, which is both far shorter
+ * and the way a printed closing chapter is actually set.
+ *
  * Order is deliberate: "I am God" lands AFTER the evidence, where it reads as a
  * punchline rather than a claim. Then the last photograph of him. Then the Om
  * Shanti Om line, which is cosmic, Indian, and about wanting something badly —
- * the right final note before an email address.
+ * the right final note after an email address.
  */
-import Plate from '../components/Plate.astro';
+import Aside from '../components/Aside.astro';
 import iAmGod from '../assets/aura/04-i-am-god.jpg';
 import birthday from '../assets/photos/05-birthday-bw.jpg';
 import universe from '../assets/aura/07-om-shanti-om-universe.jpg';
 import moneyball from '../assets/aura/11-read-now-list.jpg';
+import gym2 from '../assets/photos/10-gym-back-2.jpg';
 ---
 
 <section class="cl section" id="contact">
   <div class="wrap">
-    <Plate
-      src={moneyball}
+    <Aside src={moneyball} side="left"
       alt="Brad Pitt as Billy Beane in Moneyball, sitting in a stadium, captioned: watch me become everything i said i would."
-      caption="Moneyball — a film about throwing out the scouts' gut feel and measuring instead. I didn't pick it for that reason, but it turns out to be the entire argument of this page."
-      size="intimate"
-    />
-
-    <div class="cl__prose prose">
-      <p>
-        So — that's the work. Seven things I built because I wanted them to exist, three of them running right
-        now at URLs you can open, and every number on this page sitting one click away from the code that
-        produced it.
+      caption="Moneyball — a film about throwing out the scouts' gut feel and measuring instead.">
+      <p class="cl__lead">
+        So — that's the work. Nine things I built because I wanted them to exist, seven of them running right
+        now at URLs you can open, and every number on this site sitting one click away from the thing that
+        proves it.
       </p>
+      <p>
+        I didn't choose that poster for the measurement argument. It turns out to be the entire argument of
+        this page anyway.
+      </p>
+    </Aside>
+  </div>
+
+  <div class="wrap">
+    <Aside src={gym2} side="right"
+      alt="Shaurya Verma photographed in a bathroom mirror, his back to the glass, shoulders and back visible in the reflection."
+      caption="Same loop, different gym.">
       <p>
         <strong>I'm free from January 2027.</strong> I'm looking for a team building frontier AI systems where
         "it works" has to be provable — agents, retrieval, evals, guardrails. India, Europe, the US, or
         remote-first; wherever the most interesting agentic work is happening.
       </p>
       <p>
+        The gym is the same loop as everything else here. Put the measurement in, find out what you actually
+        did rather than what you felt like you did, change the thing. It is the only habit I have that has
+        never once lied to me.
+      </p>
+    </Aside>
+  </div>
+
+  <div class="wrap">
+    <Aside src={iAmGod} side="left"
+      alt="The words 'I am God' set in distressed blackletter type on a black ground."
+      caption="Also on the wall.">
+      <p>
         And a request, which I mean sincerely: <strong>go look at my GitHub directly rather than trusting this
-        page.</strong> Not because the page is wrong — I've been careful — but because I keep building, and by the
-        time you read this there will be something on there that isn't here yet. This portfolio is already
+        page.</strong> Not because the page is wrong — I've been careful — but because I keep building, and by
+        the time you read this there will be something on there that isn't here yet. This portfolio is already
         slightly behind me. That's the intended state.
       </p>
-    </div>
+      <p>
+        That one is at the end rather than the top on purpose. You've now seen the receipts, so you can decide
+        for yourself how seriously to take it.
+      </p>
+    </Aside>
+  </div>
 
-    <Plate
-      src={iAmGod}
-      alt="The words 'I am God' set in distressed blackletter type on a black ground."
-      caption="Also on the wall. I've put it here, at the end, rather than at the top — you've now seen the receipts, so you can decide for yourself how seriously to take it."
-      size="intimate"
-    />
-
-    <Plate
-      src={birthday}
+  <div class="wrap cl__contact">
+    <Aside src={birthday} side="right"
       alt="Shaurya Verma standing beside a staircase in an all-white outfit, arms folded, photographed in black and white, with birthday balloons softly out of focus behind him."
-      caption="Thanks for reading this far. Genuinely — most people don't."
-      size="standard"
-    />
-
-    <div class="cl__contact">
+      caption="Thanks for reading this far. Genuinely — most people don't.">
       <h2 class="cl__t display">Let's talk.</h2>
       <p class="cl__avail mono">Open for internship from January 2027</p>
 
@@ -80,14 +99,21 @@ import moneyball from '../assets/aura/11-read-now-list.jpg';
           </a>
         </li>
       </ul>
-    </div>
+    </Aside>
+  </div>
 
-    <Plate
-      src={universe}
+  <div class="wrap">
+    <Aside src={universe} side="left"
       alt="A halftone-treated poster of Shah Rukh Khan with his arms outstretched, captioned: If you really want something the whole universe helps you get it. From the film Om Shanti Om, directed by Farah Khan, 2007."
-      caption="Om Shanti Om, 2007. I've believed this for a long time, and the evidence so far is reasonably encouraging."
-      size="intimate"
-    />
+      caption="Om Shanti Om, 2007.">
+      <p class="cl__last display">
+        If you really want something, the whole universe conspires to help you get it.
+      </p>
+      <p>
+        I have believed that line for a long time, and the evidence so far is reasonably encouraging. See you
+        in January.
+      </p>
+    </Aside>
   </div>
 
   <footer class="cl__foot">
@@ -102,18 +128,22 @@ import moneyball from '../assets/aura/11-read-now-list.jpg';
 </section>
 
 <style>
-  .cl__prose { margin: clamp(var(--s-12), 8vh, var(--s-24)) auto; }
-  .cl__prose p + p { margin-top: var(--s-6); }
-  .cl__prose strong { color: var(--star); }
+  .cl__lead { color: var(--star); }
+  .cl__last {
+    font-size: clamp(1.35rem, 2.6vw, 2rem);
+    line-height: 1.2;
+    color: var(--star);
+    text-wrap: balance;
+    margin-bottom: var(--s-5);
+  }
 
-  .cl__contact { margin: clamp(var(--s-16), 10vh, var(--s-32)) auto; max-width: 62ch; }
   .cl__t { font-size: var(--t-title); }
   .cl__avail { margin-top: var(--s-4); color: var(--verify); font-size: var(--t-micro); letter-spacing: 0.08em; }
 
-  .cl__links { list-style: none; padding: 0; margin: var(--s-12) 0 0; }
+  .cl__links { list-style: none; padding: 0; margin: var(--s-8) 0 0; }
   .cl__link {
     display: flex; flex-direction: column; gap: 3px;
-    padding: var(--s-6) 0;
+    padding: var(--s-5) 0;
     border-top: var(--hair) solid var(--ridge);
     text-decoration: none;
     transition: border-color var(--d-base) var(--ease);
@@ -123,13 +153,13 @@ import moneyball from '../assets/aura/11-read-now-list.jpg';
   .cl__lk { color: var(--dust); }
   .cl__lv {
     font-family: var(--display); font-variation-settings: 'opsz' 24;
-    font-size: clamp(1.15rem, 2.4vw, 1.75rem);
+    font-size: clamp(1.05rem, 2vw, 1.5rem);
     color: var(--star);
     transition: color var(--d-base) var(--ease);
   }
   .cl__link:hover .cl__lv { color: var(--gold); }
 
-  .cl__foot { margin-top: clamp(var(--s-16), 9vh, var(--s-24)); padding-block: var(--s-8); border-top: var(--hair) solid var(--ridge); }
+  .cl__foot { margin-top: clamp(var(--s-12), 7vh, var(--s-20)); padding-block: var(--s-8); border-top: var(--hair) solid var(--ridge); }
   .cl__footin { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--s-6); }
   .cl__footin p { font-size: var(--t-micro); color: var(--dust-faint); }
   .cl__credit { max-width: 62ch; text-align: right; }

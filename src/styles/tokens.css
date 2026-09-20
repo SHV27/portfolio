@@ -23,7 +23,7 @@
   --star:        #F5F2EA;   /* primary text — 18.1:1 on --void               */
   --star-dim:    #C3BEB2;   /* secondary text — 10.0:1                       */
   --dust:        #8E897D;   /* tertiary / captions — 5.1:1, passes AA body   */
-  --dust-faint:  #6B665C;   /* decorative only — NEVER body text             */
+  --dust-faint:  #858074;   /* quietest readable tone — 5.08:1, clears AA     */
 
   /* ---- ACCENTS. Pulled from nebula emission, not from a UI kit. ---------- */
   --gold:        #E6A94E;   /* primary accent — sodium light  10.3:1         */
@@ -56,6 +56,7 @@
   /* ---- SPACE. By relationship, not one stamped gap. ---------------------- */
   --s-1: 0.25rem;  --s-2: 0.5rem;   --s-3: 0.75rem;  --s-4: 1rem;
   --s-6: 1.5rem;   --s-8: 2rem;     --s-12: 3rem;    --s-16: 4rem;
+  --s-5: 1.25rem;  --s-10: 2.5rem;  --s-20: 5rem;
   --s-24: 6rem;    --s-32: 8rem;    --s-48: 12rem;
 
   --gutter: clamp(1.25rem, 5vw, 5rem);

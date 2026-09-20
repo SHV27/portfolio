@@ -14,9 +14,11 @@ import Claim from '../components/Claim.astro';
 import Figure from '../components/Figure.astro';
 import type { Project } from '../content/types';
 import { repoUrl } from '../content/types';
+import { STORIES } from '../content/stories';
 
 interface Props { project: Project; index: string; shots: Record<string, any>; }
 const { project: p, index, shots } = Astro.props;
+const story = STORIES[p.id];
 ---
 
 <article class="pc section" id={p.id} data-accent={p.accent ?? 'gold'}>
@@ -28,14 +30,18 @@ const { project: p, index, shots } = Astro.props;
         {p.name}{p.native && <span class="pc__native deva">{p.native}</span>}
       </h2>
       {p.tagline && <p class="pc__tag">{p.tagline}</p>}
-      <p class="pc__hook">{p.hook}</p>
+      <p class="pc__hook">{p.dek ?? p.hook}</p>
 
       <div class="pc__meta">
         <span class="mono pc__year">{p.year}</span>
-        <a class="pc__btn" href={repoUrl(p.repo)} target="_blank" rel="noopener noreferrer">
-          Read the code
-          <svg width="11" height="11" viewBox="0 0 11 11" aria-hidden="true"><path d="M2.5 8.5 L8.5 2.5 M4 2.5 h4.5 v4.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="square"/></svg>
-        </a>
+        {!['uruthi','jarvis','reckoner'].includes(p.repo) ? (
+          <a class="pc__btn" href={repoUrl(p.repo)} target="_blank" rel="noopener noreferrer">
+            Read the code
+            <svg width="11" height="11" viewBox="0 0 11 11" aria-hidden="true"><path d="M2.5 8.5 L8.5 2.5 M4 2.5 h4.5 v4.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="square"/></svg>
+          </a>
+        ) : (
+          <span class="pc__btn pc__btn--muted">Source is private</span>
+        )}
         {p.live && (
           <a class="pc__btn pc__btn--live" href={p.live} target="_blank" rel="noopener noreferrer">
             Open it — it's running
@@ -45,23 +51,36 @@ const { project: p, index, shots } = Astro.props;
       </div>
     </header>
 
-    {p.shots[0] && shots[p.shots[0].file] && (
-      <figure class="pc__hero reveal">
-        <div class="pc__heroframe">
-          <Image src={shots[p.shots[0].file]} alt={p.shots[0].alt} widths={[640, 980, 1320]} sizes="(max-width:900px) 92vw, 1100px" loading="lazy" decoding="async" format="avif" />
-        </div>
-        <figcaption class="pc__cap">{p.shots[0].caption}</figcaption>
-      </figure>
+    {p.shots[0] && shots[p.shots[0].file] && (() => {
+      const m = shots[p.shots[0].file];
+      const ar = m.width / m.height;
+      const long = ar < 0.95;
+      return (
+        <figure class:list={['pc__hero', 'reveal', long && 'pc__fig--long']}>
+          <div class="pc__heroframe" style={`--ar:${ar.toFixed(4)}`} tabindex={long ? 0 : undefined}>
+            <Image src={m} alt={p.shots[0].alt} widths={[640, 980, 1320]} sizes="(max-width:900px) 92vw, 900px" loading="lazy" decoding="async" format="avif" />
+          </div>
+          <figcaption class="pc__cap">
+            {p.shots[0].caption}
+            {long && <span class="pc__scrollhint mono"> Scroll inside the frame for the rest of the page.</span>}
+          </figcaption>
+        </figure>
+      );
+    })()}
+
+    {story && (
+      <section class="pc__block pc__story reveal">
+        {story.map((para) => <p class="pc__storyp" set:html={para} />)}
+      </section>
     )}
 
     <section class="pc__block reveal">
-      <h3 class="pc__h3">Why it's hard</h3>
+      <h3 class="pc__h3">Why it was hard</h3>
       <p class="pc__prose">{p.hardProblem}</p>
     </section>
 
     <section class="pc__block reveal">
       <h3 class="pc__h3">How it actually works</h3>
-      <p class="pc__sub">Every line below opens to the code that proves it.</p>
       <ul class="pc__mech">
         {p.mechanism.map((c) => <Claim claim={c} />)}
       </ul>
@@ -69,14 +88,23 @@ const { project: p, index, shots } = Astro.props;
 
     {p.shots.length > 1 && (
       <div class="pc__shots">
-        {p.shots.slice(1).map((s) => shots[s.file] && (
-          <figure class="pc__shot reveal">
-            <div class="pc__shotframe">
-              <Image src={shots[s.file]} alt={s.alt} widths={[520, 820]} sizes="(max-width:900px) 92vw, 760px" loading="lazy" decoding="async" format="avif" />
-            </div>
-            <figcaption class="pc__cap">{s.caption}</figcaption>
-          </figure>
-        ))}
+        {p.shots.slice(1).map((s) => {
+          const m = shots[s.file];
+          if (!m) return null;
+          const ar = m.width / m.height;
+          const long = ar < 0.95;
+          return (
+            <figure class:list={['pc__shot', 'reveal', long && 'pc__fig--long']}>
+              <div class="pc__shotframe" style={`--ar:${ar.toFixed(4)}`} tabindex={long ? 0 : undefined}>
+                <Image src={m} alt={s.alt} widths={[520, 820]} sizes="(max-width:900px) 92vw, 720px" loading="lazy" decoding="async" format="avif" />
+              </div>
+              <figcaption class="pc__cap">
+                {s.caption}
+                {long && <span class="pc__scrollhint mono"> Scroll inside the frame.</span>}
+              </figcaption>
+            </figure>
+          );
+        })}
       </div>
     )}
 
@@ -104,7 +132,6 @@ const { project: p, index, shots } = Astro.props;
     {p.limits && p.limits.length > 0 && (
       <section class="pc__block reveal">
         <h3 class="pc__h3">What it can't do</h3>
-        <p class="pc__sub">Taken from the repository's own documentation, not softened.</p>
         <ul class="pc__limits">
           {p.limits.map((l) => <li>{l}</li>)}
         </ul>
@@ -147,19 +174,88 @@ const { project: p, index, shots } = Astro.props;
   }
   .pc__btn:hover { border-color: var(--pc); color: var(--pc); }
   .pc__btn--live { border-color: var(--pc); color: var(--pc); background: color-mix(in oklab, var(--gold) 8%, transparent); }
+  .pc__btn--muted { color: var(--dust); cursor: default; }
+  .pc__btn--muted:hover { border-color: var(--ridge); color: var(--dust); }
   .pc__btn--live:hover { background: color-mix(in oklab, var(--gold) 16%, transparent); }
 
-  .pc__hero { margin: var(--s-16) 0 0; }
+  .pc__hero { margin: var(--s-12) 0 0; }
   .pc__heroframe, .pc__shotframe {
     border-radius: var(--r-lg); overflow: hidden;
     outline: var(--hair) solid var(--ridge); outline-offset: -1px;
     box-shadow: var(--lift-2);
     background: var(--deep);
+    /* Height budget, width derived — so a portrait capture gets narrow rather
+       than three screens tall. Nothing is cropped at any point. */
+    max-width: min(100%, calc(var(--hcap) * var(--ar)));
   }
-  .pc__heroframe :global(img), .pc__shotframe :global(img) { width: 100%; height: auto; }
-  .pc__cap { margin-top: var(--s-4); font-size: var(--t-small); color: var(--dust); max-width: 62ch; line-height: 1.55; }
+  .pc__heroframe { --hcap: 620px; }
+  .pc__shotframe { --hcap: 560px; }
+  .pc__heroframe :global(img), .pc__shotframe :global(img) { width: 100%; height: auto; display: block; }
 
-  .pc__block { margin-top: clamp(var(--s-16), 9vh, var(--s-24)); }
+  /* A long capture of a scrolling page: a window you scroll inside, at full
+     resolution, instead of a three-thousand-pixel strip nobody can read. */
+  .pc__fig--long .pc__heroframe,
+  .pc__fig--long .pc__shotframe {
+    max-width: min(100%, 880px);
+    height: 600px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--ridge) transparent;
+  }
+  .pc__fig--long .pc__shotframe { max-width: min(100%, 760px); height: 540px; }
+  .pc__fig--long .pc__heroframe:focus-visible,
+  .pc__fig--long .pc__shotframe:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+  .pc__cap { margin-top: var(--s-4); font-size: var(--t-small); color: var(--dust); max-width: 62ch; line-height: 1.55; }
+  .pc__scrollhint { color: var(--dust-faint); font-size: var(--t-micro); }
+
+  /* Each block is a spread: the heading sits in a rail on the left and stays
+     with you while its section scrolls past, and the content runs at a proper
+     reading measure beside it. Before this the prose was a narrow column on the
+     left of a 1,296px page with nine hundred pixels of nothing to the right of
+     it — correct typographically, and it looked like a draft. */
+  .pc__block { margin-top: clamp(var(--s-12), 6vh, var(--s-20)); }
+
+  @media (min-width: 1080px) {
+    .pc__block {
+      display: grid;
+      grid-template-columns: 15rem minmax(0, 72ch);
+      gap: clamp(var(--s-8), 4vw, var(--s-16));
+      align-items: start;
+    }
+    .pc__block > .pc__h3 {
+      grid-column: 1;
+      position: sticky;
+      top: var(--s-12);
+      margin: 0;
+      text-align: right;
+      text-wrap: balance;
+    }
+    .pc__block > :not(.pc__h3) { grid-column: 2; }
+    /* The quoted block keeps its rule on the left, so it cannot join the grid. */
+    .pc__restraint { display: block; }
+    .pc__restraint > .pc__h3 { position: static; text-align: left; }
+  }
+
+  /* The story runs a size larger than body copy — it is the part that has to be
+     read, so it should look like the part that has to be read. */
+  .pc__story { max-width: 70ch; }
+  @media (min-width: 1080px) { .pc__story { display: block; margin-left: calc(15rem + clamp(var(--s-8), 4vw, var(--s-16))); } }
+  .pc__storyp {
+    font-size: clamp(1.05rem, 1.35vw, 1.22rem);
+    line-height: 1.62;
+    color: var(--star-dim);
+  }
+  .pc__storyp + .pc__storyp { margin-top: var(--s-6); }
+  .pc__storyp :global(em) { color: var(--gold); font-style: italic; font-family: var(--display); }
+  .pc__story .pc__storyp:first-child::first-letter {
+    font-family: var(--display);
+    font-variation-settings: 'opsz' 72;
+    font-size: 3.1em; line-height: 0.82;
+    float: left; margin: 0.06em 0.09em 0 0;
+    color: var(--gold);
+  }
   .pc__h3 {
     font-family: var(--display); font-variation-settings: 'opsz' 28;
     font-size: var(--t-head); font-weight: 500; color: var(--star);
@@ -169,8 +265,8 @@ const { project: p, index, shots } = Astro.props;
   .pc__prose { margin-top: var(--s-6); max-width: var(--measure); color: var(--star-dim); }
   .pc__mech { list-style: none; padding: 0; margin: var(--s-8) 0 0; }
 
-  .pc__shots { margin-top: var(--s-16); display: flex; flex-direction: column; gap: clamp(var(--s-12), 7vh, var(--s-24)); }
-  .pc__shot { margin: 0; max-width: 820px; }
+  .pc__shots { margin-top: var(--s-12); display: flex; flex-direction: column; gap: clamp(var(--s-8), 5vh, var(--s-16)); }
+  .pc__shot { margin: 0; max-width: 880px; }
   .pc__shot:nth-child(even) { margin-left: auto; }
 
   .pc__figs {
