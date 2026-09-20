@@ -106,12 +106,34 @@ const {
   }
 
   @media (max-width: 640px) {
+    /* THE BUG THIS FIXES, because it shipped and it was bad:
+       .sb is a flex ROW. Taking .sb__credit out of position:absolute below made
+       it a second flex item in that row, so the headline and the credit line sat
+       SIDE BY SIDE and split the width between them. Measured at 390px: the text
+       column came out 162px wide — thirteen characters a line — on the signature
+       full-bleed element, on every one of the eleven pages, on the device a
+       recruiter opens from LinkedIn. The break was exactly at 641px/640px.
+       Stacking the column is the whole fix. */
+    .sb {
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: center;
+    }
     .sb--full, .sb--tall { min-height: 62svh; }
+    .sb__inner { width: 100%; }
     .sb__scrim {
       background:
         linear-gradient(to bottom, rgb(8 8 11 / 0.9) 0%, rgb(8 8 11 / 0.55) 45%, rgb(8 8 11 / 0.95) 100%);
     }
-    .sb__credit { position: static; display: block; margin: var(--s-6) var(--gutter) 0; text-align: left; max-width: none; }
+    .sb__credit {
+      position: static;
+      display: block;
+      width: 100%;
+      margin: var(--s-6) 0 0;
+      padding-inline: var(--gutter);
+      text-align: left;
+      max-width: none;
+    }
   }
 </style>
 

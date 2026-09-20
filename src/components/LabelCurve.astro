@@ -33,7 +33,10 @@ const f1Path  = PTS.map((p, i) => `${i ? 'L' : 'M'}${X(p.pct).toFixed(1)},${Y(p.
   </figcaption>
 
   <div class="lc__wrap">
-    <svg class="lc__svg" viewBox="0 0 760 340" role="img" aria-label="A chart of accuracy and macro-F1 against the fraction of labels used: 53.1% at 1%, 75.3% at 5%, 78.1% at 10%, and 87.3% at 100%.">
+    <!-- role="group", not role="img". An image subtree is presentational and must
+       not contain focusable children, and there are four buttons inside this
+       one — axe-core rates that a serious nested-interactive fault. -->
+    <svg class="lc__svg" viewBox="0 0 760 340" role="group" aria-label="A chart of accuracy and macro-F1 against the fraction of labels used: 53.1% at 1%, 75.3% at 5%, 78.1% at 10%, and 87.3% at 100%.">
       <!-- gridlines -->
       {[50, 60, 70, 80, 90].map((v) => (
         <g>
@@ -122,7 +125,9 @@ const f1Path  = PTS.map((p, i) => `${i ? 'L' : 'M'}${X(p.pct).toFixed(1)},${Y(p.
   .lc__dot--acc { fill: var(--gold); stroke: var(--void); stroke-width: 2; }
   .lc__dot--f1 { fill: var(--ember); }
   .lc__hit { fill: transparent; cursor: pointer; }
-  .lc__pt { outline: none; }
+  /* A focusable control has to show focus. This used to be outline:none with
+     only a stroke change on the SVG dot, which is not a visible indicator. */
+  .lc__pt:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 4px; }
   .lc__pt.is-on .lc__dot--acc { r: 8; }
   .lc__pt:focus-visible .lc__dot--acc { stroke: var(--star); }
 

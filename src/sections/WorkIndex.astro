@@ -14,7 +14,11 @@ import { Image } from 'astro:assets';
 import { ORDER } from '../content/all';
 import { SHOTS } from '../content/shots';
 import analyticsShot from '../assets/shots/astro/frbprint.png';
-import jarvisPlate from '../assets/shots/jarvis/hud.png';
+// The square original was the only thumbnail in the index that did not fill its
+// slot — 400x416 art inside a 16:10 frame, so it sat between two dead bars while
+// its eight siblings ran edge to edge. This version puts the same ring, uncropped,
+// on the page's own black with a soft bloom of itself behind it.
+import jarvisPlate from '../assets/shots/jarvis/hud-card.png';
 
 /* JARVIS is a private Windows desktop assistant. There is no public build and
    no screenshot of it anywhere, so the row was rendering with an empty media

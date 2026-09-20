@@ -9,6 +9,10 @@ import ogImage from '../assets/photos/01-bridge-colour.jpg';
 interface Props { title: string; description: string; }
 const { title, description } = Astro.props;
 const og = new URL(ogImage.src, Astro.site).href;
+/* Per page. This was `Astro.site` — the bare root — on all eleven pages, which
+   told Google the homepage was the canonical version of every project page and
+   made every shared project link preview as the site root. */
+const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
 ---
 <!doctype html>
 <html lang="en">
@@ -17,7 +21,7 @@ const og = new URL(ogImage.src, Astro.site).href;
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{title}</title>
   <meta name="description" content={description} />
-  <link rel="canonical" href={Astro.site} />
+  <link rel="canonical" href={pageUrl} />
 
   <!-- The two faces in the LCP element, preloaded. Latin only: preload ignores
        unicode-range, so preloading a Devanagari subset would be wasted bytes. -->
@@ -28,7 +32,7 @@ const og = new URL(ogImage.src, Astro.site).href;
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
   <meta property="og:image" content={og} />
-  <meta property="og:url" content={Astro.site} />
+  <meta property="og:url" content={pageUrl} />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:image" content={og} />
   <meta name="theme-color" content="#08080B" />
@@ -114,7 +118,11 @@ const og = new URL(ogImage.src, Astro.site).href;
        anthem chapter does not, so binding per element would either miss the new
        button or double-bind the old one. */
     const VOL = 0.7;
-    const KEY = 'sv-anthem';
+    /* There was a localStorage key here recording whether the anthem had been
+       played. Nothing ever read it back, and nothing could usefully: a stored
+       "on" must never autoplay, because browsers refuse it and WCAG 2.1.4.2
+       makes it a whole-page failure. Now that the element survives navigation,
+       there is nothing left for it to remember. */
     const el = () => document.querySelector<HTMLAudioElement>('#anthem');
 
     const setUI = (on: boolean) => {
@@ -146,7 +154,6 @@ const og = new URL(ogImage.src, Astro.site).href;
           audio.volume = 0;
           await audio.play();                 // inside the gesture: always allowed
           setUI(true);
-          try { localStorage.setItem(KEY, '1'); } catch {}
           rampTo(audio, VOL);                 // fade in, never cut in
         } catch {
           setUI(false);
@@ -155,7 +162,6 @@ const og = new URL(ogImage.src, Astro.site).href;
         clearInterval(fade);
         audio.pause();
         setUI(false);
-        try { localStorage.setItem(KEY, '0'); } catch {}
       }
     };
 

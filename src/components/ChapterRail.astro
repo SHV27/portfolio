@@ -112,27 +112,39 @@ const CHAPTERS = [
   let ac: AbortController | null = null;
 
   const init = () => {
-  ac?.abort();
-  ac = new AbortController();
-  const signal = ac.signal;
-  const rail = document.querySelector('[data-rail]');
-  const fill = document.querySelector<HTMLElement>('[data-rail-fill]');
-  const mfill = document.querySelector<HTMLElement>('[data-rail-mfill]');
-  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-rail-link]'));
-  const targets = links
-    .map((a) => ({ a, el: document.getElementById(a.dataset.railLink!) }))
-    .filter((t): t is { a: HTMLAnchorElement; el: HTMLElement } => !!t.el);
+    ac?.abort();
+    ac = new AbortController();
+    const signal = ac.signal;
+    const rail = document.querySelector<HTMLElement>('[data-rail]');
+    const fill = document.querySelector<HTMLElement>('[data-rail-fill]');
+    const mfill = document.querySelector<HTMLElement>('[data-rail-mfill]');
+    const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-rail-link]'));
+    const targets = links
+      .map((a) => ({ a, el: document.getElementById(a.dataset.railLink!) }))
+      .filter((t): t is { a: HTMLAnchorElement; el: HTMLElement } => !!t.el);
 
-  if (targets.length) {
+    /* The chapters are home-page sections. On every other page there is nothing
+       for them to point at, and the old code simply did nothing — which left the
+       rail at opacity:0 with five links STILL IN THE TAB ORDER. Five invisible,
+       position:fixed stops that cannot be scrolled into view and do nothing when
+       activated: a WCAG 2.4.7 failure on ten of eleven pages. `hidden` takes the
+       whole nav out of the document properly. */
+    if (rail) rail.hidden = targets.length === 0;
+
     let ticking = false;
 
-    const update = () => {
+    /* Reading progress runs on EVERY page. It used to sit inside the
+       `if (targets.length)` guard, so the phone's progress bar was dead on all
+       ten sub-pages — including an 11,818px project page, which is exactly where
+       a reader most wants to know how much is left. */
+    const progress = () => {
       ticking = false;
-      const y = window.scrollY;
       const max = document.documentElement.scrollHeight - window.innerHeight;
-      const pct = max > 0 ? Math.min(100, (y / max) * 100) : 0;
+      const pct = max > 0 ? Math.min(100, (window.scrollY / max) * 100) : 0;
       if (fill) fill.style.height = pct + '%';
       if (mfill) mfill.style.width = pct + '%';
+
+      if (!targets.length) return;
 
       // current chapter = the last one whose top is above the middle of the screen
       const mid = window.innerHeight * 0.45;
@@ -145,22 +157,16 @@ const CHAPTERS = [
         if (i === current) t.a.setAttribute('aria-current', 'true');
         else t.a.removeAttribute('aria-current');
       });
+
+      // The rail is noise until you have actually started reading.
+      rail?.classList.toggle('is-visible', window.scrollY > window.innerHeight * 0.6);
     };
 
     window.addEventListener('scroll', () => {
-      if (!ticking) { ticking = true; requestAnimationFrame(update); }
+      if (!ticking) { ticking = true; requestAnimationFrame(progress); }
     }, { passive: true, signal });
-    window.addEventListener('resize', update, { passive: true, signal });
-    update();
-
-    // The rail is noise until you have actually started reading.
-    const show = () => {
-      if (!rail) return;
-      rail.classList.toggle('is-visible', window.scrollY > window.innerHeight * 0.6);
-    };
-    window.addEventListener('scroll', show, { passive: true, signal });
-    show();
-  }
+    window.addEventListener('resize', progress, { passive: true, signal });
+    progress();
   };
 
   document.addEventListener('astro:page-load', init);
