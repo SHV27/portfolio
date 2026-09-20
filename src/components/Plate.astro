@@ -1,0 +1,108 @@
+---
+/**
+ * PLATE — one image, alone, whole.
+ *
+ * This component takes exactly ONE image. It has no grid mode, no gallery prop,
+ * no array. That is deliberate: his instruction was "koi collage ya kuch mat
+ * banana, saari pics alag alag se hi use karna, full pics", twice, for both
+ * batches. A collage is therefore not expressible in this codebase — the rule is
+ * enforced by the type signature rather than by remembering it.
+ *
+ * The frame takes the image's own aspect ratio, so nothing is ever cropped and
+ * the "face cut off" failure he warned about cannot occur.
+ */
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  caption?: string;
+  /** Credit line, where a licence requires one. */
+  credit?: string;
+  /** How much of the viewport width the plate occupies. */
+  size?: 'intimate' | 'standard' | 'wide';
+  /** Priority images (above the fold) are eagerly loaded and never lazy. */
+  priority?: boolean;
+  align?: 'left' | 'center';
+}
+
+const {
+  src, alt, caption, credit,
+  size = 'standard',
+  priority = false,
+  align = 'center',
+} = Astro.props;
+
+// Never upscale: the largest source here is 1440px wide.
+const maxW = Math.min(src.width, size === 'intimate' ? 560 : size === 'wide' ? 1180 : 860);
+---
+
+<figure class:list={['plate', `plate--${size}`, `plate--${align}`, 'reveal']}>
+  <div class="plate__frame" style={`aspect-ratio:${src.width}/${src.height};max-width:${maxW}px`}>
+    <Image
+      src={src}
+      alt={alt}
+      widths={[360, 560, 860, 1180].filter((w) => w <= src.width)}
+      sizes={`(max-width: 640px) 92vw, ${maxW}px`}
+      loading={priority ? 'eager' : 'lazy'}
+      fetchpriority={priority ? 'high' : 'auto'}
+      decoding={priority ? 'sync' : 'async'}
+      format="avif"
+    />
+  </div>
+  {(caption || credit) && (
+    <figcaption class="plate__cap">
+      {caption && <span class="plate__caption">{caption}</span>}
+      {credit && <span class="plate__credit mono">{credit}</span>}
+    </figcaption>
+  )}
+</figure>
+
+<style>
+  .plate { margin-block: clamp(var(--s-12), 8vh, var(--s-24)); }
+  .plate--center { display: flex; flex-direction: column; align-items: center; }
+  .plate--center .plate__cap { text-align: center; }
+
+  .plate__frame {
+    width: 100%;
+    position: relative;
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    /* A contact shadow plus an ambient one — elevation, not decoration. */
+    box-shadow: var(--lift-2);
+    /* A hairline keeps a dark photograph from dissolving into a dark page. */
+    outline: var(--hair) solid var(--ridge);
+    outline-offset: -1px;
+    background: var(--deep);
+  }
+
+  /* object-fit: contain is the point — the whole frame, always, never a crop. */
+  .plate__frame :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .plate__cap {
+    margin-top: var(--s-4);
+    max-width: 62ch;
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-2);
+  }
+  .plate__caption {
+    font-size: var(--t-small);
+    line-height: 1.55;
+    color: var(--star-dim);
+  }
+  .plate__credit {
+    font-size: var(--t-micro);
+    color: var(--dust-faint);
+    letter-spacing: 0.04em;
+  }
+
+  @media (max-width: 640px) {
+    .plate { margin-block: var(--s-12); }
+  }
+</style>

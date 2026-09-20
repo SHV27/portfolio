@@ -1,0 +1,146 @@
+---
+/**
+ * The label-efficiency curve from the galaxy-morphology study, drawn from the
+ * four measured points rather than screenshotted from a paper.
+ *
+ * Interactive: hover or focus any point and it tells you what that labelling
+ * budget actually bought. The finding this chart exists to carry is that the
+ * curve flattens after 5% — which is a cost decision, not a leaderboard score.
+ *
+ * Inline SVG: no chart library, no runtime dependency, sharp at any zoom, and
+ * it renders identically with JavaScript switched off.
+ */
+const PTS = [
+  { pct: 1,   n: '~141',   acc: 53.10, f1: 47.45, note: 'About 141 images. Barely a lecture’s worth of labelling — and already five times better than guessing.' },
+  { pct: 5,   n: '~709',   acc: 75.31, f1: 73.69, note: 'The jump that matters: +22 points of accuracy for one afternoon of expert labelling. After this, the curve flattens.' },
+  { pct: 10,  n: '~1,418', acc: 78.11, f1: 76.59, note: 'Double the labels again and you gain under three points. This is where paying people to label stops being worth it.' },
+  { pct: 100, n: '14,188', acc: 87.26, f1: 86.12, note: 'Everything. Within 1.7 points of the published state of the art, without dense connectivity or attention.' },
+];
+const SOTA = 88.96;
+
+// log-x so the 1 → 100 range is readable
+const X = (p: number) => 60 + (Math.log10(p) / 2) * 640;
+const Y = (v: number) => 300 - ((v - 40) / 55) * 250;
+
+const accPath = PTS.map((p, i) => `${i ? 'L' : 'M'}${X(p.pct).toFixed(1)},${Y(p.acc).toFixed(1)}`).join(' ');
+const f1Path  = PTS.map((p, i) => `${i ? 'L' : 'M'}${X(p.pct).toFixed(1)},${Y(p.f1).toFixed(1)}`).join(' ');
+---
+
+<figure class="lc">
+  <figcaption class="lc__head">
+    <p class="label lc__k">Hover any point</p>
+    <h3 class="lc__t display display--small">How many labels do you actually need?</h3>
+  </figcaption>
+
+  <div class="lc__wrap">
+    <svg class="lc__svg" viewBox="0 0 760 340" role="img" aria-label="A chart of accuracy and macro-F1 against the fraction of labels used: 53.1% at 1%, 75.3% at 5%, 78.1% at 10%, and 87.3% at 100%.">
+      <!-- gridlines -->
+      {[50, 60, 70, 80, 90].map((v) => (
+        <g>
+          <line x1="60" x2="700" y1={Y(v)} y2={Y(v)} stroke="currentColor" stroke-width="1" class="lc__grid" />
+          <text x="46" y={Y(v) + 4} class="lc__axis" text-anchor="end">{v}</text>
+        </g>
+      ))}
+
+      <!-- published state of the art -->
+      <line x1="60" x2="700" y1={Y(SOTA)} y2={Y(SOTA)} class="lc__sota" stroke-dasharray="4 5" />
+      <text x="700" y={Y(SOTA) - 8} class="lc__sotalabel" text-anchor="end">published state of the art — 88.96</text>
+
+      <path d={f1Path} class="lc__line lc__line--f1" />
+      <path d={accPath} class="lc__line lc__line--acc" />
+
+      {PTS.map((p, i) => (
+        <g class="lc__pt" tabindex="0" role="button" aria-label={`${p.pct}% of labels, ${p.n} images: ${p.acc}% accuracy, ${p.f1} macro-F1. ${p.note}`} data-i={i}>
+          <circle cx={X(p.pct)} cy={Y(p.f1)} r="4" class="lc__dot lc__dot--f1" />
+          <circle cx={X(p.pct)} cy={Y(p.acc)} r="5.5" class="lc__dot lc__dot--acc" />
+          <circle cx={X(p.pct)} cy={Y(p.acc)} r="22" class="lc__hit" />
+          <text x={X(p.pct)} y="326" class="lc__axis" text-anchor="middle">{p.pct}%</text>
+        </g>
+      ))}
+    </svg>
+
+    <div class="lc__read" data-lc-read>
+      <p class="lc__rn mono" data-lc-n>{PTS[1].n} images · 5% of the set</p>
+      <p class="lc__rv"><span class="lc__big tabular" data-lc-acc>75.31</span><span class="lc__pct">% accuracy</span></p>
+      <p class="lc__rnote" data-lc-note>{PTS[1].note}</p>
+    </div>
+  </div>
+
+  <p class="lc__legend">
+    <span class="lc__key lc__key--acc">accuracy</span>
+    <span class="lc__key lc__key--f1">macro-F1</span>
+    <span class="lc__src mono">ResNet50 · Galaxy10-DECaLS · 17,736 labelled survey images</span>
+  </p>
+</figure>
+
+<script define:vars={{ PTS }}>
+  const pts = document.querySelectorAll('.lc__pt');
+  const nEl = document.querySelector('[data-lc-n]');
+  const aEl = document.querySelector('[data-lc-acc]');
+  const noteEl = document.querySelector('[data-lc-note]');
+  const show = (i) => {
+    const p = PTS[i];
+    if (!p) return;
+    nEl.textContent = `${p.n} images · ${p.pct}% of the set`;
+    aEl.textContent = p.acc.toFixed(2);
+    noteEl.textContent = p.note;
+    pts.forEach((g, j) => g.classList.toggle('is-on', j === i));
+  };
+  pts.forEach((g, i) => {
+    g.addEventListener('pointerenter', () => show(i));
+    g.addEventListener('focus', () => show(i));
+    g.addEventListener('click', () => show(i));
+  });
+  show(1);
+</script>
+
+<style>
+  .lc { margin: var(--s-16) 0 0; }
+  .lc__k { color: var(--gold); }
+  .lc__t { font-size: var(--t-head); margin-top: var(--s-3); }
+
+  .lc__wrap {
+    margin-top: var(--s-8);
+    display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    gap: var(--s-12); align-items: center;
+  }
+
+  .lc__svg { width: 100%; height: auto; color: var(--ridge); overflow: visible; }
+  .lc__grid { opacity: 0.85; }
+  .lc__axis { fill: var(--dust-faint); font-family: var(--mono); font-size: 11px; }
+  .lc__sota { stroke: var(--verify); opacity: 0.6; }
+  .lc__sotalabel { fill: var(--verify); font-family: var(--mono); font-size: 10px; opacity: 0.85; }
+
+  .lc__line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+  .lc__line--acc { stroke: var(--gold); }
+  .lc__line--f1 { stroke: var(--ember); opacity: 0.75; stroke-dasharray: 3 4; }
+
+  .lc__dot--acc { fill: var(--gold); stroke: var(--void); stroke-width: 2; }
+  .lc__dot--f1 { fill: var(--ember); }
+  .lc__hit { fill: transparent; cursor: pointer; }
+  .lc__pt { outline: none; }
+  .lc__pt.is-on .lc__dot--acc { r: 8; }
+  .lc__pt:focus-visible .lc__dot--acc { stroke: var(--star); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .lc__dot--acc { transition: r var(--d-base) var(--ease); }
+  }
+
+  .lc__read { border-left: 2px solid var(--gold); padding-left: var(--s-6); }
+  .lc__rn { font-size: var(--t-micro); color: var(--dust); letter-spacing: 0.05em; }
+  .lc__rv { margin-top: var(--s-2); display: flex; align-items: baseline; gap: 4px; }
+  .lc__big { font-family: var(--display); font-variation-settings: 'opsz' 40; font-size: 2.8rem; color: var(--gold); line-height: 1; }
+  .lc__pct { font-size: var(--t-small); color: var(--dust); }
+  .lc__rnote { margin-top: var(--s-4); font-size: var(--t-small); line-height: 1.6; color: var(--star-dim); }
+
+  .lc__legend { margin-top: var(--s-6); display: flex; flex-wrap: wrap; gap: var(--s-6); align-items: center; font-size: var(--t-micro); }
+  .lc__key { color: var(--dust); display: inline-flex; align-items: center; gap: 6px; }
+  .lc__key::before { content: ''; width: 14px; height: 2px; background: currentColor; }
+  .lc__key--acc { color: var(--gold); }
+  .lc__key--f1 { color: var(--ember); }
+  .lc__src { color: var(--dust-faint); }
+
+  @media (max-width: 860px) {
+    .lc__wrap { grid-template-columns: 1fr; gap: var(--s-8); }
+  }
+</style>

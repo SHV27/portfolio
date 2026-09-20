@@ -1,0 +1,163 @@
+---
+/**
+ * §4 — DATA & SIGNAL. The analytics chapter.
+ *
+ * Exists because the brief asks for analytics and consulting recruiters to see
+ * themselves here, not only AI-engineering ones. So it leads with a finding that
+ * has a cost implication rather than a leaderboard score.
+ *
+ * HONESTY CONSTRAINTS enforced here (DECISIONS D017–D021):
+ *  - the three detection pipelines are labelled a simulation study everywhere,
+ *    because they generate their own data;
+ *  - VoidSeer's w0 result is not published — it contradicts its own paper;
+ *  - StellarRift's "2.6° gap width" is not published — it is a hardcoded
+ *    fallback constant the measurement code can never overwrite;
+ *  - FRBprint reports P/R/F1 = 0.75 straight, not the README's "20/20".
+ */
+import { Image } from 'astro:assets';
+import Receipt from '../components/Receipt.astro';
+import LabelCurve from '../components/LabelCurve.astro';
+import { src, repoUrl } from '../content/types';
+import frb from '../assets/shots/astro/frbprint.png';
+import stellar from '../assets/shots/astro/stellarrift.png';
+
+const GALAXY = [
+  {
+    text: 'I fine-tuned a ResNet50 on 17,736 real images from the Dark Energy Camera Legacy Survey, labelled by the Galaxy Zoo citizen-science campaign, across ten morphological classes.',
+    receipts: [{ label: 'galaxy-morphology-transfer', href: repoUrl('galaxy-morphology-transfer'), proves: 'Method, splits, hyperparameters and full results.' }],
+  },
+  {
+    text: 'I chose macro-F1 as the primary metric rather than accuracy, because the classes are imbalanced and accuracy would have flattered the model on the common ones. I trained with class-weighted loss and stopped on validation macro-F1.',
+    receipts: [{ label: 'README', href: src('galaxy-morphology-transfer', 'README.md'), proves: 'Metric choice stated with the reason; AdamW, ReduceLROnPlateau, early stopping.' }],
+  },
+  {
+    text: 'Then I ran the same experiment at 1%, 5%, 10% and 100% of the labels, evaluating all four on the identical held-out test set — because the question I actually wanted answered was not "how good can this get" but "how few labels do we need to pay for".',
+    receipts: [{ label: 'README', href: src('galaxy-morphology-transfer', 'README.md'), proves: 'Stratified subsets, one shared test set, four measured points.' }],
+  },
+  {
+    text: 'The most interesting result was an error analysis, not a score: the smallest class scored perfect recall while a mid-sized one scored worst. Distinctiveness beats frequency — so annotation budget should go to the ambiguous classes, not the rare ones.',
+    receipts: [{ label: 'README', href: src('galaxy-morphology-transfer', 'README.md'), proves: 'Per-class recall — Cigar-shaped Smooth 100.00% on 334 training examples; Disturbed 59.26%.' }],
+  },
+];
+---
+
+<section class="an section" id="analytics">
+  <div class="wrap">
+    <p class="label an__k">Project 04 — the analytics one</p>
+    <h2 class="an__t display">Data &amp; Signal</h2>
+    <p class="an__hook">
+      Two pieces of work where the deliverable was a decision, not a model: one on how many labels a survey
+      actually needs to pay for, and one on pulling a planted signal back out of noise.
+    </p>
+
+    <!-- ---- GALAXY MORPHOLOGY ------------------------------------------ -->
+    <div class="an__block">
+      <h3 class="an__h3">Galaxy morphology — label-efficient transfer learning</h3>
+      <p class="an__sub mono">17,736 real survey images · ResNet50 · Galaxy10-DECaLS</p>
+
+      <ul class="an__list">
+        {GALAXY.map((c) => (
+          <li class="an__item">
+            <p class="an__itemtext">{c.text}</p>
+            <Receipt receipts={c.receipts} />
+          </li>
+        ))}
+      </ul>
+
+      <LabelCurve />
+
+      <p class="an__finding">
+        <span class="an__findingk label">The finding</span>
+        Five per cent of the labels — about 709 images, one afternoon of expert work — gets you to 75.3%
+        accuracy. Ten per cent gets you 78.1%. That second doubling costs the same again and buys under three
+        points. If I were advising someone paying for annotation, that is the entire recommendation, and it is
+        worth more than the 87.3% I got from labelling everything.
+      </p>
+
+      <p class="an__caveat">
+        Honest note: the training code for this one is not published yet — the repository currently holds the
+        write-up and the results. It is on my machine and it is going up.
+      </p>
+    </div>
+
+    <!-- ---- DETECTION PIPELINES ---------------------------------------- -->
+    <div class="an__block">
+      <h3 class="an__h3">Three detection pipelines for dark-sector signatures</h3>
+      <p class="an__sub mono">Simulation study — signal injection and recovery</p>
+
+      <p class="an__prose">
+        I wanted to know whether a method could find a thing it had not been told the location of. So for each of
+        three problems I generated a catalogue, planted a known signal inside it, and then measured how much of
+        that signal the detector got back. <strong>None of these use real observational data, and I would not
+        present them as if they did</strong> — the whole point of injection-recovery is that you know the right
+        answer in advance and can therefore grade the method honestly.
+      </p>
+
+      <div class="an__figs">
+        <figure class="an__fig reveal">
+          <div class="an__figframe">
+            <Image src={frb} alt="Three analysis panels on a dark background: dispersion-measure residual against redshift with flagged points marked, a histogram showing clean separation between normal and anomalous populations, and a sky map of right ascension against declination." widths={[620, 980]} sizes="(max-width:860px) 92vw, 620px" loading="lazy" decoding="async" format="avif" />
+          </div>
+          <figcaption class="an__cap">
+            <strong>FRBprint.</strong> Isolation Forest over a five-dimensional dispersion-measure feature space,
+            on a simulated catalogue of 400 fast radio bursts with 20 anomalies planted. It recovered 15 of them
+            and raised 5 false alarms — precision, recall and F1 all 0.75. The middle panel is the one that
+            matters: a clean bimodal separation, mean residual 2.97 against 171.71.
+            <Receipt receipts={[{ label: 'frbprint', href: repoUrl('frbprint'), proves: 'Method, the injected catalogue, and the full confusion matrix.' }]} />
+          </figcaption>
+        </figure>
+
+        <figure class="an__fig reveal">
+          <div class="an__figframe">
+            <Image src={stellar} alt="Two stacked panels: a scatter of stars along a stellar stream with a highlighted gap window, and the kernel-density curve beneath it with the trough marked." widths={[620, 980]} sizes="(max-width:860px) 92vw, 620px" loading="lazy" decoding="async" format="avif" />
+          </div>
+          <figcaption class="an__cap">
+            <strong>StellarRift.</strong> A gap injected into a simulated stellar stream at 6.5°, recovered by
+            kernel-density trough detection at <strong>6.477°</strong> — an offset of 0.023°. That localisation
+            is the honest result. The width and the mass I originally derived from it are not reported here,
+            because reading my own code back I found the width was falling through to a hardcoded constant.
+            <Receipt receipts={[{ label: 'stellarrift', href: repoUrl('stellarrift'), proves: 'The KDE detector and the injected gap position.' }]} />
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .an__k { color: var(--gold); }
+  .an__t { font-size: var(--t-title); margin-top: var(--s-4); }
+  .an__hook { margin-top: var(--s-6); font-size: var(--t-sub); color: var(--star); max-width: 54ch; line-height: 1.5; }
+
+  .an__block { margin-top: clamp(var(--s-16), 9vh, var(--s-24)); }
+  .an__h3 { font-family: var(--display); font-variation-settings: 'opsz' 28; font-size: var(--t-head); font-weight: 500; }
+  .an__sub { margin-top: var(--s-2); font-size: var(--t-micro); color: var(--dust); letter-spacing: 0.05em; }
+
+  .an__list { list-style: none; padding: 0; margin: var(--s-8) 0 0; }
+  .an__item { padding: var(--s-6) 0; border-top: var(--hair) solid var(--ridge); }
+  .an__list li:last-child { border-bottom: var(--hair) solid var(--ridge); }
+  .an__itemtext { color: var(--star-dim); max-width: var(--measure); }
+
+  .an__finding {
+    margin-top: var(--s-12);
+    padding-left: var(--s-8);
+    border-left: 2px solid var(--gold);
+    max-width: 62ch; color: var(--star);
+  }
+  .an__findingk { display: block; color: var(--gold); margin-bottom: var(--s-3); }
+
+  .an__caveat { margin-top: var(--s-8); font-size: var(--t-small); color: var(--dust); max-width: 58ch; }
+  .an__prose { margin-top: var(--s-6); max-width: var(--measure); color: var(--star-dim); }
+  .an__prose strong { color: var(--star); }
+
+  .an__figs { margin-top: var(--s-12); display: flex; flex-direction: column; gap: clamp(var(--s-12), 7vh, var(--s-24)); }
+  .an__fig { margin: 0; }
+  .an__figframe {
+    border-radius: var(--r-lg); overflow: hidden;
+    outline: var(--hair) solid var(--ridge); outline-offset: -1px;
+    box-shadow: var(--lift-2); background: #0d0d1a;
+  }
+  .an__figframe :global(img) { width: 100%; height: auto; }
+  .an__cap { margin-top: var(--s-4); font-size: var(--t-small); color: var(--dust); max-width: 66ch; line-height: 1.6; }
+  .an__cap strong { color: var(--star); }
+</style>

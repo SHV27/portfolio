@@ -1,0 +1,244 @@
+import { src, repoUrl, type Project } from './types';
+
+/* ============================================================================
+   Every figure and every mechanism sentence below was verified by reading the
+   repository, not the README. Where a README and the code disagreed, the code
+   won and the discrepancy is recorded in DECISIONS.md. Claims that could not be
+   reproduced were dropped rather than softened.
+   ========================================================================== */
+
+export const SIFARISH: Project = {
+  id: 'sifarish',
+  name: 'Sifarish',
+  native: 'सिफ़ारिश',
+  repo: 'sifarish',
+  live: 'https://sifarish-shv-s-projects.vercel.app',
+  tagline: 'Compile truth. Draft everything. Send nothing.',
+  hook: 'I built a job-hunt assistant that compiles a résumé out of things I can actually prove — and that is physically incapable of applying on my behalf.',
+  year: 'Jul – Sep 2026',
+  accent: 'gold',
+  hardProblem:
+    'An LLM will happily mint a claim you cannot back, and recruiters now screen for exactly that. So I made "never invents" structural rather than aspirational: the model is never allowed to write the page. It may only select and order facts that already exist, and every choice has to survive a validator that re-checks it against real ledger IDs. The harder half is the inverse — suppression is a lie too. A true, relevant fact quietly dropped for space is the same class of defect as a fabrication, so I made the compiler solve the page-budget constraint instead of trimming.',
+  mechanism: [
+    {
+      text: 'An uncited line cannot physically reach the page. Every line passes through one gate, and a bullet carrying zero ledger IDs throws a compile error rather than rendering.',
+      receipts: [
+        { label: 'compiler.ts:284', href: src('sifarish', 'src/lib/compile/compiler.ts', [284, 285]), proves: 'The I1 gate — CompileError is thrown on a bullet with an empty ledgerIds array.' },
+        { label: '13 invariants', href: src('sifarish', 'README.md'), proves: 'I1–I13, each with named enforcing tests.' },
+      ],
+    },
+    {
+      text: 'It reads the whole job posting into what the company says it cares about — and what it says it does not — keeping the posting’s literal words. A test asserts that "we do not care about LeetCode" lands in doesNotCare and never in cares.',
+      receipts: [
+        { label: 'reading.ts', href: src('sifarish', 'src/lib/strategist/reading.ts'), proves: '357 lines parsing a posting into typed cares / doesNotCare quotes.' },
+        { label: 'strategist.test.ts', href: src('sifarish', 'tests/strategist.test.ts'), proves: 'The two-sided gate on posting polarity.' },
+      ],
+    },
+    {
+      text: 'For every true fact it writes down played or benched, with a reason in the company’s own words. The validator then rejects the model’s bad calls: a bench reason under twelve characters is overruled, education can never be benched, and "page budget" is refused outright because space belongs to the compiler.',
+      receipts: [
+        { label: 'plan.ts:438', href: src('sifarish', 'src/lib/strategist/plan.ts', 438), proves: 'validatePlan() — each override is noted visibly rather than applied silently.' },
+        { label: 'plan.ts:466', href: src('sifarish', 'src/lib/strategist/plan.ts', [466, 487]), proves: 'The rules are dated to a live model failure: "LIVE-CAUGHT (05-Sep-2026, Gemini on Babaclick)".' },
+      ],
+    },
+    {
+      text: '"Send nothing" is a grep over the source tree, not a promise. The build fails if a mail or browser-automation library ever appears, and the Gmail scope is asserted read-only with thirteen send-capable strings banned.',
+      receipts: [
+        { label: 'invariants.test.ts:85', href: src('sifarish', 'tests/invariants.test.ts', [85, 108]), proves: 'Walks src/ and api/ and fails on nodemailer, smtp, puppeteer, playwright .click().' },
+        { label: 'dak.test.ts:118', href: src('sifarish', 'tests/dak.test.ts', [118, 157]), proves: 'Asserts gmail.readonly and bans gmail.send, drafts.create, batchModify and ten more.' },
+      ],
+    },
+    {
+      text: 'Every exported PDF is read back in. The text layer is re-extracted and each compiled line asserted present, and in order — so what the reader sees is provably what the ledger said.',
+      receipts: [
+        { label: 'parseback.ts', href: src('sifarish', 'src/lib/export/parseback.ts'), proves: 'Round-trip fidelity via pdfjs-dist with a cursor-advancing order check.' },
+      ],
+    },
+    {
+      text: 'A rephrase that introduces a new number, a new proper noun or a new technology is rejected, with stemming and acronym-expansion awareness so honest rewrites are not false-flagged.',
+      receipts: [
+        { label: 'factGuard.ts', href: src('sifarish', 'src/lib/polish/factGuard.ts'), proves: '152 lines of drift detection against a 46-entry technology lexicon.' },
+      ],
+    },
+  ],
+  figures: [
+    { value: '776', label: 'automated gates across 74 test files', derivable: true, receipts: [{ label: 'tests/', href: `${repoUrl('sifarish')}/tree/main/tests`, proves: 'Counted directly from source rather than taken from the README.' }] },
+    { value: '1,000', label: 'generated input cases per run, 5,000 on a deep run', receipts: [{ label: 'matrix.test.ts:223', href: src('sifarish', 'tests/matrix.test.ts', [223, 224]), proves: 'A seeded PRNG enumerating ledger × posting × operation.' }] },
+    { value: '13', label: 'invariants, each with named enforcing tests', receipts: [{ label: 'README', href: src('sifarish', 'README.md'), proves: 'I1–I13.' }] },
+    { value: '168', label: 'decisions logged, append-only, never deleted', receipts: [{ label: 'DECISIONS.md', href: src('sifarish', 'DECISIONS.md'), proves: 'D1–D168 plus two later series.' }] },
+    { value: '25,323', label: 'lines of source', receipts: [{ label: 'src/', href: `${repoUrl('sifarish')}/tree/main/src`, proves: 'Measured on the repository.' }] },
+    { value: '0', label: 'API keys required — every lane has a deterministic floor', receipts: [{ label: 'routing.json', href: src('sifarish', 'data/config/routing.json'), proves: 'Free tiers only, with a heuristic fallback behind each lane.' }] },
+  ],
+  restraint: {
+    text: 'I diagnosed a structured-output failure by controlled experiment rather than guesswork — JSON-object mode failed 0 of 3 at two different temperatures, JSON-schema mode passed 2 of 3, which proved the mode was the variable and temperature was not. I also wrote down why I had not caught it for two sessions: every caller degraded silently, by my own design. That became a standing rule in everything I have built since — every artefact prints which engine produced it.',
+    receipts: [{ label: 'dimaag/core.ts:57', href: src('sifarish', 'src/lib/dimaag/core.ts', [57, 70]), proves: 'The measured probe, with the counts and the conclusion, left in the file.' }],
+  },
+  stack: ['Vite 8', 'React 19', 'TypeScript', 'Tailwind 4', 'Dexie / IndexedDB', 'pdf-lib + pdfjs', 'WebCrypto AES-256-GCM', 'Vitest', 'Playwright', '11 serverless functions'],
+  shots: [
+    { file: 'sifarish/plan-why-this-page.png', alt: 'Sifarish’s reasoning panel, headed “why this page looks like this”, listing eleven facts played and two benched, each with a written reason quoting the job posting.', caption: 'The whole thesis in one screen: eleven facts played, two benched, every decision reasoned in the company’s own words — and two struck through beneath the posting’s literal “we do not care about…”.' },
+    { file: 'sifarish/page-a-babaclick.png', alt: 'A compiled one-page résumé for a company called Babaclick, ordered Education, then Achievements, then Projects.', caption: 'One dossier, compiled for a company that says it cares about aptitude. Education and the NTSE scholarship lead.' },
+    { file: 'sifarish/page-b-ngo.png', alt: 'The same dossier compiled for an NGO posting, ordered Projects, then Positions of Responsibility, then Achievements, with the education section absent.', caption: 'The same dossier, same facts, an NGO posting. Projects and social work lead; education is gone. Nothing was rewritten — only re-decided.' },
+    { file: 'sifarish/khabri-taleem-radar.png', alt: 'A panel listing skills the market is asking for that the user’s ledger cannot yet prove, each with the named job postings that asked for it.', caption: 'It also tells you what you cannot prove yet — each gap carrying the named postings that asked for it.' },
+  ],
+};
+
+export const AAINA: Project = {
+  id: 'aaina',
+  name: 'Aaina',
+  native: 'आईना',
+  repo: 'aaina',
+  live: 'https://aaina-two.vercel.app',
+  tagline: 'You already know more than you think.',
+  hook: 'A relationship and self assessment I built that refuses to give you a compatibility score — and shows you the receipts for every sentence it writes about you.',
+  year: 'Aug – Sep 2026',
+  accent: 'ember',
+  hardProblem:
+    'The easy product is a quiz that returns "you are 72% compatible". That number is the industry standard and it is fabricated: Joel, Eastwick and Finkel threw over a hundred measures at dyad-specific compatibility in 2017 and predicted none of the variance. So the problem I set myself was producing a reading that is specific and emotionally weighty while structurally refusing the one claim everybody wants. The second problem is worse — a language model asked for relationship feedback produces Barnum statements that people rate as more accurate the moment you tell them it was written for them.',
+  mechanism: [
+    {
+      text: 'I made genericness inexpressible rather than discouraged. Every number, contradiction and verdict is computed in TypeScript; the model receives a closed evidence bundle and may only write connective prose.',
+      receipts: [
+        { label: 'derive.ts:28', href: src('aaina', 'src/engine/derive.ts', 28), proves: 'One deterministic, fingerprinted function is the sole authority — no component recomputes.' },
+      ],
+    },
+    {
+      text: 'Any paragraph whose citations do not resolve is discarded in three independent places — in the serverless function, in the client orchestrator, and at the component, which renders nothing for unresolvable evidence.',
+      receipts: [
+        { label: 'write.ts:139', href: src('aaina', 'api/write.ts', [139, 193]), proves: 'Server-side allowlist built per request from that reader’s own findings.' },
+        { label: 'Claim.tsx:48', href: src('aaina', 'src/components/Claim.tsx', 48), proves: '“A guard that exists in one place is a guard the second call site will bypass.”' },
+      ],
+    },
+    {
+      text: 'The report is written from contradictions, not scores — collisions between a person’s own answers, such as rating “I am allowed to take up space” high while rating “my needs come after everyone else’s” low.',
+      receipts: [
+        { label: 'contradictions.ts:215', href: src('aaina', 'src/engine/contradictions.ts', [215, 264]), proves: 'Seven attitude-versus-behaviour rules, each with the direction it requires.' },
+      ],
+    },
+    {
+      text: 'I measure Pull and Hold on separate axes, because Rusbult and Martz found that what predicted staying in abusive relationships was investment and poor alternatives — not satisfaction. That separation is what lets the report reach “this is being held in place by what leaving would cost.” Safety is orthogonal and never moves a number.',
+      receipts: [
+        { label: 'axes.ts', href: src('aaina', 'src/engine/axes.ts'), proves: 'Quality, Pull, Hold and Safety computed independently.' },
+        { label: 'sources.ts', href: src('aaina', 'src/engine/sources.ts'), proves: 'Rusbult, Martz & Agnew 1998 cited with the load it bears.' },
+      ],
+    },
+    {
+      text: 'Rejecting a claim recomputes the plan. A reader’s ✗ on a finding is treated as new evidence: the finding is dropped and everything leaning on it is rebuilt.',
+      receipts: [
+        { label: 'derive.ts:170', href: src('aaina', 'src/engine/derive.ts', 170), proves: '“A claim the reader has rejected must not still be holding up a verdict three sections later.”' },
+      ],
+    },
+    {
+      text: 'Couple mode has no backend at all. Both halves travel in the URL fragment, which is never sent to a server, and every safety answer is hard-blocked from travelling in either direction — with a test that poisons a link and asserts the disclosure comes out missing.',
+      receipts: [
+        { label: 'couple.ts:92', href: src('aaina', 'src/engine/couple.ts', 92), proves: 'mayTravel() blocks all 15 safety items outbound and inbound.' },
+        { label: 'couple.test.ts:102', href: src('aaina', 'src/engine/couple.test.ts', [102, 124]), proves: 'The adversarial test that tries to smuggle one through.' },
+      ],
+    },
+  ],
+  figures: [
+    { value: '183', label: 'items in the bank, 145 of them scored', derivable: true, receipts: [{ label: 'src/items/', href: `${repoUrl('aaina')}/tree/main/src/items`, proves: 'Counted and de-duplicated from source.' }] },
+    { value: '29', label: 'measured dimensions', receipts: [{ label: 'dimensions.ts:72', href: src('aaina', 'src/engine/dimensions.ts', 72), proves: 'Each with its published weight and lens.' }] },
+    { value: '71', label: 'cited sources, each stating what it is load-bearing for', receipts: [{ label: 'sources.ts:23', href: src('aaina', 'src/engine/sources.ts', 23), proves: 'A registry test fails on any citation that does not resolve, and on any source nothing cites.' }] },
+    { value: '74', label: 'phrases banned server-side, plus every predictive claim', receipts: [{ label: '_contract.ts:197', href: src('aaina', 'api/_contract.ts', [197, 296]), proves: 'The ban list, with a comment explaining each failure mode.' }] },
+    { value: '27', label: 'named published interventions, not advice', receipts: [{ label: 'practices.ts:104', href: src('aaina', 'src/engine/practices.ts', 104), proves: 'Gottman, IBCT, EFT, Bowen, WOOP and more, each cited.' }] },
+    { value: '9', label: 'test personas — two built to be nearly identical, on purpose', receipts: [{ label: 'audit.ts:21', href: src('aaina', 'scripts/audit.ts', [21, 23]), proves: 'The transplant problem has to be solved for the hard case, not the obvious one.' }] },
+  ],
+  restraint: {
+    text: 'I refused to reproduce copyrighted instruments. Rather than administering published scales verbatim, it names the published construct and its interpretation rules and writes its own item text. MBTI, the Five Love Languages, the Dyadic Adjustment Scale and the HITS screen I considered and rejected in writing, with my reasons recorded.',
+    receipts: [
+      { label: 'relationship.ts:3', href: src('aaina', 'src/items/relationship.ts', [3, 12]), proves: 'Every item carries licence: aaina-authored.' },
+      { label: 'sources.ts', href: src('aaina', 'src/engine/sources.ts'), proves: 'The rejected instruments are recorded with the reason each was rejected.' },
+    ],
+  },
+  stack: ['Astro-free Vite 8', 'React 19', 'TypeScript', 'Tailwind 4', 'Zustand', 'one serverless function', 'Groq', 'Vitest', 'Playwright'],
+  shots: [
+    { file: 'aaina/receipt-desktop.png', alt: 'An open receipt drawer showing “what this is built on — satisfaction, 30%, from 5 answers”, with the reader’s own words quoted back, beneath a banner explaining reduced mode.', caption: 'Open any sentence and it shows its working: which dimension, which score, how many answers, and your own words quoted back at you.' },
+    { file: 'aaina/science-desktop.png', alt: 'A page headed “Why there is no compatibility percentage”, citing Joel 2017, Montoya 2008 and Joel 2020.', caption: 'It devotes a whole chapter to explaining why it will not give you the number you came for.' },
+    { file: 'aaina/report-desktop.png', alt: 'A report paragraph reading “You are 69% committed to this lasting, and 30% satisfied… here they have separated”, each paragraph tagged with a receipt count.', caption: 'The writing comes from contradictions between your own answers — not from a score.' },
+    { file: 'aaina/report-together-desktop.png', alt: 'A couple-mode section showing a prediction marked correct, then the line “You read them correctly — and the two of you are still 50 points apart”.', caption: 'Couple mode runs with no server: both halves travel inside the link itself, and safety answers are blocked from travelling at all.' },
+  ],
+  limits: [
+    'The current version replaced an earlier careless-responding detector I had built; it now surfaces dwell time and answer revisions instead, and says plainly that no self-report assessment is fake-proof.',
+  ],
+};
+
+export const BRAILLIX: Project = {
+  id: 'braillix',
+  name: 'Braillix',
+  repo: 'braillix',
+  live: 'https://braillix.vercel.app',
+  tagline: 'The teacher’s blackboard.',
+  hook: 'A maths teacher writes by hand, by typing, or by photographing a textbook — and every line lands as verified mathematical braille on a blind student’s refreshable cells. No account, no server, no internet.',
+  year: 'Aug 2026',
+  accent: 'gold',
+  hardProblem:
+    'Nemeth is not a character substitution — it is a grammar, where the same cell means "numeric indicator" in one position and "fraction close" in another. A wrong dot is invisible to the sighted teacher and to the blind student both, so there is no human in the loop who can catch it. On top of that the hardware width is genuinely unknown, so no layer of the software is permitted to know how many cells exist; and a single line of a question can mix three braille codes at once. I made all of it run offline in a browser on a village-school laptop, including a 76 MB vision model, because student work must never leave the room.',
+  mechanism: [
+    {
+      text: 'I check the braille by reading it back. A second engine, sharing no code with the one that produced the dots, reconstructs meaning from the dots alone and compares it to what the teacher wrote.',
+      receipts: [
+        { label: 'readback.ts', href: src('braillix', 'app/src/core/readback.ts'), proves: '536 lines of independent Nemeth reconstruction, plus separate engines for Devanagari and English.' },
+      ],
+    },
+    {
+      text: 'That check has three verdicts, not two. When the reader meets a cell it has no rule for it returns "unchecked" — because collapsing that into "agrees" would turn a gap in the checker into a clean bill of health for the braille.',
+      receipts: [
+        { label: 'roundtrip.ts', href: src('braillix', 'app/src/core/roundtrip.ts'), proves: 'agrees | differs | unchecked, with the reasoning in the file.' },
+      ],
+    },
+    {
+      text: 'I made a recognised line unrepresentable in the type system without an explicit human confirmation — enforced at compile time, not at runtime.',
+      receipts: [
+        { label: 'lesson.ts:21', href: src('braillix', 'app/src/lesson.ts', [21, 23]), proves: 'A recognised line requires a literal confirmed: true.' },
+        { label: 'lesson.test.ts:88', href: src('braillix', 'app/src/lesson.test.ts', [88, 91]), proves: 'Compile-time tests asserting the unconfirmed variant fails to type-check.' },
+      ],
+    },
+    {
+      text: 'The build greps its own source and fails if any file outside two named authorities hard-codes a cell count — and it first proves the guard catches a planted offender, because a guard that can only ever pass is not a guard.',
+      receipts: [
+        { label: 'invariants.test.ts', href: src('braillix', 'app/src/invariants.test.ts'), proves: 'Two-sided enforcement of the "no layer knows the width" law.' },
+      ],
+    },
+    {
+      text: 'Mirroring across several displays pads a wider device’s spare cells to blank rather than leaving stale dots — because stale dots would be a lie told in braille — and a mirrored group takes the width of its smallest device, never its largest.',
+      receipts: [
+        { label: 'httppod.ts:169', href: src('braillix', 'app/src/transport/httppod.ts', [169, 183]), proves: 'The blank-padding rule, with the reason in the comment.' },
+        { label: 'profile.ts:96', href: src('braillix', 'app/src/core/profile.ts', [96, 105]), proves: 'Smallest-device width enforcement.' },
+      ],
+    },
+    {
+      text: 'The build refuses to ship without its offline assets, and then checks that the live site is actually serving them.',
+      receipts: [
+        { label: 'assert-assets.mjs:19', href: src('braillix', 'app/scripts/assert-assets.mjs', [19, 33]), proves: 'Eleven named assets; a missing or truncated one fails the build.' },
+        { label: 'check-deployed.mjs', href: src('braillix', 'tools/check-deployed.mjs'), proves: 'Post-deploy verification against production.' },
+      ],
+    },
+  ],
+  figures: [
+    { value: '232 / 232', label: 'curriculum lines translated and read back cleanly, across 27 topics', receipts: [{ label: 'ACCURACY.md', href: src('braillix', 'docs/ACCURACY.md'), proves: 'Every line listed; zero with anything to report.' }, { label: 'syllabus.ts', href: src('braillix', 'app/src/core/syllabus.ts'), proves: 'The 232 lines themselves, counted from source.' }] },
+    { value: '64.2s → 1.25s', label: 'press-to-result, after background model warming', receipts: [{ label: 'store.ts:843', href: src('braillix', 'app/src/store.ts', [843, 871]), proves: 'The warming sequence and the load-race fix it required.' }] },
+    { value: '727', label: 'unit tests, plus 101 browser journeys', receipts: [{ label: 'REPORT.md', href: src('braillix', 'docs/REPORT.md'), proves: 'Counts recorded with the run.' }] },
+    { value: '390 / 834 / 1440', label: 'pixel widths asserted, each with a no-horizontal-scroll check', receipts: [{ label: 'screens.spec.ts:15', href: src('braillix', 'app/e2e/screens.spec.ts', [15, 19]), proves: 'Responsive behaviour is a test, not an intention.' }] },
+    { value: '9', label: 'Indic scripts covered by one Bharati table', receipts: [{ label: 'indic.ts', href: src('braillix', 'app/src/core/indic.ts'), proves: 'Devanagari through Malayalam.' }] },
+    { value: '0', label: 'network requests — it is fully offline, including a 76 MB vision model', receipts: [{ label: 'vite.config.ts:31', href: src('braillix', 'app/vite.config.ts', [31, 123]), proves: 'Hand-written service worker; fonts and both recognisers self-hosted, no CDN is ever contacted.' }] },
+  ],
+  restraint: {
+    text: 'One of my tests caught a bug in the expression rather than in the braille. In the sum-of-an-arithmetic-series formula, my segmenter mistook a subscripted term for an English word and left the equals sign stranded at the front of the maths, where it became a fraction numerator. Every braille cell was faithful to the expression it had been handed — the expression was already wrong.',
+    receipts: [{ label: 'syllabus.test.ts:77', href: src('braillix', 'app/src/core/syllabus.test.ts', [77, 83]), proves: 'The assertion that a pure-maths line must arrive as one unbroken run of Nemeth.' }],
+  },
+  stack: ['Vite 8', 'React 19', 'TypeScript', 'Zustand', 'temml', 'speech-rule-engine', 'ONNX Runtime in a Web Worker', 'Tesseract', 'ESP32 / Arduino C++'],
+  shots: [
+    { file: 'braillix/board-hero.jpeg', alt: 'A dark blackboard interface showing five class-eleven and twelve maths lines including the binomial theorem and Bayes’ theorem, with a rendered six-dot braille cell below and a forty-eight key symbol rail.', caption: 'A blackboard, not an app. The teacher writes as they would on a board; the cell below shows exactly what the student is feeling.' },
+    { file: 'braillix/coverage-proof.jpeg', alt: 'A panel reading “232 of 232 curriculum lines translate and read back cleanly, across 27 topics, in 6.3 seconds on this machine”, above a list of per-topic results all in green.', caption: 'The claim is a button. Press it and the whole curriculum is re-translated and re-checked in front of you.' },
+    { file: 'braillix/cell-atlas.png', alt: 'A reference sheet showing all sixty-four cam positions as rendered braille cells, each labelled with its dot numbers and its Nemeth meaning.', caption: 'All sixty-four positions a cell can hold, each with its dots and its meaning — the kind of reference sheet you only build if you have actually understood the code.' },
+    { file: 'braillix/reader-validation.png', alt: 'A screen showing a quadratic formula, the words “what the dots say — matches what you typed”, and a per-cell table listing dots, meaning and cam position.', caption: 'The three-way check, visible: what was typed, what the dots say when read back independently, and whether they agree.' },
+  ],
+  limits: [
+    'Handwritten Devanagari words genuinely do not work — the recogniser is trained on print, and no free browser-runnable model existed when this was built. The app says so rather than guessing.',
+    'Braille is Grade 1 plus Nemeth; contractions are not implemented.',
+    'Multi-device mirroring is verified against emulated hardware, not against two physical devices.',
+    'Screen-reader user testing has not been done. Accessibility here is asserted structurally and by automated test only.',
+  ],
+};
+
+export const PROJECTS: Project[] = [SIFARISH, AAINA, BRAILLIX];

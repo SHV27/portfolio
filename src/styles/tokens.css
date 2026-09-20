@@ -1,0 +1,103 @@
+/* ============================================================================
+   TOKENS — "FIRST LIGHT"
+   The single source of design truth. Nothing hard-codes a colour or a size.
+
+   Palette derivation (this matters — see docs/recon/design.md Lane 3):
+   Dark UIs fail when they are light UIs with the colours flipped, or when they
+   default to slate #0F172A with mid-grey text. So this palette is derived from
+   the thing it depicts: real deep-field astronomy. The void in a Hubble frame is
+   not pure black — it is a very dark, slightly warm neutral. The light in a
+   nebula is sodium-gold and hydrogen-rust, not cyan. Cyan is avoided entirely:
+   it is the single most tech-cliché accent in the dark-theme vocabulary.
+   ========================================================================== */
+
+:root {
+  /* ---- GROUND. Warm-neutral near-black, never blue slate. ---------------- */
+  --void:        #08080B;   /* page ground — the space between galaxies      */
+  --deep:        #0D0D12;   /* raised surface — a section that lifts          */
+  --shelf:       #14141A;   /* card / panel                                   */
+  --ridge:       #1E1E26;   /* hairline borders, dividers                     */
+  --ridge-lit:   #2C2C37;   /* hover / focus border                           */
+
+  /* ---- LIGHT. Starlight is warm-white, not #FFF. ------------------------- */
+  --star:        #F5F2EA;   /* primary text — 18.1:1 on --void               */
+  --star-dim:    #C3BEB2;   /* secondary text — 10.0:1                       */
+  --dust:        #8E897D;   /* tertiary / captions — 5.1:1, passes AA body   */
+  --dust-faint:  #6B665C;   /* decorative only — NEVER body text             */
+
+  /* ---- ACCENTS. Pulled from nebula emission, not from a UI kit. ---------- */
+  --gold:        #E6A94E;   /* primary accent — sodium light  10.3:1         */
+  --gold-lit:    #F2C078;   /* hover                                          */
+  --gold-deep:   #A8752F;   /* borders, de-emphasised                        */
+  --ember:       #C85A3C;   /* secondary — hydrogen rust  5.3:1              */
+  --ember-lit:   #E07B5C;
+  --verify:      #7FB289;   /* "proven" state — muted sage, 7.6:1            */
+
+  /* ---- TYPE ------------------------------------------------------------- */
+  --display: 'Bodoni Moda', 'Bodoni MT', Didot, 'Times New Roman', serif;
+  --body:    'Schibsted Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --mono:    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --deva:    'Tiro Devanagari Hindi', var(--body);
+
+  /* Fluid scale. Uneven ratios on purpose — a single stamped scale is a tell.
+     Display sizes carry their own optical size (opsz) via font-variation-settings. */
+  --t-hero:   clamp(3.25rem, 11vw,  9.5rem);
+  --t-title:  clamp(2.25rem, 6.2vw, 4.75rem);
+  --t-head:   clamp(1.65rem, 3.4vw, 2.6rem);
+  --t-sub:    clamp(1.15rem, 1.9vw, 1.45rem);
+  --t-body:   clamp(1rem,    1.05vw, 1.125rem);
+  --t-small:  0.9375rem;
+  --t-micro:  0.8125rem;
+
+  --lh-tight: 0.94;
+  --lh-head:  1.12;
+  --lh-body:  1.62;
+
+  /* ---- SPACE. By relationship, not one stamped gap. ---------------------- */
+  --s-1: 0.25rem;  --s-2: 0.5rem;   --s-3: 0.75rem;  --s-4: 1rem;
+  --s-6: 1.5rem;   --s-8: 2rem;     --s-12: 3rem;    --s-16: 4rem;
+  --s-24: 6rem;    --s-32: 8rem;    --s-48: 12rem;
+
+  --gutter: clamp(1.25rem, 5vw, 5rem);
+  --measure: 68ch;          /* reading width — never let prose run full-bleed */
+  --page-max: 1500px;
+
+  /* ---- FORM. One radius family. Inner = outer − padding (concentric). ---- */
+  --r-sm: 3px;  --r-md: 6px;  --r-lg: 10px;  --r-full: 999px;
+  --hair: 1px;
+
+  /* Shadow models elevation: a tight contact shadow + a wider ambient one.
+     If the shadow is bigger than the object, it is decoration. */
+  --lift-1: 0 1px 1px rgb(0 0 0 / 0.5), 0 2px 6px rgb(0 0 0 / 0.3);
+  --lift-2: 0 1px 2px rgb(0 0 0 / 0.55), 0 8px 24px rgb(0 0 0 / 0.38);
+  --glow-gold: 0 0 0 1px rgb(230 169 78 / 0.28);
+
+  /* ---- MOTION. 3–5 purposeful moves per page. Nothing decorative. ------- */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --d-fast: 140ms;
+  --d-base: 220ms;
+  --d-slow: 620ms;
+}
+
+/* ---- REDUCED MOTION -------------------------------------------------------
+   Default is NO motion. Motion is added back inside a no-preference query, so
+   the safe path is the fallback path (design.md Lane 5). Reduce and replace —
+   never delete a transition that communicated a state change.            */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root { scroll-behavior: smooth; }
+}
+
+/* Forced-colors / high-contrast: let the OS win. */
+@media (forced-colors: active) {
+  :root { --gold: LinkText; --star: CanvasText; --void: Canvas; }
+}

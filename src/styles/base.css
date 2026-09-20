@@ -1,0 +1,143 @@
+@import './tokens.css';
+@import './fonts.css';
+
+/* ---- RESET (minimal, deliberate) ----------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  background: var(--void);
+  color: var(--star);
+  font-family: var(--body);
+  font-size: var(--t-body);
+  line-height: var(--lh-body);
+  font-synthesis-weight: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img, picture, svg, video { display: block; max-width: 100%; }
+input, button, textarea, select { font: inherit; color: inherit; }
+p, li { text-wrap: pretty; }
+h1, h2, h3 { text-wrap: balance; }
+
+/* Numbers must align. Generators get this wrong; it is a cheap, high-signal
+   marker of craft (see docs/recon/design.md Lane 3). */
+.tabular, table, time, .fig-value { font-variant-numeric: tabular-nums lining-nums; }
+
+/* ---- FOCUS: visible, always, and never removed --------------------------- */
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: var(--r-sm);
+}
+:focus:not(:focus-visible) { outline: none; }
+
+/* ---- SKIP LINK ----------------------------------------------------------- */
+.skip {
+  position: absolute; left: var(--s-4); top: var(--s-4);
+  transform: translateY(-200%);
+  background: var(--gold); color: var(--void);
+  padding: var(--s-3) var(--s-6); border-radius: var(--r-md);
+  font-weight: 600; z-index: 100; text-decoration: none;
+  transition: transform var(--d-fast) var(--ease);
+}
+.skip:focus { transform: translateY(0); }
+
+/* ---- TYPE ---------------------------------------------------------------- */
+.display {
+  font-family: var(--display);
+  font-weight: 500;
+  line-height: var(--lh-tight);
+  letter-spacing: -0.015em;
+  /* Bodoni Moda carries a real optical-size axis: hairlines thin correctly as
+     the size grows, which is what makes a didone read as expensive rather than
+     as a stretched serif. */
+  font-variation-settings: 'opsz' 96;
+}
+.display--mid { font-variation-settings: 'opsz' 40; letter-spacing: -0.01em; }
+.display--small { font-variation-settings: 'opsz' 18; letter-spacing: 0; }
+
+.deva { font-family: var(--deva); font-weight: 400; }
+
+.mono {
+  font-family: var(--mono);
+  font-size: 0.82em;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The one label style on the site. Used sparingly — a kicker that merely
+   restates its heading is deleted, not styled. */
+.label {
+  font-family: var(--mono);
+  font-size: var(--t-micro);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dust);
+}
+
+.lede { font-size: var(--t-sub); line-height: 1.5; color: var(--star-dim); max-width: 46ch; }
+.prose { max-width: var(--measure); color: var(--star-dim); }
+.prose p + p { margin-top: var(--s-6); }
+.prose strong { color: var(--star); font-weight: 600; }
+
+/* ---- LAYOUT -------------------------------------------------------------- */
+.wrap { width: 100%; max-width: var(--page-max); margin-inline: auto; padding-inline: var(--gutter); }
+.section { padding-block: clamp(var(--s-24), 14vh, var(--s-48)); position: relative; }
+
+/* ---- LINKS --------------------------------------------------------------- */
+a { color: inherit; }
+.link {
+  color: var(--gold);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in oklab, var(--gold) 35%, transparent);
+  padding-bottom: 1px;
+  transition: border-color var(--d-fast) var(--ease), color var(--d-fast) var(--ease);
+}
+.link:hover { color: var(--gold-lit); border-bottom-color: var(--gold-lit); }
+
+/* Film grain. Real grain clumps unevenly, so this uses fractal noise rather
+   than a tiled PNG, which would repeat at a detectable interval. */
+.grain {
+  position: fixed; inset: -50%; z-index: -1; pointer-events: none;
+  opacity: 0.045; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .grain { animation: grain-drift 8s steps(6) infinite; }
+  @keyframes grain-drift {
+    0%,100% { transform: translate(0,0); }      16% { transform: translate(-3%,-2%); }
+    33% { transform: translate(2%,-4%); }        50% { transform: translate(-2%,3%); }
+    66% { transform: translate(3%,2%); }         83% { transform: translate(-1%,-3%); }
+  }
+}
+
+/* ---- REVEAL ---------------------------------------------------------------
+   Default state is VISIBLE. Motion is added only inside a no-preference query,
+   so a reduced-motion user — or anyone whose JS fails — sees finished content
+   rather than a blank page. This is the whole reason it is written this way. */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal { opacity: 0; transform: translateY(18px); }
+  .reveal.is-in {
+    opacity: 1; transform: none;
+    transition: opacity var(--d-slow) var(--ease-out), transform var(--d-slow) var(--ease-out);
+  }
+  .reveal-d1.is-in { transition-delay: 90ms; }
+  .reveal-d2.is-in { transition-delay: 180ms; }
+}
+
+/* ---- SELECTION ----------------------------------------------------------- */
+::selection { background: var(--gold); color: var(--void); }
+
+/* ---- SCROLLBAR ----------------------------------------------------------- */
+@supports selector(::-webkit-scrollbar) {
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-track { background: var(--void); }
+  ::-webkit-scrollbar-thumb { background: var(--ridge); border-radius: var(--r-full); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--ridge-lit); }
+}
+html { scrollbar-color: var(--ridge) var(--void); scrollbar-width: thin; }

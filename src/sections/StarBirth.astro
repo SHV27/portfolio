@@ -1,0 +1,153 @@
+---
+/**
+ * THE CINEMATIC MOMENT — a real photograph of stars being born.
+ *
+ * Rho Ophiuchi is the closest star-forming region to Earth. The red streaks are
+ * bipolar jets from stars that ignited within the last few hundred thousand
+ * years. This is not an illustration of the idea; it is the thing itself.
+ *
+ * The plate sits behind the text with a scrim tuned so body copy clears WCAG AA
+ * over the brightest part of the image, and it drifts very slightly with the
+ * pointer — parallax as depth, not as a trick. On touch and under
+ * prefers-reduced-motion it simply holds still.
+ */
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  plate: ImageMetadata;
+  credit: string;
+  kicker?: string;
+  line: string;
+  sub?: string;
+  /** Vertical framing of the plate — which part of the nebula stays in view. */
+  focus?: string;
+  height?: 'full' | 'tall' | 'mid';
+}
+const {
+  plate, credit, kicker, line, sub,
+  focus = '50% 50%',
+  height = 'tall',
+} = Astro.props;
+---
+
+<section class:list={['sb', `sb--${height}`]} data-parallax>
+  <div class="sb__plate" data-parallax-layer>
+    <Image
+      src={plate}
+      alt=""
+      aria-hidden="true"
+      widths={[900, 1400, 2000, 2560].filter((w) => w <= plate.width)}
+      sizes="100vw"
+      loading="lazy"
+      decoding="async"
+      format="avif"
+      style={`object-position:${focus}`}
+    />
+  </div>
+  <div class="sb__scrim" aria-hidden="true"></div>
+
+  <div class="wrap sb__inner">
+    {kicker && <p class="label sb__kicker">{kicker}</p>}
+    <p class="sb__line display display--mid">{line}</p>
+    {sub && <p class="sb__sub">{sub}</p>}
+  </div>
+
+  <p class="sb__credit mono">{credit}</p>
+</section>
+
+<style>
+  .sb {
+    position: relative;
+    display: flex; align-items: center;
+    overflow: hidden;
+    isolation: isolate;
+    margin-block: clamp(var(--s-16), 10vh, var(--s-32));
+  }
+  .sb--full { min-height: 100svh; }
+  .sb--tall { min-height: 78svh; }
+  .sb--mid  { min-height: 56svh; }
+
+  .sb__plate { position: absolute; inset: -4%; z-index: -2; will-change: transform; }
+  .sb__plate :global(img) { width: 100%; height: 100%; object-fit: cover; }
+
+  /* The scrim is what makes text legible over a bright nebula. Tuned so body
+     copy clears AA at the brightest point of the plate, not just the average. */
+  .sb__scrim {
+    position: absolute; inset: 0; z-index: -1;
+    background:
+      linear-gradient(to right, rgb(8 8 11 / 0.94) 0%, rgb(8 8 11 / 0.78) 42%, rgb(8 8 11 / 0.30) 100%),
+      linear-gradient(to bottom, rgb(8 8 11 / 0.85) 0%, transparent 22%, transparent 74%, rgb(8 8 11 / 0.92) 100%);
+  }
+
+  .sb__inner { position: relative; }
+  .sb__kicker { color: var(--gold); margin-bottom: var(--s-6); }
+  .sb__line {
+    font-size: clamp(1.9rem, 4.4vw, 3.6rem);
+    max-width: 19ch;
+    text-shadow: 0 2px 30px rgb(8 8 11 / 0.8);
+  }
+  .sb__sub {
+    margin-top: var(--s-6);
+    max-width: 48ch;
+    color: var(--star-dim);
+    font-size: var(--t-sub);
+    line-height: 1.5;
+    text-shadow: 0 1px 20px rgb(8 8 11 / 0.9);
+  }
+
+  /* Credit visible on the page, wording unaltered — the CC BY 4.0 condition. */
+  .sb__credit {
+    position: absolute; right: var(--gutter); bottom: var(--s-4);
+    font-size: 0.625rem; letter-spacing: 0.05em;
+    color: rgb(245 242 234 / 0.55);
+    max-width: 60vw; text-align: right;
+    text-shadow: 0 1px 8px rgb(8 8 11 / 0.95);
+  }
+
+  @media (max-width: 640px) {
+    .sb--full, .sb--tall { min-height: 62svh; }
+    .sb__scrim {
+      background:
+        linear-gradient(to bottom, rgb(8 8 11 / 0.9) 0%, rgb(8 8 11 / 0.55) 45%, rgb(8 8 11 / 0.95) 100%);
+    }
+    .sb__credit { position: static; display: block; margin: var(--s-6) var(--gutter) 0; text-align: left; max-width: none; }
+  }
+</style>
+
+<script>
+  /* Pointer parallax. Fine-pointer devices only, and only when motion is
+     welcome. rAF-throttled, transform-only, so it never touches layout. */
+  const fine = window.matchMedia('(pointer: fine)').matches;
+  const motionOK = window.matchMedia('(prefers-reduced-motion: no-preference)').matches;
+
+  if (fine && motionOK) {
+    const scenes = document.querySelectorAll<HTMLElement>('[data-parallax]');
+    let ticking = false;
+    let px = 0, py = 0;
+
+    const apply = () => {
+      ticking = false;
+      for (const s of scenes) {
+        const r = s.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > window.innerHeight) continue;
+        const layer = s.querySelector<HTMLElement>('[data-parallax-layer]');
+        if (!layer) continue;
+        // Scroll depth: the plate drifts slower than the page.
+        const progress = (r.top + r.height / 2 - window.innerHeight / 2) / window.innerHeight;
+        const scrollShift = progress * -22;
+        layer.style.transform = `translate3d(${px * 12}px, ${scrollShift + py * 10}px, 0) scale(1.06)`;
+      }
+    };
+    const request = () => { if (!ticking) { ticking = true; requestAnimationFrame(apply); } };
+
+    window.addEventListener('pointermove', (e) => {
+      px = (e.clientX / window.innerWidth - 0.5) * 2;
+      py = (e.clientY / window.innerHeight - 0.5) * 2;
+      request();
+    }, { passive: true });
+    window.addEventListener('scroll', request, { passive: true });
+    window.addEventListener('resize', request, { passive: true });
+    request();
+  }
+</script>

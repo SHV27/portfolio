@@ -1,0 +1,178 @@
+---
+/**
+ * §0 — THE TITLE CARD.
+ *
+ * The five seconds that decide everything. A reviewer gets, without scrolling:
+ * who he is, what he does, three things that are actually running, and that he
+ * is free from January 2027.
+ *
+ * There is deliberately no intro animation and no splash. The recon is blunt
+ * about the cost: "it takes so long to load that I've closed the tab before
+ * seeing anything" is a real engineer about a celebrated site.
+ */
+import { Image } from 'astro:assets';
+import hero from '../assets/photos/02-bridge-bw.jpg';
+
+const LIVE = [
+  { name: 'Sifarish',  native: 'सिफ़ारिश', href: 'https://sifarish-shv-s-projects.vercel.app', what: 'a résumé compiler that cannot cite what it cannot prove' },
+  { name: 'Aaina',     native: 'आईना',    href: 'https://aaina-two.vercel.app',                what: 'an assessment that refuses to score you' },
+  { name: 'Braillix',  native: '',         href: 'https://braillix.vercel.app',                 what: 'maths into braille, entirely offline' },
+];
+---
+
+<section class="tc">
+  <div class="wrap tc__grid">
+    <div class="tc__lead">
+      <p class="tc__eyebrow label">Patiala, India · open from January 2027</p>
+
+      <h1 class="tc__name display">
+        <span class="tc__first">Shaurya</span>
+        <span class="tc__last">Verma</span>
+      </h1>
+
+      <p class="tc__role">
+        I build AI systems that <em>can't lie</em> —
+        <span class="tc__role-dim">agents, retrieval, evals and guardrails, shipped to real users.</span>
+      </p>
+
+      <p class="tc__quote">“Everything I do gotta be iconic cause I&rsquo;m me.”</p>
+
+      <div class="tc__live">
+        <p class="label tc__live-label">Running right now — click any of them</p>
+        <ul class="tc__list">
+          {LIVE.map((p) => (
+            <li>
+              <a class="tc__item" href={p.href} target="_blank" rel="noopener noreferrer">
+                <span class="tc__item-name display display--small">
+                  {p.name}{p.native && <span class="deva tc__item-native">{p.native}</span>}
+                </span>
+                <span class="tc__item-what">{p.what}</span>
+                <svg class="tc__arrow" width="13" height="13" viewBox="0 0 13 13" aria-hidden="true">
+                  <path d="M3 10 L10 3 M5 3 h5 v5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square"/>
+                </svg>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <nav class="tc__links" aria-label="Contact">
+        <a class="link" href="https://github.com/SHV27" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a class="link" href="https://www.linkedin.com/in/shaurya-verma-94a607329/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        <a class="link" href="mailto:shaurya.verma2705@gmail.com">shaurya.verma2705@gmail.com</a>
+      </nav>
+    </div>
+
+    <div class="tc__portrait">
+      <Image
+        src={hero}
+        alt="Shaurya Verma in sunglasses on a riverside walkway, one hand pushed back through his hair, photographed in high-contrast black and white against a blown-out sky."
+        widths={[420, 640, 900]}
+        sizes="(max-width: 900px) 78vw, 440px"
+        loading="eager"
+        fetchpriority="high"
+        decoding="sync"
+        format="avif"
+      />
+    </div>
+  </div>
+
+  <div class="tc__scroll" aria-hidden="true">
+    <span class="label">Scroll</span>
+    <span class="tc__rule"></span>
+  </div>
+</section>
+
+<style>
+  .tc {
+    min-height: 100svh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding-block: var(--s-24) var(--s-16);
+    position: relative;
+  }
+  .tc__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: clamp(var(--s-12), 6vw, var(--s-24));
+    align-items: center;
+  }
+
+  .tc__eyebrow { color: var(--gold); }
+
+  .tc__name {
+    font-size: var(--t-hero);
+    margin-top: var(--s-6);
+    display: flex; flex-direction: column;
+  }
+  .tc__first { font-weight: 400; }
+  .tc__last  { font-weight: 700; margin-left: 0.07em; }
+
+  .tc__role {
+    margin-top: var(--s-8);
+    font-size: var(--t-sub);
+    line-height: 1.45;
+    max-width: 40ch;
+  }
+  .tc__role em { font-family: var(--display); font-style: italic; color: var(--gold); font-weight: 600; }
+  .tc__role-dim { color: var(--dust); display: block; margin-top: 2px; }
+
+  .tc__quote {
+    margin-top: var(--s-6);
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--star-dim);
+    border-left: var(--hair) solid var(--gold-deep);
+    padding-left: var(--s-4);
+  }
+
+  .tc__live { margin-top: var(--s-12); }
+  .tc__live-label { color: var(--verify); }
+  .tc__list { list-style: none; padding: 0; margin: var(--s-4) 0 0; }
+
+  .tc__item {
+    display: flex; align-items: baseline; gap: var(--s-3);
+    padding: var(--s-4) 0;
+    border-top: var(--hair) solid var(--ridge);
+    text-decoration: none;
+    transition: border-color var(--d-base) var(--ease);
+  }
+  .tc__list li:last-child .tc__item { border-bottom: var(--hair) solid var(--ridge); }
+  .tc__item:hover { border-color: var(--gold-deep); }
+  .tc__item-name { font-size: 1.22rem; color: var(--star); flex: none; }
+  .tc__item-native { font-size: 0.7em; color: var(--gold); margin-left: 0.35em; }
+  .tc__item-what { font-size: var(--t-small); color: var(--dust); flex: 1; }
+  .tc__arrow { color: var(--gold); flex: none; transition: transform var(--d-base) var(--ease); }
+  .tc__item:hover .tc__arrow { transform: translate(2px, -2px); }
+
+  .tc__links { margin-top: var(--s-8); display: flex; flex-wrap: wrap; gap: var(--s-6); font-size: var(--t-small); }
+
+  /* Whole frame, never cropped. The container takes the photo's own 1:1 ratio. */
+  .tc__portrait {
+    aspect-ratio: 1 / 1;
+    max-width: 440px; width: 100%; margin-left: auto;
+    border-radius: var(--r-lg); overflow: hidden;
+    outline: var(--hair) solid var(--ridge); outline-offset: -1px;
+    box-shadow: var(--lift-2);
+  }
+  .tc__portrait :global(img) { width: 100%; height: 100%; object-fit: contain; background: var(--deep); }
+
+  .tc__scroll {
+    position: absolute; bottom: var(--s-8); left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: var(--s-3);
+  }
+  .tc__rule { width: var(--hair); height: 44px; background: linear-gradient(var(--gold-deep), transparent); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .tc__rule { animation: drop 2.4s var(--ease) infinite; transform-origin: top; }
+    @keyframes drop { 0%,100% { transform: scaleY(0.3); opacity: 0.4; } 50% { transform: scaleY(1); opacity: 1; } }
+  }
+
+  @media (max-width: 900px) {
+    .tc__grid { grid-template-columns: 1fr; gap: var(--s-12); }
+    .tc__portrait { order: -1; max-width: min(78vw, 360px); margin: 0 auto; }
+    .tc__name { font-size: clamp(3rem, 15vw, 5rem); }
+    .tc__scroll { display: none; }
+    .tc { min-height: auto; padding-block: var(--s-16) var(--s-12); }
+  }
+</style>

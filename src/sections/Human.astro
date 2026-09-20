@@ -1,0 +1,197 @@
+---
+/**
+ * THE PERSONAL CHAPTER.
+ *
+ * Every image here stands alone, full frame, uncropped, with copy between —
+ * never paired, never gridded (his instruction, twice, for both batches).
+ *
+ * The résumé facts live inside the prose here rather than in a CV block,
+ * because the portfolio IS the résumé (CLAUDE.md §5, DECISIONS D044).
+ */
+import Plate from '../components/Plate.astro';
+
+import iAmWhoIAm from '../assets/aura/06-i-am-who-i-am.jpg';
+import mountains from '../assets/photos/04-mountains.jpg';
+import wallBlue from '../assets/photos/07-wall-blue.jpg';
+import barneyTub from '../assets/aura/03-barney-bathtub.jpg';
+import wallBw from '../assets/photos/06-wall-bw.jpg';
+import jumping from '../assets/photos/08-jumping.jpg';
+import barneyAwesome from '../assets/aura/08-barney-awesome.jpg';
+---
+
+<section class="hu section" id="who">
+  <div class="wrap">
+    <p class="label hu__k">Enough about the code</p>
+    <h2 class="hu__t display">Who's actually building this</h2>
+  </div>
+
+  <div class="wrap">
+    <Plate
+      src={iAmWhoIAm}
+      alt="A silhouetted figure and an outstretched hand rendered entirely in streaks of starlight, captioned with Exodus 3:14 — I AM WHO I AM."
+      caption="I don't spend much energy being a version of myself that's easier to categorise."
+      size="intimate"
+    />
+
+    <div class="hu__prose prose">
+      <p>
+        I'm in my final year of Computer Science at Thapar Institute in Patiala, currently sitting at a
+        <strong>7.62 CGPA</strong>. Before that: 90% in Class XII, <strong>98.6% in Class X</strong>, and an
+        <strong>NTSE scholarship</strong> from the Government of India — the aptitude exam that takes roughly the
+        top 0.1% nationally. I mention the NTSE and not the CGPA when someone asks what I'm good at, because one
+        of those measures how fast I pick up a thing I've never seen and the other measures how well I sat
+        through semesters.
+      </p>
+      <p>
+        I've won first place twice at IIT Ropar hackathons — the Gen AI Hackathon in November 2025 with a
+        multimodal Alzheimer's detection system, which is the project that eventually became Sehat Saarthi, and
+        the Agentic &amp; GenAI Showcase in July 2026 with Sifarish. Outside that I've been on the core organising
+        committee for Saturnalia, Thapar's techno-cultural festival, on the committee for Urja, the sports
+        festival, and I volunteer with Bharat Vikas Parishad.
+      </p>
+      <p>
+        The thing I'd actually want you to know is that none of the projects on this page were assigned to me. I
+        go looking for problems. It's a slightly compulsive habit — I see something broken and some part of my
+        brain starts chewing on it until I've built the thing that fixes it.
+      </p>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <Plate
+      src={mountains}
+      alt="Shaurya Verma standing on a Himalayan ridge in a white polo shirt and sunglasses, both thumbs up, a forested valley and layered mountain ranges behind him."
+      caption="Uttarakhand. I want a very big life, and I'm not embarrassed about saying so."
+      size="standard"
+    />
+
+    <div class="hu__prose prose">
+      <p>
+        I want to do something genuinely big. Not "senior engineer by thirty" big — I mean I want to point myself
+        at a problem that matters and actually move it. Right now that means getting inside a team building
+        frontier AI systems and being useful there faster than anyone expects a final-year student to be.
+      </p>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <Plate
+      src={wallBlue}
+      alt="Shaurya Verma standing in front of a wall covered in printed photographs and quote cards, smiling, in a light blue shirt."
+      caption="This is the wall in my room. Look closely — you've been reading it this whole time."
+      size="standard"
+    />
+
+    <div class="hu__prose prose">
+      <p>
+        Every image on this page that isn't a photograph of me or a screenshot of my work is printed and stuck on
+        that wall. The Stark frames, the SRK line, Barney, the blackletter one. They were on the wall long before
+        there was a portfolio to put them in — which is why they're here rather than some tasteful abstract
+        pattern a designer would have picked instead.
+      </p>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <Plate
+      src={barneyTub}
+      alt="Barney Stinson reclining in a bathtub in a full suit, talking on a phone, captioned: He is my spirit animal."
+      caption="Barney Stinson, on my wall, unironically."
+      size="intimate"
+    />
+  </div>
+
+  <div class="wrap">
+    <Plate
+      src={wallBw}
+      alt="Shaurya Verma in front of the same wall of printed images, photographed in black and white, laughing."
+      caption="Same wall, different day."
+      size="standard"
+    />
+
+    <div class="hu__prose prose">
+      <p>
+        My friends come to me for two things: motivation, and consolation. Those are opposite jobs and I seem to
+        be the person for both, which I think says something reasonably good about me. I'm told I'm good company.
+        I'd like the place I work to be somewhere I'm allowed to be good company.
+      </p>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <Plate
+      src={jumping}
+      alt="Shaurya Verma mid-jump on his bed with both arms thrown up, laughing, the wall of printed images behind him."
+      caption="If you want someone who makes the workplace more fun, I'm available for that too."
+      size="standard"
+    />
+  </div>
+
+  <div class="wrap hu__anthem">
+    <div class="hu__anthembox">
+      <p class="label hu__ak">The anthem</p>
+      <h3 class="hu__at display display--small">"Shaurya Verma is Awesome"</h3>
+      <p class="hu__ap">
+        Barney made a video called <em>I'm Awesome</em>. I have one too. It exists because I thought it was funny
+        and then it kept being funny.
+      </p>
+      <button class="hu__play" data-anthem type="button" aria-pressed="false">
+        <span class="hu__playicon" aria-hidden="true"></span>
+        <span data-anthem-label>Play the anthem</span>
+      </button>
+      <audio id="anthem" src="/anthem.mp3" preload="none"></audio>
+      <p class="hu__anote mono">
+        It won't start on its own. Nothing on this page makes noise unless you ask it to.
+      </p>
+    </div>
+
+    <Plate
+      src={barneyAwesome}
+      alt="Neil Patrick Harris reclining at a desk in a suit, photographed in black and white, captioned: I'm sorry, I can't hear you over the sound of how awesome I am."
+      caption="I'm aware of how this looks. That's rather the point."
+      size="intimate"
+    />
+  </div>
+</section>
+
+<style>
+  .hu__k { color: var(--gold); }
+  .hu__t { font-size: var(--t-title); margin-top: var(--s-4); }
+  .hu__prose { margin: var(--s-12) auto 0; }
+  .hu__prose p + p { margin-top: var(--s-6); }
+
+  .hu__anthem { margin-top: clamp(var(--s-16), 9vh, var(--s-24)); }
+  .hu__anthembox {
+    max-width: 52ch; margin-inline: auto;
+    padding: var(--s-8);
+    border: var(--hair) solid var(--ridge);
+    border-radius: var(--r-lg);
+    text-align: center;
+  }
+  .hu__ak { color: var(--gold); }
+  .hu__at { font-size: var(--t-head); margin-top: var(--s-3); }
+  .hu__ap { margin-top: var(--s-4); font-size: var(--t-small); color: var(--star-dim); }
+  .hu__ap em { font-family: var(--display); font-style: italic; }
+
+  .hu__play {
+    margin-top: var(--s-8);
+    display: inline-flex; align-items: center; gap: var(--s-3);
+    padding: 12px 24px; min-height: 44px;
+    background: color-mix(in oklab, var(--gold) 8%, transparent);
+    border: var(--hair) solid var(--gold);
+    border-radius: var(--r-full);
+    color: var(--gold); font-size: var(--t-small); cursor: pointer;
+    transition: background var(--d-base) var(--ease);
+  }
+  .hu__play:hover { background: color-mix(in oklab, var(--gold) 18%, transparent); }
+  .hu__playicon {
+    width: 0; height: 0; flex: none;
+    border-left: 9px solid currentColor;
+    border-top: 6px solid transparent; border-bottom: 6px solid transparent;
+  }
+  .hu__play[data-on='true'] .hu__playicon {
+    width: 9px; height: 12px; border: none;
+    background: linear-gradient(to right, currentColor 0 3px, transparent 3px 6px, currentColor 6px 9px);
+  }
+  .hu__anote { margin-top: var(--s-4); font-size: var(--t-micro); color: var(--dust-faint); }
+</style>

@@ -1,0 +1,99 @@
+---
+/**
+ * RECEIPT — the affordance the whole site is built on.
+ *
+ * Every claim carries one or more of these. Open it and you get the file, the
+ * line, and what it proves — on his GitHub, in his code. This is the same rule
+ * Sifarish enforces on itself at src/lib/compile/compiler.ts:284, where a bullet
+ * with zero citations throws rather than renders.
+ *
+ * Built on <details>, so it works with zero JavaScript, is keyboard-operable by
+ * default, and is announced correctly by screen readers.
+ */
+import type { Receipt } from '../content/types';
+
+interface Props {
+  receipts: Receipt[];
+  /** Label shown on the closed state. */
+  count?: boolean;
+}
+const { receipts, count = true } = Astro.props;
+---
+
+<details class="rc">
+  <summary class="rc__toggle">
+    <span class="rc__marker" aria-hidden="true"></span>
+    <span class="rc__label mono">
+      {count ? `${receipts.length} receipt${receipts.length === 1 ? '' : 's'}` : 'receipts'}
+    </span>
+  </summary>
+  <ul class="rc__list">
+    {receipts.map((r) => (
+      <li class="rc__item">
+        <a class="rc__src mono" href={r.href} target="_blank" rel="noopener noreferrer">
+          {r.label}
+          <svg class="rc__ext" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+            <path d="M2 8 L8 2 M4 2 h4 v4" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="square"/>
+          </svg>
+        </a>
+        <span class="rc__proves">{r.proves}</span>
+      </li>
+    ))}
+  </ul>
+</details>
+
+<style>
+  .rc { display: inline-block; margin-top: var(--s-3); }
+
+  .rc__toggle {
+    display: inline-flex; align-items: center; gap: var(--s-2);
+    cursor: pointer; list-style: none;
+    padding: 3px var(--s-3) 3px var(--s-2);
+    border: var(--hair) solid var(--ridge);
+    border-radius: var(--r-full);
+    background: color-mix(in oklab, var(--gold) 5%, transparent);
+    transition: border-color var(--d-fast) var(--ease), background var(--d-fast) var(--ease);
+  }
+  .rc__toggle::-webkit-details-marker { display: none; }
+  .rc__toggle:hover { border-color: var(--gold-deep); background: color-mix(in oklab, var(--gold) 10%, transparent); }
+
+  .rc__marker {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--gold);
+    flex: none;
+    transition: transform var(--d-base) var(--ease);
+  }
+  .rc[open] .rc__marker { transform: scale(2.1); background: var(--verify); }
+
+  .rc__label {
+    font-size: var(--t-micro);
+    color: var(--gold);
+    letter-spacing: 0.06em;
+  }
+
+  .rc__list {
+    list-style: none; padding: var(--s-4) 0 0; margin: 0;
+    display: flex; flex-direction: column; gap: var(--s-4);
+    max-width: 58ch;
+  }
+  .rc__item {
+    display: flex; flex-direction: column; gap: 3px;
+    padding-left: var(--s-4);
+    border-left: var(--hair) solid var(--ridge);
+  }
+  .rc__src {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: var(--t-micro);
+    color: var(--gold);
+    text-decoration: none;
+    width: fit-content;
+  }
+  .rc__src:hover { color: var(--gold-lit); text-decoration: underline; text-underline-offset: 3px; }
+  .rc__ext { opacity: 0.6; }
+  .rc__proves { font-size: var(--t-micro); line-height: 1.5; color: var(--dust); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .rc[open] .rc__list { animation: rc-in var(--d-base) var(--ease-out); }
+    @keyframes rc-in { from { opacity: 0; transform: translateY(-4px); } }
+  }
+</style>

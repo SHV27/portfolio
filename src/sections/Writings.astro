@@ -1,0 +1,139 @@
+---
+/**
+ * WRITINGS — PRANA and the galaxy-morphology paper.
+ *
+ * Placed high rather than buried at the bottom. Anthropic's own careers page
+ * says: "If you've done interesting independent research, written a thoughtful
+ * blog post, or contributed to open source, put that at the top of your resume."
+ * That is the closest thing to a primary source on what this audience values.
+ */
+import Receipt from '../components/Receipt.astro';
+import { src, repoUrl } from '../content/types';
+
+const LAYERS = [
+  { k: 'P', n: 'Physics-aligned hardware', d: 'Lowest joules per operation at each tier — photonic and analog in-memory accelerators, liquid cooling as the default rather than the upgrade.' },
+  { k: 'R', n: 'Right-sized intelligence', d: 'Route every query to the smallest model that clears its quality bar. Distillation, quantisation, sparsity, cascades.' },
+  { k: 'A', n: 'Adaptive scheduling', d: 'Most of the fleet is deferrable in time and movable in space. Schedule it against grid carbon, regional water stress, and demand for the exhaust heat.' },
+  { k: 'N', n: 'Negative-waste symbiosis', d: 'Plumb the building so its rejected heat has a customer — district heating, industrial pre-heat, greenhouses. Turn a compliance number into a revenue line.' },
+  { k: 'A', n: 'Accountability metrics', d: 'Retire PUE. Measure energy-reuse-per-token: the fraction of the energy behind each token that went on to serve a second human purpose.' },
+];
+---
+
+<section class="wr section" id="writings">
+  <div class="wrap">
+    <p class="label wr__k">Writing</p>
+    <h2 class="wr__t display">Things I've argued in public</h2>
+
+    <!-- ---- PRANA ------------------------------------------------------- -->
+    <article class="wr__paper">
+      <header class="wr__phead">
+        <h3 class="wr__pt display display--small">PRANA — A Layered Framework for Sustainable AI Compute</h3>
+        <p class="wr__pm mono">Position paper · July 2026 · 5 pages · 24 references</p>
+      </header>
+
+      <p class="wr__lead">
+        The whole paper turns on one reframe: <strong>computation does not consume energy, it relocates and
+        degrades it.</strong> A data centre turns almost all of its input electricity into low-grade heat, and
+        the water use is a design choice — evaporative cooling — not a requirement of computing. So the problem
+        is not consumption. It is <em>exergy misplacement</em>: we generate heat where it has no value, destroy
+        it at the cost of water and capital, and burn gas somewhere else to make the identical heat.
+      </p>
+
+      <ol class="wr__layers">
+        {LAYERS.map((l) => (
+          <li class="wr__layer">
+            <span class="wr__lk display display--small">{l.k}</span>
+            <div>
+              <span class="wr__ln">{l.n}</span>
+              <p class="wr__ld">{l.d}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+
+      <div class="wr__props">
+        <div class="wr__prop">
+          <h4 class="wr__ph">Follow-the-Cold routing</h4>
+          <p class="wr__pd">
+            The inversion of follow-the-sun. Heating demand is one of the most predictable loads on Earth and it
+            is hemispherically anti-correlated — January in Finland is July in Chile. So move deferrable work
+            toward wherever its waste heat currently displaces a fossil boiler. The round trip costs 100–200ms,
+            which a batch job does not notice. The carbon credit then includes the boilers you switched off,
+            which no existing scheduler models.
+          </p>
+        </div>
+        <div class="wr__prop">
+          <h4 class="wr__ph">The Compute Boiler</h4>
+          <p class="wr__pd">
+            A 1–50 MW facility sitting inside a district-heating network. It draws power when renewables are
+            over-supplying, does deferrable AI work, banks the resulting 55–65 °C heat in cheap water tanks, and
+            releases it on the evening demand peak. One asset sells three products — grid flexibility, heat, and
+            computation — against a single energy purchase.
+          </p>
+        </div>
+      </div>
+
+      <p class="wr__honest">
+        I argued against myself in section 3.2, because Jevons' paradox is the obvious objection and it deserves
+        an answer rather than a silence: efficiency alone slows the demand curve without bending it down. I also
+        killed orbital compute as a 2026 strategy in 3.4, despite it being the most exciting option in the paper,
+        because the launch economics do not work until roughly 2035. And I said plainly in the limitations that
+        both proposals are architectures with plausibility arguments behind them, not measured deployments.
+      </p>
+
+      <Receipt receipts={[{ label: 'PRANA-Sustainable-AI', href: repoUrl('PRANA-Sustainable-AI'), proves: 'The full paper, with all 24 references and the limitations section.' }]} />
+    </article>
+
+    <!-- ---- GALAXY PAPER ------------------------------------------------ -->
+    <article class="wr__paper">
+      <header class="wr__phead">
+        <h3 class="wr__pt display display--small">Label-Efficient Transfer Learning for Galaxy Morphology</h3>
+        <p class="wr__pm mono">Write-up · April 2026 · 10 references, 6 of them 2024–2025</p>
+      </header>
+      <p class="wr__lead">
+        Transfer learning on 17,736 real survey images, run at four labelling budgets to find where the curve
+        flattens. The chart and the finding are in the Data &amp; Signal chapter above — the short version is that
+        5% of the labels gets you 86% of the way, and the classes worth paying to annotate are the ambiguous
+        ones, not the rare ones.
+      </p>
+      <p class="wr__honest">
+        Two things I'd flag if you read it. I ran a single seed, and said so — multi-seed with error bars is the
+        obvious next step and I haven't done it. And I've retitled it here: the original said
+        "semi-supervised", but the pseudo-labelling stage is future work and was never run. A title that
+        overclaims is exactly the kind of thing the rest of this page is about not doing.
+      </p>
+      <Receipt receipts={[{ label: 'galaxy-morphology-transfer', href: src('galaxy-morphology-transfer', 'README.md'), proves: 'Method, splits, per-class recall and the limitations I listed myself.' }]} />
+    </article>
+  </div>
+</section>
+
+<style>
+  .wr__k { color: var(--gold); }
+  .wr__t { font-size: var(--t-title); margin-top: var(--s-4); }
+
+  .wr__paper { margin-top: clamp(var(--s-16), 9vh, var(--s-24)); padding-top: var(--s-8); border-top: var(--hair) solid var(--ridge); }
+  .wr__pt { font-size: var(--t-head); max-width: 24ch; }
+  .wr__pm { margin-top: var(--s-3); font-size: var(--t-micro); color: var(--dust); letter-spacing: 0.05em; }
+
+  .wr__lead { margin-top: var(--s-8); max-width: var(--measure); color: var(--star-dim); font-size: var(--t-sub); line-height: 1.55; }
+  .wr__lead strong { color: var(--star); }
+  .wr__lead em { color: var(--gold); font-style: italic; font-family: var(--display); }
+
+  .wr__layers { list-style: none; padding: 0; margin: var(--s-12) 0 0; }
+  .wr__layer {
+    display: grid; grid-template-columns: 3rem 1fr; gap: var(--s-6);
+    padding: var(--s-5) 0; border-top: var(--hair) solid var(--ridge);
+    align-items: baseline;
+  }
+  .wr__layers li:last-child { border-bottom: var(--hair) solid var(--ridge); }
+  .wr__lk { font-size: 1.9rem; color: var(--gold); line-height: 1; }
+  .wr__ln { color: var(--star); font-weight: 600; font-size: var(--t-small); }
+  .wr__ld { margin-top: var(--s-2); font-size: var(--t-small); color: var(--dust); max-width: 58ch; line-height: 1.55; }
+
+  .wr__props { margin-top: var(--s-12); display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--s-12); }
+  .wr__prop { border-left: 2px solid var(--gold); padding-left: var(--s-6); }
+  .wr__ph { font-family: var(--display); font-variation-settings: 'opsz' 18; font-size: 1.15rem; font-weight: 500; color: var(--gold); }
+  .wr__pd { margin-top: var(--s-3); font-size: var(--t-small); line-height: 1.6; color: var(--star-dim); }
+
+  .wr__honest { margin-top: var(--s-12); max-width: var(--measure); color: var(--dust); font-size: var(--t-small); line-height: 1.65; }
+</style>

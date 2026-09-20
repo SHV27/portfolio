@@ -1,0 +1,116 @@
+---
+/**
+ * §1 — THE THESIS.
+ *
+ * VOICE: first person, always. This is Shaurya speaking about his own work. A
+ * portfolio written in the third person about yourself reads like a stranger
+ * wrote it, which is the opposite of the point.
+ */
+import Receipt from '../components/Receipt.astro';
+import Plate from '../components/Plate.astro';
+import { src } from '../content/types';
+import starkGenius from '../assets/aura/09-stark-genius.jpg';
+
+const PROOFS = [
+  {
+    project: 'Sifarish',
+    line: 'A résumé line with no citation throws an exception. Not a warning — a thrown error, at the one gate every line has to pass through.',
+    receipts: [{ label: 'compiler.ts:284', href: src('sifarish', 'src/lib/compile/compiler.ts', [284, 285]), proves: 'CompileError("I1 violation…") on a bullet with an empty ledgerIds array.' }],
+  },
+  {
+    project: 'Aaina',
+    line: 'I refused to output a compatibility score, and wrote a whole chapter explaining why — because the research says that number predicts nothing.',
+    receipts: [{ label: 'sources.ts', href: src('aaina', 'src/engine/sources.ts'), proves: 'Joel, Eastwick & Finkel 2017 — over a hundred measures predicted none of the dyad-specific variance.' }],
+  },
+  {
+    project: 'Braillix',
+    line: 'My braille checker has three verdicts, not two. It will say “unchecked — this proves nothing” rather than let a gap in itself read as a pass.',
+    receipts: [{ label: 'roundtrip.ts', href: src('braillix', 'app/src/core/roundtrip.ts'), proves: 'agrees | differs | unchecked, with the reasoning kept in the file.' }],
+  },
+  {
+    project: 'Sehat Saarthi',
+    line: 'I fed my own live app an MRI of a healthy brain, got back “80% dementia”, and deleted two working models that night — including the one descended from a hackathon I had won.',
+    receipts: [{ label: 'MODEL_ANALYSIS.md', href: src('sehat-saarthi', 'docs/MODEL_ANALYSIS.md'), proves: 'The test, the finding, and the decision to remove both modules from the live app.' }],
+  },
+];
+---
+
+<section class="section" id="thesis">
+  <div class="wrap">
+    <p class="label th__k">The short version</p>
+
+    <h2 class="th__claim display display--mid">
+      Most people building with AI are trying to make it <em>say</em> more.
+      <span class="th__turn">I build systems that <strong>can't lie</strong>.</span>
+    </h2>
+
+    <p class="th__body prose">
+      It shows up in everything I make, on projects that have nothing to do with each other — a job-hunt tool, a
+      relationship assessment, a braille display for blind students, a screening assistant for rural clinics. Same
+      instinct every time: make the dishonest output <em>structurally impossible</em>, then prove it with a test.
+      Four of them, from four different codebases:
+    </p>
+
+    <ol class="th__proofs">
+      {PROOFS.map((p, i) => (
+        <li class="th__proof reveal">
+          <span class="th__n mono">{String(i + 1).padStart(2, '0')}</span>
+          <div class="th__pbody">
+            <span class="th__project">{p.project}</span>
+            <p class="th__line">{p.line}</p>
+            <Receipt receipts={p.receipts} />
+          </div>
+        </li>
+      ))}
+    </ol>
+
+    <p class="th__close prose">
+      I care about this because the gap between a demo and a product is entirely made of the things a system
+      refuses to claim. Evals, guardrails, honest uncertainty — that is the work I want to be doing, and it is
+      already how I build when nobody is watching.
+    </p>
+
+    <Plate
+      src={starkGenius}
+      alt="Tony Stark at a workbench with the arc reactor lit, captioned: genius is undeniable."
+      caption="Stark is the reason I started. He solved anything he pointed himself at, and he had JARVIS. I have Claude Code, and I can too."
+      size="intimate"
+    />
+  </div>
+</section>
+
+<style>
+  .th__k { color: var(--gold); }
+  .th__claim {
+    font-size: clamp(1.6rem, 3.6vw, 2.9rem);
+    margin-top: var(--s-6);
+    max-width: 24ch;
+    color: var(--dust);
+  }
+  .th__claim em { font-style: normal; }
+  .th__turn { display: block; margin-top: var(--s-4); color: var(--star); }
+  .th__turn strong { font-weight: 700; color: var(--gold); font-style: italic; }
+
+  .th__body { margin-top: var(--s-12); }
+  .th__body em { color: var(--star); font-style: italic; }
+
+  .th__proofs { list-style: none; padding: 0; margin: var(--s-12) 0 0; }
+  .th__proof {
+    display: grid; grid-template-columns: auto 1fr; gap: var(--s-6);
+    padding: var(--s-8) 0; border-top: var(--hair) solid var(--ridge);
+  }
+  .th__proofs li:last-child { border-bottom: var(--hair) solid var(--ridge); }
+  .th__n { color: var(--gold-deep); font-size: var(--t-micro); padding-top: 0.45em; }
+  .th__project {
+    font-family: var(--display); font-variation-settings: 'opsz' 18;
+    font-size: 1.05rem; color: var(--gold);
+  }
+  .th__line { margin-top: var(--s-2); color: var(--star-dim); max-width: 60ch; }
+
+  .th__close { margin-top: var(--s-12); }
+
+  @media (max-width: 640px) {
+    .th__proof { grid-template-columns: 1fr; gap: var(--s-3); }
+    .th__n { padding-top: 0; }
+  }
+</style>

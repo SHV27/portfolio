@@ -1,0 +1,127 @@
+---
+import '../styles/base.css';
+import Cosmos from '../components/Cosmos.astro';
+import ogImage from '../assets/photos/01-bridge-colour.jpg';
+
+interface Props { title: string; description: string; }
+const { title, description } = Astro.props;
+const og = new URL(ogImage.src, Astro.site).href;
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={Astro.site} />
+
+  <!-- The two faces in the LCP element, preloaded. Latin only: preload ignores
+       unicode-range, so preloading a Devanagari subset would be wasted bytes. -->
+  <link rel="preload" href="/fonts/bodoni-moda-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/schibsted-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin />
+
+  <meta property="og:type" content="profile" />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:image" content={og} />
+  <meta property="og:url" content={Astro.site} />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content={og} />
+  <meta name="theme-color" content="#08080B" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+  <script type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: 'Shaurya Verma',
+    jobTitle: 'Agentic-AI Engineer',
+    email: 'mailto:shaurya.verma2705@gmail.com',
+    url: 'https://github.com/SHV27',
+    sameAs: ['https://github.com/SHV27', 'https://www.linkedin.com/in/shaurya-verma-94a607329/'],
+    alumniOf: { '@type': 'CollegeOrUniversity', name: 'Thapar Institute of Engineering & Technology' },
+    address: { '@type': 'PostalAddress', addressLocality: 'Patiala', addressRegion: 'Punjab', addressCountry: 'IN' },
+  })} />
+</head>
+
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <Cosmos />
+  <div class="grain" aria-hidden="true"></div>
+
+  <main id="main">
+    <slot />
+  </main>
+
+  <script>
+    /* The site's ONLY script. Two jobs, both progressive enhancements:
+       reveal-on-scroll, and the audio toggle. Neither is required for the page
+       to be complete — content is visible by default (see base.css .reveal). */
+
+    // 1 — Reveal. IntersectionObserver, unobserved after firing. No scroll handler.
+    const motionOK = window.matchMedia('(prefers-reduced-motion: no-preference)').matches;
+    if (motionOK && 'IntersectionObserver' in window) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+          }
+        },
+        { rootMargin: '0px 0px -8% 0px', threshold: 0.06 }
+      );
+      document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+    } else {
+      document.querySelectorAll('.reveal').forEach((el) => el.classList.add('is-in'));
+    }
+
+    // 2 — Audio. Opt-in only, never autoplay.
+    //     WCAG 2.1.4.2 (Level A) makes audio that plays automatically for more
+    //     than 3 seconds without a pause mechanism a failure of the WHOLE page,
+    //     and every current browser blocks unmuted autoplay for a first-time
+    //     visitor anyway. So: silent until asked, one visible control, and the
+    //     choice is remembered. See docs/AUDIO.md.
+    const btn = document.querySelector<HTMLButtonElement>('[data-anthem]');
+    const audio = document.querySelector<HTMLAudioElement>('#anthem');
+    if (btn && audio) {
+      const KEY = 'sv-anthem';
+      const setUI = (on: boolean) => {
+        btn.setAttribute('aria-pressed', String(on));
+        btn.dataset.on = String(on);
+        const t = btn.querySelector('[data-anthem-label]');
+        if (t) t.textContent = on ? 'Pause the anthem' : 'Play the anthem';
+      };
+      // A stored ON does not autoplay — browsers would refuse, and it would
+      // ambush a returning visitor. It only pre-arms the control.
+      setUI(false);
+
+      btn.addEventListener('click', async () => {
+        if (audio.paused) {
+          try {
+            audio.volume = 0;
+            await audio.play();               // inside the gesture: always allowed
+            setUI(true);
+            try { localStorage.setItem(KEY, '1'); } catch {}
+            const target = 0.7, step = target / 24;   // fade in, never cut in
+            const t = setInterval(() => {
+              audio.volume = Math.min(target, audio.volume + step);
+              if (audio.volume >= target) clearInterval(t);
+            }, 40);
+          } catch {
+            setUI(false);
+          }
+        } else {
+          audio.pause();
+          setUI(false);
+          try { localStorage.setItem(KEY, '0'); } catch {}
+        }
+      });
+
+      audio.addEventListener('ended', () => setUI(false));
+      // Duck when the tab is hidden — nobody wants a forgotten tab singing.
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden && !audio.paused) { audio.pause(); setUI(false); }
+      });
+    }
+  </script>
+</body>
+</html>

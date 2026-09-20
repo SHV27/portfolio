@@ -1,0 +1,135 @@
+---
+/**
+ * THE INTERACTIVE PROOF.
+ *
+ * Sifarish's whole claim is that one dossier of true facts produces different
+ * résumés for different companies — and writes down why. Describing that is
+ * boring. Letting someone flip between the two compiled pages, and watch the
+ * facts reorder themselves, is the argument.
+ *
+ * Built on two radio inputs so it works with no JavaScript at all, is keyboard
+ * operable with arrow keys by default, and is announced correctly. The only
+ * script is the one that swaps the reasoning text.
+ */
+import { Image } from 'astro:assets';
+import pageA from '../assets/shots/sifarish/page-a-babaclick.png';
+import pageB from '../assets/shots/sifarish/page-b-ngo.png';
+
+const CASES = [
+  {
+    id: 'a',
+    company: 'A start-up that says it cares about aptitude',
+    order: ['Education', 'Achievements', 'Projects'],
+    why: 'They wrote that they screen on reasoning ability. So the NTSE scholarship and the board results lead — proof of aptitude, in their words, not ours.',
+    img: pageA,
+    alt: 'A compiled one-page résumé ordered Education, then Achievements, then Projects, with the NTSE scholarship near the top.',
+  },
+  {
+    id: 'b',
+    company: 'An NGO hiring for social impact',
+    order: ['Projects', 'Positions of Responsibility', 'Achievements'],
+    why: 'Same facts, same dossier. Braillix and Sehat Saarthi lead, volunteering is promoted, and the education section is dropped entirely — because this posting never asked.',
+    img: pageB,
+    alt: 'The same résumé recompiled, ordered Projects, then Positions of Responsibility, then Achievements, with no education section.',
+  },
+];
+---
+
+<div class="dt">
+  <div class="dt__head">
+    <p class="label dt__label">Try it — one dossier, two companies</p>
+    <p class="dt__hint">Nothing is rewritten between these two. Only re-decided.</p>
+  </div>
+
+  <div class="dt__switch" role="radiogroup" aria-label="Choose a company">
+    {CASES.map((c, i) => (
+      <>
+        <input
+          type="radio" name="dossier" id={`dt-${c.id}`} value={c.id}
+          class="dt__radio" checked={i === 0}
+        />
+        <label class="dt__opt" for={`dt-${c.id}`}>{c.company}</label>
+      </>
+    ))}
+  </div>
+
+  <div class="dt__stage">
+    {CASES.map((c) => (
+      <figure class="dt__panel" data-case={c.id}>
+        <div class="dt__page">
+          <Image src={c.img} alt={c.alt} widths={[420, 660]} sizes="(max-width:760px) 88vw, 420px" loading="lazy" decoding="async" format="avif" />
+        </div>
+        <figcaption class="dt__meta">
+          <ol class="dt__order">
+            {c.order.map((s, i) => (
+              <li><span class="mono dt__oi">{i + 1}</span>{s}</li>
+            ))}
+          </ol>
+          <p class="dt__why">{c.why}</p>
+        </figcaption>
+      </figure>
+    ))}
+  </div>
+</div>
+
+<style>
+  .dt {
+    margin-block: var(--s-16);
+    padding: var(--s-8);
+    border: var(--hair) solid var(--ridge);
+    border-radius: var(--r-lg);
+    background: color-mix(in oklab, var(--deep) 70%, transparent);
+  }
+  .dt__label { color: var(--gold); }
+  .dt__hint { margin-top: var(--s-2); font-size: var(--t-small); color: var(--dust); }
+
+  .dt__switch { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-top: var(--s-6); }
+  .dt__radio { position: absolute; opacity: 0; pointer-events: none; }
+  .dt__opt {
+    cursor: pointer;
+    padding: var(--s-3) var(--s-6);
+    border: var(--hair) solid var(--ridge);
+    border-radius: var(--r-full);
+    font-size: var(--t-small);
+    color: var(--star-dim);
+    transition: border-color var(--d-base) var(--ease), color var(--d-base) var(--ease), background var(--d-base) var(--ease);
+  }
+  .dt__opt:hover { border-color: var(--gold-deep); color: var(--star); }
+  .dt__radio:checked + .dt__opt {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: color-mix(in oklab, var(--gold) 10%, transparent);
+  }
+  .dt__radio:focus-visible + .dt__opt { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+  .dt__stage { margin-top: var(--s-8); position: relative; }
+  .dt__panel { display: none; grid-template-columns: minmax(0, 420px) 1fr; gap: var(--s-8); align-items: start; margin: 0; }
+
+  /* Pure-CSS panel switching, tied to the radios. Works with JS disabled. */
+  .dt:has(#dt-a:checked) .dt__panel[data-case='a'],
+  .dt:has(#dt-b:checked) .dt__panel[data-case='b'] { display: grid; }
+
+  .dt__page {
+    border-radius: var(--r-md); overflow: hidden;
+    outline: var(--hair) solid var(--ridge); outline-offset: -1px;
+    box-shadow: var(--lift-2);
+    background: #F7F4EC;
+  }
+  .dt__page :global(img) { width: 100%; height: auto; }
+
+  .dt__order { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: var(--s-3); }
+  .dt__order li { display: flex; align-items: baseline; gap: var(--s-3); font-size: var(--t-small); color: var(--star); }
+  .dt__oi { color: var(--gold-deep); font-size: var(--t-micro); }
+  .dt__why { margin-top: var(--s-6); font-size: var(--t-small); line-height: 1.6; color: var(--dust); max-width: 46ch; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .dt__panel { animation: dt-in var(--d-base) var(--ease-out); }
+    @keyframes dt-in { from { opacity: 0; transform: translateY(6px); } }
+  }
+
+  @media (max-width: 760px) {
+    .dt { padding: var(--s-6); }
+    .dt__panel { grid-template-columns: 1fr; }
+    .dt__opt { padding: var(--s-2) var(--s-4); font-size: var(--t-micro); }
+  }
+</style>

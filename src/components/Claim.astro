@@ -1,0 +1,21 @@
+---
+/** A sentence that asserts something, with its evidence attached. */
+import Receipt from './Receipt.astro';
+import type { Claim } from '../content/types';
+interface Props { claim: Claim; as?: 'li' | 'div'; }
+const { claim, as = 'li' } = Astro.props;
+const Tag = as;
+---
+<Tag class="claim">
+  <p class="claim__text">{claim.text}</p>
+  <Receipt receipts={claim.receipts} />
+</Tag>
+<style>
+  .claim { list-style: none; padding-left: var(--s-6); position: relative; }
+  .claim + .claim { margin-top: var(--s-8); }
+  .claim::before {
+    content: ''; position: absolute; left: 0; top: 0.62em;
+    width: var(--s-3); height: var(--hair); background: var(--gold-deep);
+  }
+  .claim__text { color: var(--star-dim); max-width: var(--measure); }
+</style>

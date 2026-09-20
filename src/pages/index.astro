@@ -1,0 +1,170 @@
+---
+/**
+ * THE SCROLL.
+ *
+ * Project order is HIS, from the brief, and every one gets equal space:
+ *   01 Sifarish · 02 Aaina · 03 Braillix · 04 Data & Signal · 05 the slot
+ *   06 Sehat Saarthi · 07 Gloaming
+ * Writings sits high — Anthropic's careers page says to put independent
+ * research at the top. No separate résumé section: the page IS the résumé.
+ *
+ * Section rhythm per docs/ART-DIRECTION.md: dense reading → full-bleed plate →
+ * dense reading → interactive → … Never two full-bleed moments back to back.
+ */
+import Base from '../layouts/Base.astro';
+import TitleCard from '../sections/TitleCard.astro';
+import Thesis from '../sections/Thesis.astro';
+import StarBirth from '../sections/StarBirth.astro';
+import ProjectCase from '../sections/ProjectCase.astro';
+import Analytics from '../sections/Analytics.astro';
+import Uruthi from '../sections/Uruthi.astro';
+import Writings from '../sections/Writings.astro';
+import Human from '../sections/Human.astro';
+import Closing from '../sections/Closing.astro';
+import Plate from '../components/Plate.astro';
+import DossierToggle from '../components/DossierToggle.astro';
+import BlackHole from '../components/BlackHole.astro';
+
+import { SIFARISH, AAINA, BRAILLIX } from '../content/projects';
+import { SEHAT, GLOAMING } from '../content/projects-more';
+import { SHOTS } from '../content/shots';
+
+import srkIconic from '../assets/aura/01-srk-iconic.jpg';
+import starkVillains from '../assets/aura/02-stark-villains.jpg';
+import lockIn from '../assets/aura/10-built-in-silence.jpg';
+import fuckNormal from '../assets/aura/05-fuck-normal-magic.jpg';
+import bridgeColour from '../assets/photos/01-bridge-colour.jpg';
+
+import rho from '../assets/space/rho-ophiuchi.jpg';
+import pillars from '../assets/space/pillars.jpg';
+import westerlund from '../assets/space/westerlund2.jpg';
+import horsehead from '../assets/space/horsehead.jpg';
+---
+<Base
+  title="Shaurya Verma — I build AI systems that can't lie"
+  description="Agentic-AI engineer, final year at Thapar. Three systems running in production: a résumé compiler that cannot cite what it cannot prove, an assessment that refuses to score you, and maths-to-braille that runs entirely offline. Every number on this page opens to the code behind it. Open for internship from January 2027."
+>
+  <TitleCard />
+
+  <section class="section">
+    <div class="wrap">
+      <Plate
+        src={srkIconic}
+        alt="Shah Rukh Khan in a tuxedo on a red carpet, overlaid with the words: Everything I do gotta be iconic cause I'm me."
+        caption="This one is printed and stuck on my wall. It has been there a while."
+        size="intimate"
+      />
+    </div>
+  </section>
+
+  <Thesis />
+
+  <StarBirth
+    plate={rho}
+    credit="Rho Ophiuchi cloud complex · NASA, ESA, CSA, STScI, K. Pontoppidan (STScI), A. Pagan (STScI) · CC BY 4.0"
+    kicker="Rho Ophiuchi — 390 light years away"
+    line="The closest place to Earth where stars are being born."
+    sub="Those red streaks are jets, fired by stars that switched on within the last few hundred thousand years. Nothing here is an illustration — it is a photograph, taken by Webb, of the thing actually happening. Which is roughly the standard I hold the rest of this page to."
+    focus="52% 42%"
+    height="tall"
+  />
+
+  <section class="section" id="what-runs">
+    <div class="wrap">
+      <p class="label" style="color:var(--gold)">Seven builds</p>
+      <h2 class="display display--mid" style="font-size:var(--t-title);margin-top:var(--s-6);max-width:18ch">
+        Nobody asked me to make any of these.
+      </h2>
+      <p class="prose" style="margin-top:var(--s-8)">
+        Three of them are running right now at URLs you can open. Not prototypes, not notebooks, not a demo
+        video — live software a stranger can use, built alongside a full degree. Every one started the same way:
+        I saw something broken and couldn't leave it alone.
+      </p>
+
+      <Plate
+        src={starkVillains}
+        alt="Robert Downey Jr. sitting on a film set holding a phone, overlaid with the words: I'm just like him, I create my own villains (problems) then kill (solve) them."
+        caption="An uncomfortably accurate description of how I pick what to work on."
+        size="intimate"
+      />
+
+      <DossierToggle />
+    </div>
+  </section>
+
+  <ProjectCase project={SIFARISH} index="Project 01" shots={SHOTS} />
+
+  <BlackHole />
+
+  <ProjectCase project={AAINA} index="Project 02" shots={SHOTS} />
+
+  <StarBirth
+    plate={pillars}
+    credit="The Pillars of Creation, Eagle Nebula · NASA, ESA and the Hubble Heritage Team (STScI/AURA) · CC BY 4.0"
+    kicker="The Pillars of Creation"
+    line="Columns of gas, light-years tall, collapsing into new stars."
+    sub="Hubble, 2015. The pillars are being eroded by the very stars they are giving birth to — the kind of detail you only find by staring at one thing for a very long time."
+    focus="50% 38%"
+    height="mid"
+  />
+
+  <ProjectCase project={BRAILLIX} index="Project 03" shots={SHOTS}>
+    <Plate
+      src={lockIn}
+      alt="Iron Man standing in a workshop, captioned: Lock in — build yourself."
+      caption="Braillix was fifty-one hours start to finish, including tearing the whole thing down halfway and rebuilding it. This is on my wall, and it is roughly what that felt like."
+      size="intimate"
+    />
+  </ProjectCase>
+
+  <Analytics />
+
+  <StarBirth
+    plate={westerlund}
+    credit="Westerlund 2 · NASA, ESA, the Hubble Heritage Team (STScI/AURA), A. Nota (ESA/STScI) and the Westerlund 2 Science Team · CC BY 4.0"
+    kicker="Westerlund 2"
+    line="Three thousand stars, all roughly two million years old."
+    sub="A cluster caught in the act of switching on. Hubble's twenty-fifth-anniversary image."
+    focus="50% 46%"
+    height="mid"
+  />
+
+  <Uruthi />
+
+  <ProjectCase project={SEHAT} index="Project 06" shots={SHOTS} />
+
+  <ProjectCase project={GLOAMING} index="Project 07" shots={SHOTS}>
+    <Plate
+      src={fuckNormal}
+      alt="A luminous figure dissolving into a trail of stardust, with hand-lettered text reading: Fuck normal, I want magic."
+      caption="I had a working game and I threw it away, because working is not the bar. This is also on the wall."
+      size="intimate"
+    />
+  </ProjectCase>
+
+  <Writings />
+
+  <section class="section">
+    <div class="wrap">
+      <Plate
+        src={bridgeColour}
+        alt="Shaurya Verma on a riverside walkway in sunglasses and a patterned shirt, one hand pushed back through his hair, bright daylight behind him."
+        size="standard"
+      />
+    </div>
+  </section>
+
+  <StarBirth
+    plate={horsehead}
+    credit="The Horsehead Nebula in infrared · NASA, ESA and the Hubble Heritage Team (STScI/AURA) · CC BY 4.0"
+    kicker="The Horsehead, in infrared"
+    line="Look at it in a different band of light and it stops being a shadow."
+    sub="In visible light the Horsehead is a dark silhouette. In infrared it turns out to be a structure, lit from within. Same object, different instrument — which is most of what analysis is."
+    focus="50% 44%"
+    height="mid"
+  />
+
+  <Human />
+
+  <Closing />
+</Base>

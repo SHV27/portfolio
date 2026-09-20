@@ -1,0 +1,138 @@
+---
+/**
+ * THE CLOSING.
+ *
+ * Order is deliberate: "I am God" lands AFTER the evidence, where it reads as a
+ * punchline rather than a claim. Then the last photograph of him. Then the Om
+ * Shanti Om line, which is cosmic, Indian, and about wanting something badly —
+ * the right final note before an email address.
+ */
+import Plate from '../components/Plate.astro';
+import iAmGod from '../assets/aura/04-i-am-god.jpg';
+import birthday from '../assets/photos/05-birthday-bw.jpg';
+import universe from '../assets/aura/07-om-shanti-om-universe.jpg';
+import moneyball from '../assets/aura/11-read-now-list.jpg';
+---
+
+<section class="cl section" id="contact">
+  <div class="wrap">
+    <Plate
+      src={moneyball}
+      alt="Brad Pitt as Billy Beane in Moneyball, sitting in a stadium, captioned: watch me become everything i said i would."
+      caption="Moneyball — a film about throwing out the scouts' gut feel and measuring instead. I didn't pick it for that reason, but it turns out to be the entire argument of this page."
+      size="intimate"
+    />
+
+    <div class="cl__prose prose">
+      <p>
+        So — that's the work. Seven things I built because I wanted them to exist, three of them running right
+        now at URLs you can open, and every number on this page sitting one click away from the code that
+        produced it.
+      </p>
+      <p>
+        <strong>I'm free from January 2027.</strong> I'm looking for a team building frontier AI systems where
+        "it works" has to be provable — agents, retrieval, evals, guardrails. India, Europe, the US, or
+        remote-first; wherever the most interesting agentic work is happening.
+      </p>
+      <p>
+        And a request, which I mean sincerely: <strong>go look at my GitHub directly rather than trusting this
+        page.</strong> Not because the page is wrong — I've been careful — but because I keep building, and by the
+        time you read this there will be something on there that isn't here yet. This portfolio is already
+        slightly behind me. That's the intended state.
+      </p>
+    </div>
+
+    <Plate
+      src={iAmGod}
+      alt="The words 'I am God' set in distressed blackletter type on a black ground."
+      caption="Also on the wall. I've put it here, at the end, rather than at the top — you've now seen the receipts, so you can decide for yourself how seriously to take it."
+      size="intimate"
+    />
+
+    <Plate
+      src={birthday}
+      alt="Shaurya Verma standing beside a staircase in an all-white outfit, arms folded, photographed in black and white, with birthday balloons softly out of focus behind him."
+      caption="Thanks for reading this far. Genuinely — most people don't."
+      size="standard"
+    />
+
+    <div class="cl__contact">
+      <h2 class="cl__t display">Let's talk.</h2>
+      <p class="cl__avail mono">Open for internship from January 2027</p>
+
+      <ul class="cl__links">
+        <li>
+          <a class="cl__link" href="mailto:shaurya.verma2705@gmail.com">
+            <span class="cl__lk label">Email</span>
+            <span class="cl__lv">shaurya.verma2705@gmail.com</span>
+          </a>
+        </li>
+        <li>
+          <a class="cl__link" href="https://github.com/SHV27" target="_blank" rel="noopener noreferrer">
+            <span class="cl__lk label">GitHub — start here</span>
+            <span class="cl__lv">github.com/SHV27</span>
+          </a>
+        </li>
+        <li>
+          <a class="cl__link" href="https://www.linkedin.com/in/shaurya-verma-94a607329/" target="_blank" rel="noopener noreferrer">
+            <span class="cl__lk label">LinkedIn</span>
+            <span class="cl__lv">shaurya-verma-94a607329</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <Plate
+      src={universe}
+      alt="A halftone-treated poster of Shah Rukh Khan with his arms outstretched, captioned: If you really want something the whole universe helps you get it. From the film Om Shanti Om, directed by Farah Khan, 2007."
+      caption="Om Shanti Om, 2007. I've believed this for a long time, and the evidence so far is reasonably encouraging."
+      size="intimate"
+    />
+  </div>
+
+  <footer class="cl__foot">
+    <div class="wrap cl__footin">
+      <p class="mono">Shaurya Verma · Patiala, Punjab, India</p>
+      <p class="mono cl__credit">
+        Deep-field imagery: ESA/Hubble &amp; ESA/Webb, CC BY 4.0. Starfield and black hole generated in-browser.
+        Type: Bodoni Moda, Schibsted Grotesk, JetBrains Mono, Tiro Devanagari Hindi — all SIL OFL.
+      </p>
+    </div>
+  </footer>
+</section>
+
+<style>
+  .cl__prose { margin: clamp(var(--s-12), 8vh, var(--s-24)) auto; }
+  .cl__prose p + p { margin-top: var(--s-6); }
+  .cl__prose strong { color: var(--star); }
+
+  .cl__contact { margin: clamp(var(--s-16), 10vh, var(--s-32)) auto; max-width: 62ch; }
+  .cl__t { font-size: var(--t-title); }
+  .cl__avail { margin-top: var(--s-4); color: var(--verify); font-size: var(--t-micro); letter-spacing: 0.08em; }
+
+  .cl__links { list-style: none; padding: 0; margin: var(--s-12) 0 0; }
+  .cl__link {
+    display: flex; flex-direction: column; gap: 3px;
+    padding: var(--s-6) 0;
+    border-top: var(--hair) solid var(--ridge);
+    text-decoration: none;
+    transition: border-color var(--d-base) var(--ease);
+  }
+  .cl__links li:last-child .cl__link { border-bottom: var(--hair) solid var(--ridge); }
+  .cl__link:hover { border-color: var(--gold); }
+  .cl__lk { color: var(--dust); }
+  .cl__lv {
+    font-family: var(--display); font-variation-settings: 'opsz' 24;
+    font-size: clamp(1.15rem, 2.4vw, 1.75rem);
+    color: var(--star);
+    transition: color var(--d-base) var(--ease);
+  }
+  .cl__link:hover .cl__lv { color: var(--gold); }
+
+  .cl__foot { margin-top: clamp(var(--s-16), 9vh, var(--s-24)); padding-block: var(--s-8); border-top: var(--hair) solid var(--ridge); }
+  .cl__footin { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--s-6); }
+  .cl__footin p { font-size: var(--t-micro); color: var(--dust-faint); }
+  .cl__credit { max-width: 62ch; text-align: right; }
+
+  @media (max-width: 760px) { .cl__credit { text-align: left; } }
+</style>

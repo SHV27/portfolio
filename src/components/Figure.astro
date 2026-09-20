@@ -1,0 +1,22 @@
+---
+/** A headline number that can be opened to its source. */
+import Receipt from './Receipt.astro';
+import type { Figure } from '../content/types';
+interface Props { figure: Figure; }
+const { figure } = Astro.props;
+---
+<div class="fig">
+  <div class="fig__value display display--small tabular">
+    {figure.value}{figure.unit && <span class="fig__unit">{figure.unit}</span>}
+  </div>
+  <div class="fig__label">{figure.label}</div>
+  {figure.derivable && <div class="fig__derived mono">counted from source</div>}
+  <Receipt receipts={figure.receipts} count={false} />
+</div>
+<style>
+  .fig { padding: var(--s-6) 0; border-top: var(--hair) solid var(--ridge); }
+  .fig__value { font-size: clamp(1.9rem, 3.6vw, 2.9rem); color: var(--gold); line-height: 1; }
+  .fig__unit { font-size: 0.5em; color: var(--gold-deep); margin-left: 2px; }
+  .fig__label { margin-top: var(--s-3); font-size: var(--t-small); color: var(--star-dim); line-height: 1.45; max-width: 34ch; }
+  .fig__derived { margin-top: var(--s-2); font-size: var(--t-micro); color: var(--verify); letter-spacing: 0.06em; }
+</style>

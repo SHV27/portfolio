@@ -1,0 +1,18 @@
+---
+interface Props { index?: string; title: string; native?: string; lede?: string; id?: string; }
+const { index, title, native, lede, id } = Astro.props;
+---
+<header class="sh reveal" id={id}>
+  {index && <div class="sh__i label">{index}</div>}
+  <h2 class="sh__t display display--mid">
+    {title}{native && <span class="sh__n deva">{native}</span>}
+  </h2>
+  {lede && <p class="sh__l lede">{lede}</p>}
+</header>
+<style>
+  .sh { margin-bottom: var(--s-12); }
+  .sh__i { margin-bottom: var(--s-4); }
+  .sh__t { font-size: var(--t-title); }
+  .sh__n { font-size: 0.5em; color: var(--gold); margin-left: 0.4em; vertical-align: 0.2em; }
+  .sh__l { margin-top: var(--s-6); }
+</style>
