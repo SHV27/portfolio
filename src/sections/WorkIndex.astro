@@ -14,6 +14,20 @@ import { Image } from 'astro:assets';
 import { ORDER } from '../content/all';
 import { SHOTS } from '../content/shots';
 import analyticsShot from '../assets/shots/astro/frbprint.png';
+import jarvisPlate from '../assets/shots/jarvis/hud.png';
+
+/* JARVIS is a private Windows desktop assistant. There is no public build and
+   no screenshot of it anywhere, so the row was rendering with an empty media
+   column. Shaurya supplied this instead — it is the Iron Man HUD, the thing he
+   was actually building toward, and it is labelled as exactly that rather than
+   dressed up as a capture of his software. The site's rule is that a picture
+   may never imply a claim the repo cannot back; a named piece of fan art,
+   called a named piece of fan art, breaks nothing. */
+const JARVIS_PLATE = {
+  img: jarvisPlate,
+  alt: 'The J.A.R.V.I.S. wordmark inside a cyan holographic interface ring, set over Iron Man blueprint schematics. Fan art of the fictional assistant, not a screenshot of the software.',
+  note: 'The fictional one. Mine runs on Windows and has never been public.',
+};
 
 // The analytics chapter is not a repo-backed Project, so it is inserted by hand
 // at the position the brief gives it — fifth, right after Braillix.
@@ -30,7 +44,9 @@ const ROWS = [
   ...ORDER.slice(0, 4).map((p) => ({
     id: p.id, href: `/projects/${p.id}`, name: p.name, native: p.native,
     hook: p.hook, year: p.year, live: p.live,
-    img: SHOTS[p.shots[0]?.file], alt: p.shots[0]?.alt ?? p.name,
+    img: p.id === 'jarvis' ? JARVIS_PLATE.img : SHOTS[p.shots[0]?.file],
+    alt: p.id === 'jarvis' ? JARVIS_PLATE.alt : (p.shots[0]?.alt ?? p.name),
+    note: p.id === 'jarvis' ? JARVIS_PLATE.note : null,
     tag: null as string | null,
   })),
   {
@@ -39,12 +55,14 @@ const ROWS = [
     hook: 'Label-efficient transfer learning on 17,736 real survey images, and three detection pipelines validated by planting a signal and measuring how much came back.',
     year: 'Apr – May 2026', live: undefined,
     img: analyticsShot, alt: 'Three analysis panels on a dark background showing a dispersion-measure residual plot, a class-separation histogram, and a sky map.',
+    note: null as string | null,
     tag: 'Analytics',
   },
   ...ORDER.slice(4).map((p) => ({
     id: p.id, href: `/projects/${p.id}`, name: p.name, native: p.native,
     hook: p.hook, year: p.year, live: p.live,
     img: SHOTS[p.shots[0]?.file], alt: p.shots[0]?.alt ?? p.name,
+    note: null as string | null,
     tag: null as string | null,
   })),
 ];
@@ -79,8 +97,17 @@ const ROWS = [
         <li class="wk__row reveal">
           <a class:list={['wk__link', !r.img && 'wk__link--noimg']} href={r.href}>
             {r.img && (
-              <div class="wk__media">
-                <Image src={r.img} alt={r.alt} widths={[420, 680]} sizes="(max-width: 860px) 92vw, 460px" loading={i < 2 ? 'eager' : 'lazy'} decoding="async" format="avif" />
+              <div class:list={['wk__media', r.note && 'wk__media--art']}>
+                <Image
+                  src={r.img}
+                  alt={r.alt}
+                  widths={[420, 680].filter((w) => w <= r.img.width)}
+                  sizes="(max-width: 860px) 92vw, 460px"
+                  loading={i < 2 ? 'eager' : 'lazy'}
+                  decoding="async"
+                  format="avif"
+                />
+                {r.note && <span class="wk__note mono">{r.note}</span>}
               </div>
             )}
             <div class="wk__body">
@@ -159,11 +186,25 @@ const ROWS = [
   .wk__row:nth-child(even) .wk__media { order: 2; }
 
   .wk__media {
+    position: relative;
     border-radius: var(--r-md); overflow: hidden;
     outline: var(--hair) solid var(--ridge); outline-offset: -1px;
     background: var(--deep);
     aspect-ratio: 16 / 10;
     box-shadow: var(--lift-1);
+  }
+  /* Artwork rather than a capture: show the whole thing, never crop into it,
+     and sit it on the page's own black so there is no visible letterbox. */
+  .wk__media--art { background: var(--void); }
+  .wk__media--art :global(img) { object-fit: contain !important; object-position: center !important; }
+  .wk__note {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: var(--s-6) var(--s-4) var(--s-3);
+    background: linear-gradient(to bottom, rgba(8, 8, 11, 0) 0%, rgba(8, 8, 11, 0.9) 62%);
+    font-size: var(--t-micro);
+    line-height: 1.45;
+    color: var(--dust);
+    text-align: center;
   }
   .wk__media :global(img) {
     width: 100%; height: 100%; object-fit: cover; object-position: top center;
