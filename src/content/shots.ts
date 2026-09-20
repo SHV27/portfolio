@@ -24,10 +24,14 @@ import brAtlas from '../assets/shots/braillix/cell-atlas.png';
 import brReader from '../assets/shots/braillix/reader-validation.png';
 import brInk from '../assets/shots/braillix/ink-hero.jpeg';
 import brMirror from '../assets/shots/braillix/mirror-two-pods.jpeg';
+import brPhone from '../assets/shots/braillix/phone-hero.jpeg';
+import brTablet from '../assets/shots/braillix/tablet-hero.jpeg';
 
 import glBoard from '../assets/shots/gloaming/board.png';
 import glDeep from '../assets/shots/gloaming/deep.png';
 import glLegibility from '../assets/shots/gloaming/legibility.png';
+import glHeroes from '../assets/shots/gloaming/heroes-UNCROPPED.png';
+import glTitle from '../assets/shots/live/gloaming-title.png';
 
 import urLineup from '../assets/shots/uruthi/lineup.jpg';
 import urReceipt from '../assets/shots/uruthi/receipt.png';
@@ -74,10 +78,14 @@ export const SHOTS: Record<string, ImageMetadata> = {
   'braillix/reader-validation.png': brReader,
   'braillix/ink-hero.jpeg': brInk,
   'braillix/mirror-two-pods.jpeg': brMirror,
+  'braillix/phone-hero.jpeg': brPhone,
+  'braillix/tablet-hero.jpeg': brTablet,
 
   'gloaming/board.png': glBoard,
   'gloaming/deep.png': glDeep,
   'gloaming/legibility.png': glLegibility,
+  'gloaming/heroes-UNCROPPED.png': glHeroes,
+  'live/gloaming-title.png': glTitle,
 
   'uruthi/lineup.jpg': urLineup,
   'uruthi/receipt.png': urReceipt,

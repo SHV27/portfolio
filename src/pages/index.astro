@@ -22,12 +22,12 @@ import Aside from '../components/Aside.astro';
 import srkIconic from '../assets/aura/01-srk-iconic.jpg';
 import starkVillains from '../assets/aura/02-stark-villains.jpg';
 import bridgeBw from '../assets/photos/02-bridge-bw.jpg';
-import rho from '../assets/space/rho-ophiuchi.jpg';
-import pillars from '../assets/space/pillars.jpg';
+import veil from '../assets/space/veil.jpg';
+import sombrero from '../assets/space/sombrero.jpg';
 ---
 <Base
   title="Shaurya Verma — I build AI systems that can't lie"
-  description="Agentic-AI engineer, final year at Thapar. Five systems running in production, and every number on this site opens to the code behind it. Open for internship from January 2027."
+  description="Agentic-AI engineer, final year at Thapar. Nine systems built, seven of them running right now, and every number on this site opens to the code behind it. Open for internship from January 2027."
 >
   <TitleCard />
 
@@ -36,12 +36,12 @@ import pillars from '../assets/space/pillars.jpg';
   <Thesis />
 
   <StarBirth
-    plate={rho}
-    credit="Rho Ophiuchi cloud complex · NASA, ESA, CSA, STScI, K. Pontoppidan (STScI), A. Pagan (STScI) · CC BY 4.0"
-    kicker="Rho Ophiuchi — 390 light years away"
-    line="The closest place to Earth where stars are being born."
-    sub="Those red streaks are jets, fired by stars that switched on within the last few hundred thousand years. It is a photograph, not an illustration — which is roughly the standard I hold the rest of this site to."
-    focus="52% 42%"
+    plate={veil}
+    credit="The Veil Nebula · NASA, ESA and the Hubble Heritage Team (STScI/AURA) · CC BY 4.0"
+    kicker="The Veil Nebula — the wreck of a star"
+    line="A star exploded here. This is the shockwave, still travelling, ten thousand years later."
+    sub="Every filament is gas being lit as the blast slams into it. The star itself is long gone; what you are looking at is entirely evidence of something that already happened — which is, more or less, what the rest of this page is too."
+    focus="50% 48%"
     height="tall"
   />
 
@@ -70,27 +70,26 @@ import pillars from '../assets/space/pillars.jpg';
   </section>
 
   <StarBirth
-    plate={pillars}
-    credit="The Pillars of Creation, Eagle Nebula · NASA, ESA and the Hubble Heritage Team (STScI/AURA) · CC BY 4.0"
-    kicker="The Pillars of Creation"
-    line="Columns of gas, light-years tall, collapsing into new stars."
-    sub="Hubble, 2015. The pillars are being eroded by the very stars they are giving birth to."
-    focus="50% 38%"
+    plate={sombrero}
+    credit="The Sombrero Galaxy, M104 · NASA, ESA and the Hubble Heritage Team (STScI/AURA) · CC BY 4.0"
+    kicker="The Sombrero Galaxy, seen almost edge-on"
+    line="Eight hundred billion suns, and the first thing you notice is the dark."
+    sub="That black band is not empty. It is a ring of dust dense enough to block the light of the galaxy behind it, and it is where the new stars are being made. The obstruction is the productive part."
+    focus="50% 50%"
     height="mid"
   />
 
   <section class="section">
     <div class="wrap">
       <Aside src={bridgeBw} side="left"
-        alt="Shaurya Verma in sunglasses on a riverside walkway, one hand pushed back through his hair, photographed in high-contrast black and white against a blown-out sky."
+        alt="Me in sunglasses on a riverside walkway, one hand pushed back through my hair, photographed in high-contrast black and white against a blown-out sky."
         caption="Patiala, somewhere near the water.">
         <p class="pull display">
           I am not asking you to take my word for a single thing on this page.
         </p>
         <p>
-          Every number has a link under it that opens the file it came from. That is not modesty — it is the
-          flex. Anyone can write a portfolio. Very few can hand you the receipts and invite you to go looking
-          for the hole.
+          Anyone can write a portfolio. Very few will hand you the source and invite you to go looking for the
+          hole in it — which is the actual flex, and the reason this site is built the way it is.
         </p>
       </Aside>
     </div>

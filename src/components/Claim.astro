@@ -7,7 +7,8 @@ const { claim, as = 'li' } = Astro.props;
 const Tag = as;
 ---
 <Tag class="claim">
-  <p class="claim__text">{claim.text}</p>
+  {claim.lead && <p class="claim__lead">{claim.lead}</p>}
+  <p class:list={['claim__text', claim.lead && 'claim__text--sub']}>{claim.text}</p>
   <Receipt receipts={claim.receipts} />
 </Tag>
 <style>
@@ -17,5 +18,19 @@ const Tag = as;
     content: ''; position: absolute; left: 0; top: 0.62em;
     width: var(--s-3); height: var(--hair); background: var(--gold-deep);
   }
+  .claim__lead {
+    color: var(--star);
+    max-width: var(--measure);
+    font-size: clamp(1.02rem, 1.25vw, 1.16rem);
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
   .claim__text { color: var(--star-dim); max-width: var(--measure); }
+  /* Demoted: still there, still exact, no longer the first thing you hit. */
+  .claim__text--sub {
+    margin-top: var(--s-3);
+    font-size: var(--t-small);
+    line-height: 1.6;
+    color: var(--dust);
+  }
 </style>

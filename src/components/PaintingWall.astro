@@ -1,0 +1,113 @@
+---
+/**
+ * THE PAINTING WALL — every picture inside Aaina, hung.
+ *
+ * Aaina's rule was: no stock photography, no generated imagery, no human faces.
+ * Ten CC0 Indian paintings instead, each one named, dated, attributed to the
+ * museum that holds it and carrying its accession number, so a sceptic can go
+ * and look it up. The app prints that line under every image it shows.
+ *
+ * This is hung the way a wall of plates is actually hung — bottom edges on one
+ * line, varying heights left to right, not forced into equal boxes. Equal boxes
+ * would crop a Ragamala miniature to the same rectangle as a bird study, which
+ * is exactly the flattening the project refuses to do everywhere else.
+ *
+ * Each one links to the museum record. That is the receipt.
+ */
+import { Image } from 'astro:assets';
+import { PAINTINGS } from '../content/paintings';
+---
+
+<section class="pw reveal" aria-labelledby="pw-h">
+  <p class="label pw__k">Not one stock image</p>
+  <h3 class="pw__t display" id="pw-h">Every picture in it is a real painting.</h3>
+  <p class="pw__lede">
+    Ten of them, all Indian, all CC0, all named — Company School bird studies from Calcutta and Lucknow, a
+    Rajput falcon, Ragamala miniatures from Mewar and Amber. Each one carries its museum and its accession
+    number inside the app, because an uncredited image is the same failure as an uncited sentence. Click any
+    of them to open the museum's own record.
+  </p>
+
+  <ul class="pw__wall">
+    {PAINTINGS.map((p) => (
+      <li class="pw__item">
+        <a class="pw__link" href={p.page} target="_blank" rel="noopener noreferrer">
+          <span class="pw__frame">
+            <Image
+              src={p.src}
+              alt={`${p.title}, ${p.date}. ${p.school}.`}
+              widths={[180, 360].filter((w) => w <= p.src.width)}
+              sizes="(max-width: 700px) 40vw, 200px"
+              loading="lazy"
+              decoding="async"
+              format="avif"
+            />
+          </span>
+          <span class="pw__cap">
+            <span class="pw__name">{p.title}</span>
+            <span class="pw__meta mono">{p.date} · {p.holder} · {p.acc}</span>
+          </span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .pw { margin-top: clamp(var(--s-12), 6vh, var(--s-20)); }
+  .pw__k { color: var(--gold); }
+  .pw__t { font-size: var(--t-head); margin-top: var(--s-3); max-width: 24ch; }
+  .pw__lede { margin-top: var(--s-4); max-width: 62ch; color: var(--star-dim); text-wrap: pretty; }
+
+  /* Bottom edges on one line, heights left as they came. A real hang. */
+  .pw__wall {
+    list-style: none; padding: 0;
+    margin: var(--s-10) 0 0;
+    display: flex; flex-wrap: wrap; align-items: flex-end;
+    gap: clamp(var(--s-4), 2vw, var(--s-8)) clamp(var(--s-4), 2.2vw, var(--s-8));
+  }
+  .pw__item { flex: 0 0 auto; max-width: 46%; }
+
+  .pw__link {
+    display: flex; flex-direction: column; gap: var(--s-3);
+    text-decoration: none; max-width: 210px;
+  }
+  .pw__frame {
+    display: block;
+    border-radius: var(--r-sm);
+    overflow: hidden;
+    outline: var(--hair) solid var(--ridge);
+    outline-offset: -1px;
+    box-shadow: var(--lift-1);
+    transition: outline-color var(--d-base) var(--ease), transform var(--d-base) var(--ease);
+  }
+  .pw__frame :global(img) {
+    display: block;
+    height: clamp(118px, 17vh, 186px);
+    width: auto;
+    max-width: 100%;
+  }
+  .pw__link:hover .pw__frame,
+  .pw__link:focus-visible .pw__frame {
+    outline-color: var(--gold);
+    transform: translateY(-3px);
+  }
+
+  .pw__cap { display: flex; flex-direction: column; gap: 2px; max-width: 22ch; }
+  .pw__name {
+    font-family: var(--display); font-variation-settings: 'opsz' 16;
+    font-size: 0.95rem; line-height: 1.25; color: var(--star-dim);
+    transition: color var(--d-base) var(--ease);
+  }
+  .pw__link:hover .pw__name { color: var(--gold); }
+  .pw__meta { font-size: 0.6875rem; line-height: 1.4; color: var(--dust-faint); }
+
+  @media (max-width: 700px) {
+    .pw__item { max-width: 47%; }
+    .pw__frame :global(img) { height: clamp(96px, 20vw, 140px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pw__link:hover .pw__frame, .pw__link:focus-visible .pw__frame { transform: none; }
+  }
+</style>

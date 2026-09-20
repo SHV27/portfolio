@@ -35,7 +35,7 @@ const PRACTICE = [
   },
   {
     n: 'I build adversaries, not assistants',
-    t: 'The useful move is not asking a model to write the thing. It is pointing a second one at the finished thing with instructions to break it. Uruthi has an agent that starts with no memory of how the thing was built, whose entire job is to hunt for places where the app quietly gives up instead of saying so, and it found that a consent gate I believed was structural was merely aspirational — which is written down, not buried.',
+    t: 'The useful move is not asking a model to write the thing. It is pointing a second one at the finished thing and telling it to break it — an agent starting with no memory of how the thing was built, so it cannot inherit my reasons for thinking it is fine. Aaina generates nine different people and grades the writing each of them gets. Sifarish invents thousands of its own inputs and can replay any failure exactly. Both found real defects on their first run, and both are open below.',
     receipts: [
       { label: 'aaina/scripts/audit.ts', href: src('aaina', 'scripts/audit.ts'), proves: 'Nine personas generated and graded on the finished prose, two of them built to be nearly identical.' },
       { label: 'sifarish/tests/matrix.test.ts', href: src('sifarish', 'tests/matrix.test.ts'), proves: 'A test that invents thousands of its own inputs. It found two real bugs on its first run, and any failure can be replayed exactly.' },
@@ -73,9 +73,8 @@ const PRACTICE = [
         model a problem. Almost nobody hands it a set of rules it is not allowed to break.
       </p>
       <p>
-        That is genuinely available now, and almost nobody uses it properly. Most people treat these models as a
-        faster autocomplete. I treat mine the way Stark treated JARVIS: <strong>I decide what is true and what the
-        rules are, and it does the part that scales.</strong>
+        Most people treat these models as a faster autocomplete. I treat mine the way Stark treated JARVIS:
+        <strong>I decide what is true and what the rules are, and it does the part that scales.</strong>
       </p>
       <p class="jv__dim">
         The difference shows up in the artefacts. Anyone can say they are good at directing AI. Below is what that

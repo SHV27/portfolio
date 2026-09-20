@@ -73,7 +73,11 @@ const f1Path  = PTS.map((p, i) => `${i ? 'L' : 'M'}${X(p.pct).toFixed(1)},${Y(p.
   </p>
 </figure>
 
-<script define:vars={{ PTS }}>
+<!-- data-astro-rerun: with client-side routing Astro executes a given script
+     body once per session. Without this the label-efficiency widget would be
+     inert the second time you opened the page it lives on. It binds only to
+     nodes inside this component, so re-running it cannot stack listeners. -->
+<script define:vars={{ PTS }} data-astro-rerun>
   const pts = document.querySelectorAll('.lc__pt');
   const nEl = document.querySelector('[data-lc-n]');
   const aEl = document.querySelector('[data-lc-acc]');

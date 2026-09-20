@@ -1,11 +1,10 @@
 ---
+import { ClientRouter } from 'astro:transitions';
 import '../styles/base.css';
 import CosmicField from '../components/CosmicField.astro';
 import ChapterRail from '../components/ChapterRail.astro';
 import SoundToggle from '../components/SoundToggle.astro';
 import ogImage from '../assets/photos/01-bridge-colour.jpg';
-import nebA from '../assets/space/rho-ophiuchi.jpg';
-import nebB from '../assets/space/pillars.jpg';
 
 interface Props { title: string; description: string; }
 const { title, description } = Astro.props;
@@ -35,6 +34,13 @@ const og = new URL(ogImage.src, Astro.site).href;
   <meta name="theme-color" content="#08080B" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
+  <!-- Client-side routing. It is here for one concrete reason: the anthem is a
+       single media element, and a full page load destroys it, so opening any
+       project stopped the music. With this, the document contents are swapped
+       in place and anything marked transition:persist survives the navigation.
+       The sky and the player are the two things that must never restart. -->
+  <ClientRouter />
+
   <script type="application/ld+json" set:html={JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'Person',
@@ -48,13 +54,18 @@ const og = new URL(ogImage.src, Astro.site).href;
   })} />
 </head>
 
-<body style={`--neb-a:url(${nebA.src});--neb-b:url(${nebB.src})`}>
+<!-- --neb-a / --neb-b used to be set here, pointing at two full-resolution
+     nebula plates. Nothing in any stylesheet ever read them, so every page on
+     the site was referencing two large images for no reason, and an audit of
+     "which nebula appears on which page" reported both of them on all eleven.
+     Removed: they were costing bytes and telling a lie about the layout. -->
+<body>
   <a class="skip" href="#main">Skip to content</a>
   <CosmicField />
-  <div class="grain" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true" transition:persist="grain"></div>
 
   <ChapterRail />
-  <SoundToggle />
+  <SoundToggle transition:persist="sound" />
 
   <main id="main">
     <slot />
@@ -63,78 +74,118 @@ const og = new URL(ogImage.src, Astro.site).href;
   <script>
     /* The site's ONLY script. Two jobs, both progressive enhancements:
        reveal-on-scroll, and the audio toggle. Neither is required for the page
-       to be complete — content is visible by default (see base.css .reveal). */
+       to be complete — content is visible by default (see base.css .reveal).
 
-    // 1 — Reveal. IntersectionObserver, unobserved after firing. No scroll handler.
+       With client-side routing this file executes ONCE for the whole session.
+       Anything tied to the current page therefore re-arms on astro:page-load,
+       which also fires on the first load, so there is no separate bootstrap. */
+
     const motionOK = window.matchMedia('(prefers-reduced-motion: no-preference)').matches;
-    if (motionOK && 'IntersectionObserver' in window) {
-      const io = new IntersectionObserver(
+
+    /* 1 — REVEAL. A fresh observer per page; the previous one is disconnected
+       first, because its targets were just swapped out of the document. */
+    let io: IntersectionObserver | null = null;
+    const arm = () => {
+      if (!motionOK || !('IntersectionObserver' in window)) {
+        document.querySelectorAll('.reveal').forEach((el) => el.classList.add('is-in'));
+        return;
+      }
+      io?.disconnect();
+      io = new IntersectionObserver(
         (entries) => {
           for (const e of entries) {
-            if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+            if (e.isIntersecting) { e.target.classList.add('is-in'); io?.unobserve(e.target); }
           }
         },
         { rootMargin: '0px 0px -8% 0px', threshold: 0.06 }
       );
-      document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
-    } else {
-      document.querySelectorAll('.reveal').forEach((el) => el.classList.add('is-in'));
-    }
+      document.querySelectorAll('.reveal').forEach((el) => io!.observe(el));
+    };
 
-    // 2 — Audio. Opt-in only, never autoplay.
-    //     WCAG 2.1.4.2 (Level A) makes audio that plays automatically for more
-    //     than 3 seconds without a pause mechanism a failure of the WHOLE page,
-    //     and every current browser blocks unmuted autoplay for a first-time
-    //     visitor anyway. So: silent until asked, one visible control, and the
-    //     choice is remembered. See docs/AUDIO.md.
-    const btns = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-anthem]'));
-    const audio = document.querySelector<HTMLAudioElement>('#anthem');
-    if (btns.length && audio) {
-      const KEY = 'sv-anthem';
-      // Two controls drive one element: the persistent corner toggle and the
-      // one in the personal chapter. They must never disagree about state.
-      const setUI = (on: boolean) => {
-        for (const btn of btns) {
-          btn.setAttribute('aria-pressed', String(on));
-          btn.dataset.on = String(on);
-          btn.setAttribute('aria-label', on ? 'Pause the anthem' : 'Play the anthem');
-          const t = btn.querySelector('[data-anthem-label]');
-          if (t) t.textContent = on ? 'Pause the anthem' : 'Play the anthem';
-        }
-      };
-      // A stored ON does not autoplay — browsers would refuse, and it would
-      // ambush a returning visitor. It only pre-arms the control.
-      setUI(false);
+    /* 2 — AUDIO. Opt-in only, never autoplay.
+       WCAG 2.1.4.2 (Level A) makes audio that plays automatically for more than
+       3 seconds without a pause mechanism a failure of the WHOLE page, and every
+       current browser blocks unmuted autoplay for a first-time visitor anyway.
+       So: silent until asked, one visible control, and it keeps playing across
+       navigation because the element itself is never destroyed.
 
-      const toggle = async () => {
-        if (audio.paused) {
-          try {
-            audio.volume = 0;
-            await audio.play();               // inside the gesture: always allowed
-            setUI(true);
-            try { localStorage.setItem(KEY, '1'); } catch {}
-            const target = 0.7, step = target / 24;   // fade in, never cut in
-            const t = setInterval(() => {
-              audio.volume = Math.min(target, audio.volume + step);
-              if (audio.volume >= target) clearInterval(t);
-            }, 40);
-          } catch {
-            setUI(false);
-          }
-        } else {
-          audio.pause();
-          setUI(false);
-          try { localStorage.setItem(KEY, '0'); } catch {}
-        }
-      };
-      for (const btn of btns) btn.addEventListener('click', toggle);
+       The click handler is delegated to the document rather than bound to each
+       button. The corner control persists across pages while the one in the
+       anthem chapter does not, so binding per element would either miss the new
+       button or double-bind the old one. */
+    const VOL = 0.7;
+    const KEY = 'sv-anthem';
+    const el = () => document.querySelector<HTMLAudioElement>('#anthem');
 
-      audio.addEventListener('ended', () => setUI(false));
-      // Duck when the tab is hidden — nobody wants a forgotten tab singing.
-      document.addEventListener('visibilitychange', () => {
-        if (document.hidden && !audio.paused) { audio.pause(); setUI(false); }
+    const setUI = (on: boolean) => {
+      document.querySelectorAll<HTMLButtonElement>('[data-anthem]').forEach((btn) => {
+        btn.setAttribute('aria-pressed', String(on));
+        btn.dataset.on = String(on);
+        btn.setAttribute('aria-label', on ? 'Pause the anthem' : 'Play the anthem');
+        const t = btn.querySelector('[data-anthem-label]');
+        if (t) t.textContent = on ? 'Pause the anthem' : 'Play the anthem';
       });
-    }
+    };
+
+    let fade: number | undefined;
+    const rampTo = (audio: HTMLAudioElement, target: number) => {
+      clearInterval(fade);
+      const step = 0.04;
+      fade = window.setInterval(() => {
+        const d = target - audio.volume;
+        if (Math.abs(d) <= step) { audio.volume = target; clearInterval(fade); return; }
+        audio.volume = Math.min(1, Math.max(0, audio.volume + Math.sign(d) * step));
+      }, 40);
+    };
+
+    const toggle = async () => {
+      const audio = el();
+      if (!audio) return;
+      if (audio.paused) {
+        try {
+          audio.volume = 0;
+          await audio.play();                 // inside the gesture: always allowed
+          setUI(true);
+          try { localStorage.setItem(KEY, '1'); } catch {}
+          rampTo(audio, VOL);                 // fade in, never cut in
+        } catch {
+          setUI(false);
+        }
+      } else {
+        clearInterval(fade);
+        audio.pause();
+        setUI(false);
+        try { localStorage.setItem(KEY, '0'); } catch {}
+      }
+    };
+
+    document.addEventListener('click', (e) => {
+      const btn = (e.target as Element | null)?.closest?.('[data-anthem]');
+      if (btn) { e.preventDefault(); toggle(); }
+    });
+
+    /* Hidden tab: duck to silent, do not stop. Pausing outright was the second
+       reason the music "stopped by itself" — one alt-tab and it never came
+       back. Silent-but-running keeps the track in sync with where you were. */
+    document.addEventListener('visibilitychange', () => {
+      const audio = el();
+      if (!audio || audio.paused) return;
+      clearInterval(fade);
+      if (document.hidden) audio.volume = 0;
+      else rampTo(audio, VOL);
+    });
+
+    document.addEventListener('astro:page-load', () => {
+      arm();
+      const audio = el();
+      if (audio) {
+        setUI(!audio.paused);
+        if (!audio.dataset.wired) {
+          audio.dataset.wired = '1';
+          audio.addEventListener('ended', () => setUI(false));
+        }
+      }
+    });
   </script>
 </body>
 </html>

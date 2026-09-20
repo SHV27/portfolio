@@ -7,6 +7,7 @@ import ngc2841 from '../assets/space/ngc2841.jpg';
 import antennae from '../assets/space/antennae.jpg';
 import ngc1275 from '../assets/space/ngc1275.jpg';
 import freggs from '../assets/space/freggs.jpg';
+import butterfly from '../assets/space/butterfly.jpg';
 
 /* ============================================================================
    One plate per page, each with its own line. Nothing repeats anywhere on the
@@ -110,6 +111,16 @@ export const PLATES: Record<string, Plate> = {
     line: 'Dense knots that survive precisely because they were dense enough to.',
     sub: 'Radiation from nearby giant stars blasts away the loose gas around them, and only the densest clumps hold together — each one now forming a star inside. What survives the measurement is not what was most common. It is what was most robust.',
     focus: '50% 46%',
+  },
+
+  // Gloaming: a light going out, and the going out is the beautiful part.
+  gloaming: {
+    src: butterfly,
+    credit: `The Butterfly Nebula, NGC 6302 · ${HUBBLE}`,
+    kicker: 'NGC 6302 — the Butterfly Nebula',
+    line: 'A star dying, and the dying is the most beautiful thing it ever did.',
+    sub: 'The gas in those wings is leaving at nearly a million kilometres an hour, lit from inside by the exposed core of the star that shed it — one of the hottest objects in the galaxy, and already on its way to going out. Nothing here is being destroyed by an enemy. It is just running out.',
+    focus: '50% 48%',
   },
 
   // Sehat Saarthi: a cluster caught mid-decision, and honest about its youth.

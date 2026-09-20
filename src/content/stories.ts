@@ -43,7 +43,7 @@ export const STORIES: Record<string, string[]> = {
      would have, so I made it structurally impossible for any part of the software to assume a number — the
      build greps its own source and fails if a file hard-codes one. Student work cannot leave the room, so the
      whole thing runs offline in a browser, including a 76 MB vision model. And a teacher's line can mix
-     three braille codes at once. I built it in a single fifty-one hour run, including throwing the first
+     three braille codes at once. I built it in a single fifty-one-hour run, including throwing the first
      version away halfway through.`,
   ],
 
@@ -140,8 +140,9 @@ export const STORIES: Record<string, string[]> = {
      should have asked for instead: November against November, one year apart, both complete, seasonality held
      constant. One period out of twenty-five fails that gate — and it is the one everybody would have reported.`,
     `The honest answer turns out to be plus 2.7%. Which is also not the finding, because "roughly flat" is a
-     disguise. Underneath it, four hundred and eighty-four thousand pounds of new products is being almost
-     entirely eaten by two hundred and forty-five thousand pounds of lost volume on everything else. So it breaks
+     disguise. Underneath it, four hundred and eighty-four thousand pounds of brand-new products is being eaten alive by
+     two hundred and forty-five thousand of lost volume, a hundred and thirty-eight of mix and a hundred and
+     thirty-five of lines that were discontinued. So it breaks
      the movement into named pieces — volume, price, mix, new products, discontinued — and the pieces add back up
      to the totals exactly. That is the sentence a CEO actually needs: not "we are flat", but "we are flat
      because a new range is carrying a shrinking old one".`,
@@ -166,6 +167,7 @@ export const STORIES: Record<string, string[]> = {
      and a greedy bot that just grabs, and played them against each other on identical seeded games so the only
      variable was decisions. The first run came back flat — skill was not paying. That result changed the
      design: the torch went from eight to seven, and stepping on frayed ground went from costing one to costing
-     two. Now a good player wins sixteen points more often than a greedy one, and I can show you the number.`,
+     two. Now a skilled bot scores sixteen points higher than a greedy one over the same seeded games, and I can
+     show you the number.`,
   ],
 };

@@ -15,13 +15,14 @@ export const SIFARISH: Project = {
   live: 'https://sifarish-shv-s-projects.vercel.app',
   tagline: 'Compile truth. Draft everything. Send nothing.',
   hook: 'I built a job-hunt assistant that compiles a résumé out of things I can actually prove — and that is physically incapable of applying on my behalf.',
-  dek: 'Seven rooms and one ledger, built over a month, under a rule I gave it on the first day: it may find, draft and prepare — it may never press send.',
+  dek: 'Seven rooms and one ledger, built across three months, under a rule I gave it on the first day: it may find, draft and prepare — it may never press send.',
   year: 'Jul – Sep 2026',
   accent: 'gold',
   hardProblem:
     'An LLM will happily mint a claim you cannot back, and recruiters now screen for exactly that. So I made "never invents" structural rather than aspirational: the model is never allowed to write the page. It may only select and order facts that already exist, and every choice has to survive a validator that re-checks it against real ledger IDs. The harder half is the inverse — suppression is a lie too. A true, relevant fact quietly dropped for space is the same class of defect as a fabrication, so I made the compiler solve the page-budget constraint instead of trimming.',
   mechanism: [
     {
+      lead: 'A sentence with nothing behind it does not get flagged for review. It stops the whole page from building.',
       text: 'An uncited line cannot physically reach the page. Every line passes through one gate, and a bullet carrying zero ledger IDs throws a compile error rather than rendering.',
       receipts: [
         { label: 'compiler.ts:284', href: src('sifarish', 'src/lib/compile/compiler.ts', [284, 285]), proves: 'The I1 gate — CompileError is thrown on a bullet with an empty ledgerIds array.' },
@@ -29,6 +30,7 @@ export const SIFARISH: Project = {
       ],
     },
     {
+      lead: 'It reads the job ad the way a cynic would — including the part that says what they do NOT want.',
       text: 'It reads the whole job posting into what the company says it cares about — and what it says it does not — keeping the posting’s literal words. A test asserts that "we do not care about LeetCode" lands in doesNotCare and never in cares.',
       receipts: [
         { label: 'reading.ts', href: src('sifarish', 'src/lib/strategist/reading.ts'), proves: '357 lines parsing a posting into typed cares / doesNotCare quotes.' },
@@ -36,13 +38,15 @@ export const SIFARISH: Project = {
       ],
     },
     {
-      text: 'For every true fact it writes down played or benched, with a reason in the company’s own words. The validator then rejects the model’s bad calls: a bench reason under twelve characters is overruled, education can never be benched, and "page budget" is refused outright because space belongs to the compiler.',
+      lead: 'For every fact about me it decides: play this one, or leave it on the bench — and it has to write down why, in the company’s own words. Then I get to overrule it when the reason is rubbish.',
+      text: 'For every true fact it writes down whether that fact was played or benched, with a reason in the company’s own words. The validator then rejects the model’s bad calls: a bench reason under twelve characters is overruled, education can never be benched, and "page budget" is refused outright because space belongs to the compiler.',
       receipts: [
         { label: 'plan.ts:438', href: src('sifarish', 'src/lib/strategist/plan.ts', 438), proves: 'validatePlan() — each override is noted visibly rather than applied silently.' },
         { label: 'plan.ts:466', href: src('sifarish', 'src/lib/strategist/plan.ts', [466, 487]), proves: 'The rules are dated to a live model failure: "LIVE-CAUGHT (05-Sep-2026, Gemini on Babaclick)".' },
       ],
     },
     {
+      lead: 'It is physically incapable of applying on my behalf. Not switched off — the code that could send an email is not in there, and the build goes looking for it every single time.',
       text: '"Send nothing" is a grep over the source tree, not a promise. The build fails if a mail or browser-automation library ever appears, and the Gmail scope is asserted read-only with thirteen send-capable strings banned.',
       receipts: [
         { label: 'invariants.test.ts:85', href: src('sifarish', 'tests/invariants.test.ts', [85, 108]), proves: 'Walks src/ and api/ and fails on nodemailer, smtp, puppeteer, playwright .click().' },
@@ -50,12 +54,14 @@ export const SIFARISH: Project = {
       ],
     },
     {
+      lead: 'After it makes the PDF, it opens the PDF back up and reads it, to check the page really says what the ledger said.',
       text: 'Every exported PDF is read back in. The text layer is re-extracted and each compiled line asserted present, and in order — so what the reader sees is provably what the ledger said.',
       receipts: [
         { label: 'parseback.ts', href: src('sifarish', 'src/lib/export/parseback.ts'), proves: 'Round-trip fidelity via pdfjs-dist with a cursor-advancing order check.' },
       ],
     },
     {
+      lead: 'The model may make my sentences better. It may not make them bigger. Invent a number, a company or a technology in a rewrite and the rewrite is binned.',
       text: 'A rephrase that introduces a new number, a new proper noun or a new technology is rejected, with stemming and acronym-expansion awareness so honest rewrites are not false-flagged.',
       receipts: [
         { label: 'factGuard.ts', href: src('sifarish', 'src/lib/polish/factGuard.ts'), proves: '152 lines of drift detection against a 46-entry technology lexicon.' },
@@ -81,7 +87,7 @@ export const SIFARISH: Project = {
     { file: 'sifarish/page-b-ngo.png', alt: 'The same dossier compiled for an NGO posting, ordered Projects, then Positions of Responsibility, then Achievements, with the education section absent.', caption: 'The same dossier, same facts, an NGO posting. Projects and social work lead; education is gone. Nothing was rewritten — only re-decided.' },
     { file: 'sifarish/khabri-taleem-radar.png', alt: 'A panel listing skills the market is asking for that the user’s ledger cannot yet prove, each with the named job postings that asked for it.', caption: 'It also tells you what you cannot prove yet — each gap carrying the named postings that asked for it.' },
     { file: 'sifarish/gate.png', alt: 'The Sifarish entry screen offering two modes side by side: Owner Mode, which verifies an owner code on the server and stores nothing in the browser, and Demo Mode, which runs read-only on a fictional persona.', caption: 'The first screen is a door. Demo mode is read-only, runs on a fictional persona, cannot spend my API budget, and is structurally incapable of sending anything — which is why I can leave it open to the public at all.' },
-    { file: 'sifarish/radar-scored-roles.png', alt: 'The Shikaar Radar screen, headed "29 keyless boards · ranked, capped at 15", listing scored roles at Siemens, Open Health Agents, LeadVaultAI, AryaXAI and Netflix, each with a numeric score and a "why this score" link.', caption: 'It reads twenty-nine job boards without a single API key, ranks eighty-five roles, and then deliberately caps the list at fifteen. Every score opens into its own reasoning — there is no number here you are asked to take on faith.' },
+    { file: 'sifarish/radar-scored-roles.png', alt: 'The Shikaar Radar screen, headed "29 keyless boards · ranked, capped at 15", listing scored roles at Siemens, Open Health Agents, LeadVaultAI, AryaXAI and Netflix, each with a numeric score and a "why this score" link.', caption: 'It reads job boards without a single API key — twenty-nine of them on the day of this capture, thirty-two in the seed list now — ranks eighty-five roles, and then deliberately caps what it shows you at fifteen. Every score opens into its own reasoning. There is no number here you are asked to take on faith.' },
     { file: 'sifarish/briefing.png', alt: 'The Sifarish dashboard greeting the owner by name with four packets compiled and ready, three ranked roles beneath it, and below that the Sach Ledger showing a shipped Gloaming entry and skills marked shipped.', caption: 'The morning briefing, and under it the Sach Ledger — the single place anything about me is written down, each entry either provable or honestly marked as still in the forge. The résumé is compiled out of this. It is never typed.' },
   ],
 };
@@ -93,7 +99,7 @@ export const AAINA: Project = {
   repo: 'aaina',
   live: 'https://aaina-two.vercel.app',
   tagline: 'You already know more than you think.',
-  hook: 'A relationship and self assessment I built that refuses to give you a compatibility score — and shows you the receipts for every sentence it writes about you.',
+  hook: 'A relationship and self-assessment I built that refuses to give you a compatibility score — and shows you the receipts for every sentence it writes about you.',
   dek: 'Ninety-one questions and no score at the end. What you get instead is every place your own answers contradict each other, quoted back to you.',
   year: 'Aug – Sep 2026',
   accent: 'ember',
@@ -101,12 +107,14 @@ export const AAINA: Project = {
     'The easy product is a quiz that returns "you are 72% compatible". That number is the industry standard and it is fabricated: Joel, Eastwick and Finkel threw over a hundred measures at dyad-specific compatibility in 2017 and predicted none of the variance. So the problem I set myself was producing a reading that is specific and emotionally weighty while structurally refusing the one claim everybody wants. The second problem is worse — a language model asked for relationship feedback produces Barnum statements that people rate as more accurate the moment you tell them it was written for them.',
   mechanism: [
     {
+      lead: 'The model is not allowed to think. Every number and every contradiction is worked out in ordinary code first; the model only gets to write the joining sentences.',
       text: 'I made genericness inexpressible rather than discouraged. Every number, contradiction and verdict is computed in TypeScript; the model receives a closed evidence bundle and may only write connective prose.',
       receipts: [
         { label: 'derive.ts:28', href: src('aaina', 'src/engine/derive.ts', 28), proves: 'One deterministic, fingerprinted function is the sole authority — no component recomputes.' },
       ],
     },
     {
+      lead: 'A paragraph that cannot point back at your own answers is thrown away three separate times on its way to your screen — once on the server, once in the browser, and once more at the moment of drawing it.',
       text: 'Any paragraph whose citations do not resolve is discarded in three independent places — in the serverless function, in the client orchestrator, and at the component, which renders nothing for unresolvable evidence.',
       receipts: [
         { label: 'write.ts:139', href: src('aaina', 'api/write.ts', [139, 193]), proves: 'Server-side allowlist built per request from that reader’s own findings.' },
@@ -114,12 +122,14 @@ export const AAINA: Project = {
       ],
     },
     {
+      lead: 'It writes from the places where you disagree with yourself. You said you are allowed to take up space. You also said your needs come after everyone else’s.',
       text: 'The report is written from contradictions, not scores — collisions between a person’s own answers, such as rating “I am allowed to take up space” high while rating “my needs come after everyone else’s” low.',
       receipts: [
         { label: 'contradictions.ts:215', href: src('aaina', 'src/engine/contradictions.ts', [215, 264]), proves: 'Seven attitude-versus-behaviour rules, each with the direction it requires.' },
       ],
     },
     {
+      lead: 'Wanting to stay and being unable to leave are not the same feeling, so they get two separate axes. That split is the only reason it can ever say: this is being held together by what leaving would cost.',
       text: 'I measure Pull and Hold on separate axes, because Rusbult and Martz found that what predicted staying in abusive relationships was investment and poor alternatives — not satisfaction. That separation is what lets the report reach “this is being held in place by what leaving would cost.” Safety is orthogonal and never moves a number.',
       receipts: [
         { label: 'axes.ts', href: src('aaina', 'src/engine/axes.ts'), proves: 'Quality, Pull, Hold and Safety computed independently.' },
@@ -127,12 +137,14 @@ export const AAINA: Project = {
       ],
     },
     {
+      lead: 'Disagree with something it said, press the cross, and it does not simply grey the line out — it rebuilds everything that was leaning on it.',
       text: 'Rejecting a claim recomputes the plan. A reader’s ✗ on a finding is treated as new evidence: the finding is dropped and everything leaning on it is rebuilt.',
       receipts: [
         { label: 'derive.ts:170', href: src('aaina', 'src/engine/derive.ts', 170), proves: '“A claim the reader has rejected must not still be holding up a verdict three sections later.”' },
       ],
     },
     {
+      lead: 'Two people can compare answers with no server involved anywhere. Both halves ride inside the link itself, and anything either of you said about safety is physically blocked from travelling.',
       text: 'Couple mode has no backend at all. Both halves travel in the URL fragment, which is never sent to a server, and every safety answer is hard-blocked from travelling in either direction — with a test that poisons a link and asserts the disclosure comes out missing.',
       receipts: [
         { label: 'couple.ts:92', href: src('aaina', 'src/engine/couple.ts', 92), proves: 'mayTravel() blocks all 15 safety items outbound and inbound.' },
@@ -155,7 +167,7 @@ export const AAINA: Project = {
       { label: 'sources.ts', href: src('aaina', 'src/engine/sources.ts'), proves: 'The rejected instruments are recorded with the reason each was rejected.' },
     ],
   },
-  stack: ['Astro-free Vite 8', 'React 19', 'TypeScript', 'Tailwind 4', 'Zustand', 'one serverless function', 'Groq', 'Vitest', 'Playwright'],
+  stack: ['Vite 8', 'React 19', 'TypeScript', 'Tailwind 4', 'Zustand', 'one serverless function', 'Groq', 'Vitest', 'Playwright'],
   shots: [
     { file: 'aaina/receipt-desktop.png', alt: 'An open receipt drawer showing “what this is built on — satisfaction, 30%, from 5 answers”, with the reader’s own words quoted back, beneath a banner explaining reduced mode.', caption: 'Open any sentence and it shows its working: which dimension, which score, how many answers, and your own words quoted back at you.' },
     { file: 'aaina/science-desktop.png', alt: 'A page headed “Why there is no compatibility percentage”, citing Joel 2017, Montoya 2008 and Joel 2020.', caption: 'It devotes a whole chapter to explaining why it will not give you the number you came for.' },
@@ -182,18 +194,21 @@ export const BRAILLIX: Project = {
     'Nemeth is not a character substitution — it is a grammar, where the same cell means "numeric indicator" in one position and "fraction close" in another. A wrong dot is invisible to the sighted teacher and to the blind student both, so there is no human in the loop who can catch it. On top of that the hardware width is genuinely unknown, so no layer of the software is permitted to know how many cells exist; and a single line of a question can mix three braille codes at once. I made all of it run offline in a browser on a village-school laptop, including a 76 MB vision model, because student work must never leave the room.',
   mechanism: [
     {
+      lead: 'It marks its own homework backwards. A completely separate engine looks only at the dots, says what they say, and that gets held against what the teacher actually typed.',
       text: 'I check the braille by reading it back. A second engine, sharing no code with the one that produced the dots, reconstructs meaning from the dots alone and compares it to what the teacher wrote.',
       receipts: [
         { label: 'readback.ts', href: src('braillix', 'app/src/core/readback.ts'), proves: '536 lines of independent Nemeth reconstruction, plus separate engines for Devanagari and English.' },
       ],
     },
     {
+      lead: 'The checker is allowed to say “I don’t know”. When it meets a dot pattern it has no rule for, it says so — instead of quietly counting it as a pass.',
       text: 'That check has three verdicts, not two. When the reader meets a cell it has no rule for it returns "unchecked" — because collapsing that into "agrees" would turn a gap in the checker into a clean bill of health for the braille.',
       receipts: [
         { label: 'roundtrip.ts', href: src('braillix', 'app/src/core/roundtrip.ts'), proves: 'agrees | differs | unchecked, with the reasoning in the file.' },
       ],
     },
     {
+      lead: 'A line that came out of a photograph of a textbook cannot reach a blind student until a human has confirmed it. Not should not — cannot. The software will not build with an unconfirmed line inside it.',
       text: 'I made a recognised line unrepresentable in the type system without an explicit human confirmation — enforced at compile time, not at runtime.',
       receipts: [
         { label: 'lesson.ts:21', href: src('braillix', 'app/src/lesson.ts', [21, 23]), proves: 'A recognised line requires a literal confirmed: true.' },
@@ -201,12 +216,14 @@ export const BRAILLIX: Project = {
       ],
     },
     {
+      lead: 'The hardware team had not decided how many braille cells the device would have, so the software is forbidden to guess. Before it ships it searches its own code for a hard-coded number — and plants one first, to prove the search actually works.',
       text: 'The build greps its own source and fails if any file outside two named authorities hard-codes a cell count — and it first proves the guard catches a planted offender, because a guard that can only ever pass is not a guard.',
       receipts: [
         { label: 'invariants.test.ts', href: src('braillix', 'app/src/invariants.test.ts'), proves: 'Two-sided enforcement of the "no layer knows the width" law.' },
       ],
     },
     {
+      lead: 'Two braille displays of different sizes, showing the same line: the bigger one blanks its spare cells rather than leaving yesterday’s dots sitting under a student’s fingers. A stale dot is a lie told in braille.',
       text: 'Mirroring across several displays pads a wider device’s spare cells to blank rather than leaving stale dots — because stale dots would be a lie told in braille — and a mirrored group takes the width of its smallest device, never its largest.',
       receipts: [
         { label: 'httppod.ts:169', href: src('braillix', 'app/src/transport/httppod.ts', [169, 183]), proves: 'The blank-padding rule, with the reason in the comment.' },
@@ -214,6 +231,7 @@ export const BRAILLIX: Project = {
       ],
     },
     {
+      lead: 'It will not ship half-offline. The build checks that all eleven pieces it needs to work with no internet are present — and then checks the live site is really handing them out.',
       text: 'The build refuses to ship without its offline assets, and then checks that the live site is actually serving them.',
       receipts: [
         { label: 'assert-assets.mjs:19', href: src('braillix', 'app/scripts/assert-assets.mjs', [19, 33]), proves: 'Eleven named assets; a missing or truncated one fails the build.' },
@@ -241,6 +259,8 @@ export const BRAILLIX: Project = {
     { file: 'braillix/reader-validation.png', alt: 'A screen showing a quadratic formula, the words “what the dots say — matches what you typed”, and a per-cell table listing dots, meaning and cam position.', caption: 'The three-way check, visible: what was typed, what the dots say when read back independently, and whether they agree.' },
     { file: 'braillix/ink-hero.jpeg', alt: 'The Braillix board showing the equation x squared plus 3x plus 2 equals 0 written by hand, a rendered six-dot braille cell, a reader panel confirming the dots read back as what was written, and a status bar listing speech as degraded while the maths engine, recognition, USB display and offline copy read ready.', caption: 'The teacher writes; the dots appear; a separate engine reads those dots back and states what they say. Along the bottom every subsystem declares its own condition — speech is degraded here, and it says so instead of quietly pretending.' },
     { file: 'braillix/mirror-two-pods.jpeg', alt: 'The Braillix board driving two braille pods at once over Wi-Fi, with a status line reading “2 cells across 2 pods” and a cell counter reading “cells 1–2 of 7”.', caption: 'Two pods on the same board, over Wi-Fi, showing the same cells — and the software genuinely does not know how many there are. The build greps its own source and fails if any file hard-codes a cell count.' },
+    { file: 'braillix/tablet-hero.jpeg', alt: 'Braillix on a tablet in portrait, showing five lines of class eleven and twelve mathematics — a quadratic, nCr, the binomial theorem, Bayes’ theorem and integration by parts — above a braille cell reading “cell 1 of 15”, a symbol rail, and a status bar reporting 1,153 half-steps with 1,792 saved, or 61% less motor travel.', caption: 'Five lines of real class-eleven and twelve syllabus, live. The status bar is my favourite part: 1,792 half-steps of motor travel SAVED, 61% less than the naive route. That is a physical braille cell being spared thousands of movements per lesson, which is the difference between hardware that lasts a school year and hardware that does not.' },
+    { file: 'braillix/phone-hero.jpeg', alt: 'The same Braillix board running on a phone in landscape, with two equations, a braille cell, the symbol rail and a status bar showing the maths engine, speech, recognition, USB display, display and offline copy all ready.', caption: 'The identical board on a phone. A teacher in a government school is far more likely to have this in their pocket than a laptop on their desk, so every control is thumb-sized and nothing is hidden behind a menu.' },
   ],
   limits: [
     'Handwritten Devanagari words genuinely do not work — the recogniser is trained on print, and no free browser-runnable model existed when this was built. The app says so rather than guessing.',

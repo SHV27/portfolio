@@ -30,12 +30,16 @@ const { receipts, count = true } = Astro.props;
   <ul class="rc__list">
     {receipts.map((r) => (
       <li class="rc__item">
-        <a class="rc__src mono" href={r.href} target="_blank" rel="noopener noreferrer">
-          {r.label}
-          <svg class="rc__ext" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
-            <path d="M2 8 L8 2 M4 2 h4 v4" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="square"/>
-          </svg>
-        </a>
+        {r.href ? (
+          <a class="rc__src mono" href={r.href} target="_blank" rel="noopener noreferrer">
+            {r.label}
+            <svg class="rc__ext" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+              <path d="M2 8 L8 2 M4 2 h4 v4" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="square"/>
+            </svg>
+          </a>
+        ) : (
+          <span class="rc__src rc__src--nolink mono">{r.label}</span>
+        )}
         <span class="rc__proves">{r.proves}</span>
       </li>
     ))}
@@ -89,6 +93,10 @@ const { receipts, count = true } = Astro.props;
     width: fit-content;
   }
   .rc__src:hover { color: var(--gold-lit); text-decoration: underline; text-underline-offset: 3px; }
+  /* Private repository: there is nothing to open, so this is plainly not a
+     link rather than a link that 404s. */
+  .rc__src--nolink { color: var(--dust); cursor: default; }
+  .rc__src--nolink:hover { color: var(--dust); text-decoration: none; }
   .rc__ext { opacity: 0.6; }
   .rc__proves { font-size: var(--t-micro); line-height: 1.5; color: var(--dust); }
 

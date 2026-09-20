@@ -1,0 +1,91 @@
+---
+/**
+ * A ROW OF PHONES.
+ *
+ * Every screen of a responsive build, at phone width, side by side. This is the
+ * one claim that a desktop screenshot can never make and that everybody
+ * asserts anyway — "it's responsive" — so here is the whole app at 412px and
+ * you can check.
+ *
+ * Deliberately small: these are evidence, not exhibits. The desktop captures
+ * higher up the page are where you read the interface; this strip is where you
+ * confirm it survives a phone.
+ */
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Shot { src: ImageMetadata; label: string; alt: string }
+interface Props {
+  kicker?: string;
+  title: string;
+  lede?: string;
+  shots: Shot[];
+}
+const { kicker = 'On a phone', title, lede, shots } = Astro.props;
+---
+
+<section class="ds reveal">
+  <p class="label ds__k">{kicker}</p>
+  <h3 class="ds__t display">{title}</h3>
+  {lede && <p class="ds__lede">{lede}</p>}
+
+  <ul class="ds__row">
+    {shots.map((s) => (
+      <li class="ds__item">
+        <span class="ds__phone">
+          <Image
+            src={s.src}
+            alt={s.alt}
+            widths={[206, 412].filter((w) => w <= s.src.width)}
+            sizes="(max-width: 700px) 28vw, 150px"
+            loading="lazy"
+            decoding="async"
+            format="avif"
+          />
+        </span>
+        <span class="ds__label mono">{s.label}</span>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .ds { margin-top: clamp(var(--s-12), 6vh, var(--s-20)); }
+  .ds__k { color: var(--gold); }
+  .ds__t { font-size: var(--t-head); margin-top: var(--s-3); max-width: 26ch; }
+  .ds__lede { margin-top: var(--s-4); max-width: 62ch; color: var(--star-dim); text-wrap: pretty; }
+
+  /* A grid, not a wrapping flex row: eight phones wrapping 7 + 1 left an
+     orphan hanging under a full row, which looks like a mistake rather than a
+     set. Equal columns keep it one clean rank on a laptop and two on a phone. */
+  .ds__row {
+    list-style: none; padding: 0;
+    margin: var(--s-8) 0 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(var(--s-5), 1.8vw, var(--s-8)) clamp(var(--s-3), 1.4vw, var(--s-5));
+    align-items: start;
+  }
+  @media (min-width: 900px) { .ds__row { grid-template-columns: repeat(8, minmax(0, 1fr)); } }
+  .ds__item { display: flex; flex-direction: column; gap: var(--s-2); min-width: 0; }
+
+  .ds__phone {
+    display: block;
+    width: 100%;
+    border-radius: 9px;
+    overflow: hidden;
+    outline: var(--hair) solid var(--ridge);
+    outline-offset: -1px;
+    box-shadow: var(--lift-1);
+    background: var(--deep);
+    transition: outline-color var(--d-base) var(--ease);
+  }
+  .ds__phone :global(img) { display: block; width: 100%; height: auto; }
+  .ds__item:hover .ds__phone { outline-color: color-mix(in oklab, var(--gold) 50%, var(--ridge)); }
+
+  .ds__label {
+    font-size: 0.6875rem;
+    color: var(--dust-faint);
+    line-height: 1.35;
+  }
+</style>

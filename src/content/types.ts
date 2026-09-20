@@ -44,14 +44,29 @@ export function repoUrl(repo: string): string {
 export interface Receipt {
   /** What the reader sees on the chip, e.g. "compiler.ts:284". Keep it short. */
   label: string;
-  /** Where it leads. Always a real, reachable URL. */
-  href: string;
+  /**
+   * Where it leads. Always a real, reachable URL — or omitted entirely.
+   * A receipt for a PRIVATE repository has nothing a visitor can open, and a
+   * link that lands on a GitHub 404 is worse than no link at all: it reads as
+   * evidence that was withdrawn. Those render as plain text instead, with the
+   * measurement still attached, which is the honest version of the same claim.
+   */
+  href?: string;
   /** One line: what this source actually proves. Shown on open. */
   proves: string;
 }
 
 /** A sentence that asserts something, plus the evidence for it. */
 export interface Claim {
+  /**
+   * The plain-English headline: what this actually does, said the way you would
+   * say it out loud. It lands first and it is the only part most readers need.
+   * `text` stays underneath in smaller type for the engineer who wants the
+   * exact mechanism. Without this, "How it actually works" was a list of
+   * sentences containing the words `doesNotCare` and "stemming", which is true
+   * and useless to nine readers in ten.
+   */
+  lead?: string;
   text: string;
   receipts: Receipt[];
 }

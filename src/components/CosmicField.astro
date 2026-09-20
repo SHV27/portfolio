@@ -33,13 +33,13 @@
  */
 ---
 
-<canvas class="field" data-field aria-hidden="true"></canvas>
+<canvas class="field" data-field aria-hidden="true" transition:persist="sky"></canvas>
 <!-- The scrim is what lets the sky be this bright. Without it every nebula has
      to be dim enough for body copy to clear AA on top of its brightest pixel,
      which is why the old field was grey dots. With a fixed wash between the
      canvas and the page, the sky gets its colour back and the text gets a
      guaranteed floor of darkness underneath it. -->
-<div class="field-scrim" aria-hidden="true"></div>
+<div class="field-scrim" aria-hidden="true" transition:persist="scrim"></div>
 
 <style>
   .field {
@@ -61,6 +61,11 @@
 </style>
 
 <script>
+  /* The canvas is transition:persist, so it survives navigation and the loop
+     below keeps running across the whole visit — the sky never restarts, never
+     re-seeds, and never flashes black between pages. This script therefore runs
+     exactly once; the only thing a navigation has to do is re-measure the new
+     document's height so the scroll parallax stays calibrated. */
   const cv = document.querySelector<HTMLCanvasElement>('[data-field]');
   if (cv) {
     const ctx = cv.getContext('2d', { alpha: false })!;
@@ -71,7 +76,7 @@
     let docH = 1;
     let px = 0.5, py = 0.5;          // pointer, normalised
 
-    type Star = { x: number; y: number; z: number; r: number; hue: string; a: number; tw: number };
+    type Star = { x: number; y: number; z: number; r: number; hue: string; a: number; tw: number; spike?: boolean };
     type Meteor = { x: number; y: number; vx: number; vy: number; life: number; max: number; len: number };
     type Proto = { x: number; y: number; age: number; max: number; hue: string };
     // A dying star: swells to a red giant, holds, then detonates and leaves a
@@ -132,7 +137,7 @@
     let deep: HTMLCanvasElement | null = null;
     const DEEP = 1.6;              // taller than the viewport, for parallax room
 
-    const HUES = ['#F5F2EA', '#F5F2EA', '#F5F2EA', '#F5F2EA', '#CFE0FF', '#FFE2B8', '#FFD0A8', '#BFD4FF'];
+    const HUES = ['#F5F2EA', '#F5F2EA', '#F5F2EA', '#FFF6E8', '#CFE0FF', '#FFE2B8', '#FFD0A8', '#BFD4FF', '#A9C4FF', '#FFC48C'];
 
     function size() {
       DPR = Math.min(window.devicePixelRatio || 1, 2);
@@ -158,6 +163,9 @@
           hue: HUES[(Math.random() * HUES.length) | 0],
           a: 0.3 + z * 0.55,
           tw: Math.random() * Math.PI * 2,
+          // only the nearest, brightest few per cent — a sky full of crosses
+          // would look like a lens flare filter, which is the opposite of this
+          spike: z > 0.93 && Math.random() < 0.55,
         };
       });
     }
@@ -194,14 +202,14 @@
       g.fillStyle = bg;
       g.fillRect(-bw / 2, -h * 0.22, bw, h * 0.44);
       // dark lanes of dust cutting across it, which is what sells the band
-      g.globalCompositeOperation = 'source-over';
+      g.globalCompositeOperation = 'destination-out';
       for (let i = 0; i < 4; i++) {
         const x0 = R(-bw / 2, 0), x1 = x0 + R(bw * 0.18, bw * 0.4);
         const ly = R(-h * 0.07, h * 0.07);
         g.beginPath();
         g.moveTo(x0, ly);
         for (let x = x0; x <= x1; x += 40) g.lineTo(x, ly + Math.sin(x * 0.004 + i) * 14);
-        g.strokeStyle = 'rgba(8,8,11,0.34)';
+        g.strokeStyle = 'rgba(0,0,0,0.55)';
         g.lineWidth = R(8, 22);
         g.lineCap = 'round';
         g.stroke();
@@ -549,6 +557,31 @@
         ctx.beginPath();
         ctx.arc(x, y, rad, 0, Math.PI * 2);
         ctx.fill();
+
+        /* The brightest few get the cross a telescope actually throws, plus a
+           soft halo. This is the single detail that separates "a photograph of
+           the sky" from "some dots on a dark background". */
+        if (s.spike) {
+          const twinkle = 0.75 + 0.25 * Math.sin(t * 0.02 + s.tw);
+          const len = rad * 9 * twinkle;
+          const g = ctx.createRadialGradient(x, y, 0, x, y, rad * 6);
+          g.addColorStop(0, s.hue);
+          g.addColorStop(0.25, `rgba(255,255,255,${0.1 * alpha})`);
+          g.addColorStop(1, 'rgba(255,255,255,0)');
+          ctx.globalAlpha = alpha * 0.55;
+          ctx.fillStyle = g;
+          ctx.beginPath(); ctx.arc(x, y, rad * 6, 0, Math.PI * 2); ctx.fill();
+
+          ctx.globalAlpha = alpha * 0.5 * twinkle;
+          ctx.strokeStyle = s.hue;
+          ctx.lineWidth = Math.max(0.5, rad * 0.32);
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(x - len, y); ctx.lineTo(x + len, y);
+          ctx.moveTo(x, y - len); ctx.lineTo(x, y + len);
+          ctx.stroke();
+          ctx.fillStyle = s.hue;
+        }
       }
       ctx.globalAlpha = 1;
 
@@ -579,7 +612,7 @@
         p.age++;
         const k = p.age / p.max;
         if (k >= 1) {
-          stars.push({ x: p.x, y: p.y + (scrollY * 0.3) % (H * 2.2), z: 0.8, r: 1.15, hue: p.hue, a: 0.8, tw: 0 });
+          stars.push({ x: p.x, y: p.y + (scrollY * 0.3) % (H * 2.2), z: 0.8, r: 1.3, hue: p.hue, a: 0.85, tw: 0, spike: true });
           protos.splice(i, 1);
           continue;
         }
@@ -701,7 +734,11 @@
         ctx.globalAlpha = 1;
       }
 
-      /* aurora — slow curtains, behind everything else */
+      /* aurora — slow curtains, behind everything else.
+         Drawn additively: a curtain passing over a bright nebula was subtly
+         DARKENING it, which read as a dark diagonal band lying across the
+         picture. Light can only ever add light. */
+      ctx.globalCompositeOperation = 'lighter';
       for (let i = aurorae.length - 1; i >= 0; i--) {
         const a = aurorae[i];
         a.age++;
@@ -721,6 +758,8 @@
           ctx.strokeStyle = g; ctx.lineWidth = 46; ctx.stroke();
         }
       }
+
+      ctx.globalCompositeOperation = 'source-over';
 
       /* wormhole — concentric rings folding inward */
       for (let i = wormholes.length - 1; i >= 0; i--) {
@@ -753,7 +792,7 @@
         q.age++;
         if (q.age > q.max) { quasars.splice(i, 1); continue; }
         const env = Math.min(q.age / 150, 1) * Math.min((q.max - q.age) / 170, 1);
-        const jet = Math.min(W, H) * 0.3 * Math.min(q.age / 220, 1);
+        const jet = Math.min(W, H) * 0.22 * Math.min(q.age / 220, 1);
         const dirs = [q.ang, q.ang + Math.PI];
         for (const dir of dirs) {
           const ex = q.x + Math.cos(dir) * jet, ey = q.y + Math.sin(dir) * jet;
@@ -892,13 +931,14 @@
         br.age++;
         if (br.age > br.max) { bursts.splice(i, 1); continue; }
         const k = br.age / br.max;
-        const env = k < 0.12 ? k / 0.12 : Math.pow(1 - (k - 0.12) / 0.88, 1.6);
-        const len = Math.max(W, H) * 0.7 * Math.min(k * 3, 1);
+        const env = k < 0.1 ? k / 0.1 : Math.pow(1 - (k - 0.1) / 0.9, 2.6);
+        const len = Math.max(W, H) * 0.34 * Math.min(k * 4, 1);
         for (const d of [br.ang, br.ang + Math.PI]) {
           const ex = br.x + Math.cos(d) * len, ey = br.y + Math.sin(d) * len;
           const g5 = ctx.createLinearGradient(br.x, br.y, ex, ey);
-          g5.addColorStop(0, `rgba(236,244,255,${0.62 * env})`);
-          g5.addColorStop(0.3, `rgba(180,200,255,${0.2 * env})`);
+          g5.addColorStop(0, `rgba(236,244,255,${0.7 * env})`);
+          g5.addColorStop(0.18, `rgba(190,208,255,${0.24 * env})`);
+          g5.addColorStop(0.55, `rgba(160,185,255,${0.05 * env})`);
           g5.addColorStop(1, 'rgba(150,180,255,0)');
           ctx.strokeStyle = g5;
           ctx.lineWidth = 2.2;
@@ -1125,6 +1165,14 @@
       clearTimeout(rt);
       rt = window.setTimeout(() => { size(); draw(); }, 200);
     }, { passive: true });
+
+    /* A swapped-in page is a different height. Without this the parallax
+       divisor is still the old page's and the stars drift at the wrong rate. */
+    document.addEventListener('astro:after-swap', () => {
+      scrollY = window.scrollY;
+      docH = Math.max(1, document.documentElement.scrollHeight - H);
+      kick();
+    });
 
     size();
     draw();

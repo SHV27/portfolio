@@ -16,6 +16,30 @@ import StarBirth from '../../sections/StarBirth.astro';
 import { ORDER } from '../../content/all';
 import { SHOTS } from '../../content/shots';
 import { PLATES } from '../../content/plates';
+import PaintingWall from '../../components/PaintingWall.astro';
+import DeviceStrip from '../../components/DeviceStrip.astro';
+
+/* Aaina at phone width, every screen. These sat unused in the repository while
+   the page asserted the app was responsive and showed only desktop captures. */
+import mLanding from '../../assets/shots/aaina/landing-mobile.png';
+import mScience from '../../assets/shots/aaina/science-mobile.png';
+import mPlan from '../../assets/shots/aaina/plan-mobile.png';
+import mReport from '../../assets/shots/aaina/report-mobile.png';
+import mSelf from '../../assets/shots/aaina/self-report-mobile.png';
+import mTogether from '../../assets/shots/aaina/report-together-mobile.png';
+import mReceipt from '../../assets/shots/aaina/receipt-mobile.png';
+import mJhalak from '../../assets/shots/aaina/jhalak-mobile.png';
+
+const AAINA_PHONES = [
+  { src: mLanding, label: 'The door', alt: 'The Aaina landing screen at phone width, with the headline and the start button stacked above a painting.' },
+  { src: mScience, label: 'Why no score', alt: 'The science chapter at phone width, explaining why there is no compatibility percentage.' },
+  { src: mPlan, label: 'The plan', alt: 'The plan screen at phone width, listing what the assessment will do and how long it takes.' },
+  { src: mReport, label: 'The report', alt: 'A generated report at phone width, with paragraphs each tagged by a receipt count.' },
+  { src: mSelf, label: 'On your own', alt: 'The solo self-assessment report at phone width.' },
+  { src: mTogether, label: 'Both of you', alt: 'The couple-mode report at phone width, showing a prediction marked correct.' },
+  { src: mReceipt, label: 'Open a receipt', alt: 'A receipt drawer open at phone width, quoting the reader’s own answers back with their scores.' },
+  { src: mJhalak, label: 'A glimpse', alt: 'The jhalak screen at phone width, showing a short early glimpse of the findings.' },
+];
 
 import lockIn from '../../assets/aura/10-built-in-silence.jpg';
 import fuckNormal from '../../assets/aura/05-fuck-normal-magic.jpg';
@@ -73,6 +97,16 @@ const plate = PLATES[project.id];
         caption="Braillix was fifty-one hours start to finish, including tearing the whole thing down halfway and rebuilding it. This is on my wall, and it is roughly what that felt like."
         size="intimate"
       />
+    )}
+    {project.id === 'aaina' && (
+      <>
+        <DeviceStrip
+          title="All of it, on a 412-pixel phone."
+          lede="Not a shrunken desktop with a hamburger bolted on — the reading measure, the receipt drawers and the couple-mode comparison all re-set for a thumb. Most people who take this will take it in bed on a phone, so that is the size it was designed at."
+          shots={AAINA_PHONES}
+        />
+        <PaintingWall />
+      </>
     )}
     {project.id === 'gloaming' && (
       <Plate

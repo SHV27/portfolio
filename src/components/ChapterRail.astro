@@ -106,6 +106,15 @@ const CHAPTERS = [
 </style>
 
 <script>
+  /* Re-armed on every page: the rail's targets are sections of the CURRENT
+     document, and a navigation replaces all of them. The AbortController is
+     what stops a second scroll handler being added on every navigation. */
+  let ac: AbortController | null = null;
+
+  const init = () => {
+  ac?.abort();
+  ac = new AbortController();
+  const signal = ac.signal;
   const rail = document.querySelector('[data-rail]');
   const fill = document.querySelector<HTMLElement>('[data-rail-fill]');
   const mfill = document.querySelector<HTMLElement>('[data-rail-mfill]');
@@ -140,8 +149,8 @@ const CHAPTERS = [
 
     window.addEventListener('scroll', () => {
       if (!ticking) { ticking = true; requestAnimationFrame(update); }
-    }, { passive: true });
-    window.addEventListener('resize', update, { passive: true });
+    }, { passive: true, signal });
+    window.addEventListener('resize', update, { passive: true, signal });
     update();
 
     // The rail is noise until you have actually started reading.
@@ -149,9 +158,13 @@ const CHAPTERS = [
       if (!rail) return;
       rail.classList.toggle('is-visible', window.scrollY > window.innerHeight * 0.6);
     };
-    window.addEventListener('scroll', show, { passive: true });
+    window.addEventListener('scroll', show, { passive: true, signal });
     show();
   }
+  };
+
+  document.addEventListener('astro:page-load', init);
+  document.addEventListener('astro:before-swap', () => ac?.abort());
 </script>
 
 <style is:global>
